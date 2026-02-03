@@ -10,16 +10,17 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace CrispyLo
+namespace CrispyLo.Views
 {
     /// <summary>
-    /// Logique d'interaction pour Login.xaml
+    /// Logique d'interaction pour AdminHome.xaml
     /// </summary>
-    public partial class Login : Window
+    public partial class AdminHome : Page
     {
-        public Login()
+        public AdminHome()
         {
             InitializeComponent();
         }
