@@ -60,7 +60,7 @@ namespace CrispyLo.Modules
             }
         }
 
-        public void AllTypePrduit(out DataTable dataT, out int nbrRow)
+        public void AllTypeProduit(out DataTable dataT, out int nbrRow)
         {
             MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
             dataT = new DataTable();
@@ -100,7 +100,7 @@ namespace CrispyLo.Modules
             }
         }
 
-        public void ProduitById(int id, out DataTable dataT, out int nbrRow)
+        public void ProduitById(int id, out DataTable dataT)
         {
             MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
             dataT = new DataTable();
@@ -110,7 +110,6 @@ namespace CrispyLo.Modules
                 string query = "SELECT * FROM produit WHERE id = " + id;
                 MySqlDataAdapter Data = new MySqlDataAdapter(query, maConnexion);
                 Data.Fill(dataT);
-                nbrRow = dataT.Rows.Count;
                 maConnexion.Close();
             }
             catch (Exception ex)

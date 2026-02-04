@@ -1,4 +1,6 @@
 ﻿using CrispyLo.Modules;
+using CrispyLo.Views.Info;
+using Org.BouncyCastle.Asn1.Pkcs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +17,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 //------
 using System.Data;
-using CrispyLo.Views.Info;
+using CrispyLo.Classes;
 
 
 namespace CrispyLo.Views
@@ -38,10 +40,27 @@ namespace CrispyLo.Views
         Dictionary<string, WrapPanel> catalogueWrap = new Dictionary<string, WrapPanel>();
         WrapPanel pizza = new WrapPanel();
         WrapPanel pate = new WrapPanel();
+        WrapPanel ingrédient = new WrapPanel();
 
+        RadioButton radioTailleLarge = new RadioButton();
+        RadioButton allPizza = new RadioButton();
+        RadioButton traditionellePizza = new RadioButton();
+        RadioButton spécialPizza = new RadioButton();
+        RadioButton blanchePizza = new RadioButton();
+        RadioButton merPizza = new RadioButton();
+        RadioButton radioPateTagliatelle = new RadioButton();
+        RadioButton radioPateTortellini = new RadioButton();
+        RadioButton radioPateRigatoni = new RadioButton();
+        RadioButton radioPateSpaghetti = new RadioButton();
+        RadioButton radioPateCanneloni = new RadioButton();
+        RadioButton suggestionLarge = new RadioButton();
+        RadioButton suggestionRigatoni = new RadioButton();
+        RadioButton suggestionSpaghetti = new RadioButton();
+        RadioButton suggestionTagliatelle = new RadioButton();
 
         public void PrepareInitialize()
         {
+            this.Background = Brushes.DimGray;
             //Grille Colonne
             grdMain.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(220) });
             grdMain.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
@@ -53,64 +72,6 @@ namespace CrispyLo.Views
             grdMain.RowDefinitions.Add(new RowDefinition { Height = new GridLength(40) });
             grdMain.RowDefinitions.Add(new RowDefinition { Height = new GridLength(124) });
 
-            //Bordure
-            Border bordS = new Border();
-            bordS.BorderBrush = Brushes.Black;
-            bordS.Background = Brushes.DarkKhaki;
-            bordS.BorderThickness= new Thickness(0, 1, 2, 0);
-            Grid.SetColumn(bordS, 0);
-            Grid.SetRow(bordS, 1);
-            Grid.SetRowSpan(bordS, 4);
-            grdMain.Children.Add(bordS);
-
-            Border bordT = new Border();
-            bordT.BorderBrush = Brushes.Black;
-            bordT.Background = Brushes.DarkKhaki;
-            bordT.BorderThickness = new Thickness(1, 0, 1, 2);
-            Grid.SetColumn(bordT, 1);
-            Grid.SetRow(bordT, 0);
-            grdMain.Children.Add(bordT);
-
-            Border bordD = new Border();
-            bordD.BorderBrush = Brushes.Black;
-            bordD.Background = Brushes.DarkKhaki;
-            bordD.BorderThickness = new Thickness(0, 0, 1, 1);
-            Grid.SetColumn(bordD, 0);
-            Grid.SetRow(bordD, 0);
-            grdMain.Children.Add(bordD);
-
-            Border bordA = new Border();
-            bordA.BorderBrush = Brushes.Black;
-            bordA.Background = Brushes.DarkKhaki;
-            bordA.BorderThickness = new Thickness(1, 0, 0, 1);
-            Grid.SetColumn(bordA, 2);
-            Grid.SetRow(bordA, 0);
-            grdMain.Children.Add(bordA);
-
-            Border bordP = new Border();
-            bordP.BorderBrush = Brushes.Black;
-            bordP.Background = Brushes.White;
-            bordP.BorderThickness = new Thickness(2, 1, 0, 1);
-            Grid.SetColumn(bordP, 2);
-            Grid.SetRow(bordP, 1);
-            grdMain.Children.Add(bordP);
-
-            Border bordAP = new Border();
-            bordAP.BorderBrush = Brushes.Black;
-            bordAP.Background = Brushes.DarkKhaki;
-            bordAP.BorderThickness = new Thickness(2, 1, 0, 1);
-            Grid.SetColumn(bordAP, 2);
-            Grid.SetRow(bordAP, 2);
-            grdMain.Children.Add(bordAP);
-
-            Border bordC = new Border();
-            bordC.BorderBrush = Brushes.Black;
-            bordC.Background = Brushes.DarkKhaki;
-            bordC.BorderThickness = new Thickness(2, 1, 0, 0);
-            Grid.SetColumn(bordC, 2);
-            Grid.SetRow(bordC, 3);
-            grdMain.Children.Add(bordC);
-
             //------------------------------------------Création Vue Gauche------------------------------------------ 
             StackPanel selectionAffichage = new StackPanel();
 
@@ -119,17 +80,18 @@ namespace CrispyLo.Views
             Grid.SetRowSpan(selectionAffichage, 4);
 
             //Bouton catalogue
-            sql.AllTypePrduit(out DataTable data, out int nbrRow);
+            sql.AllTypeProduit(out DataTable data, out int nbrRow);
             for (int i = 0; i < nbrRow; i++)
             {
                 Button btnCatalogue = new Button();
                 btnCatalogue.Content = data.Rows[i]["libelle"].ToString().ToUpper();
-                btnCatalogue.Height = 80;
-                btnCatalogue.Width = 218;
+                btnCatalogue.Height = 70;
+                btnCatalogue.Width = 210;
                 btnCatalogue.HorizontalAlignment = HorizontalAlignment.Left;
                 btnCatalogue.FontWeight = FontWeights.Bold;
                 btnCatalogue.FontSize = 20;
-                btnCatalogue.Background = Brushes.Yellow;
+                btnCatalogue.Background = Brushes.LimeGreen;
+                btnCatalogue.Foreground = Brushes.White;
                 btnCatalogue.Click += new RoutedEventHandler(Click_catalogue);
                 if (data.Rows[i]["libelle"].ToString() == "pizza")
                 {
@@ -139,54 +101,58 @@ namespace CrispyLo.Views
                     selectionAffichage.Children.Add(btnCatalogue);
             }
 
+            Button btnIngrédient = new Button();
+            btnIngrédient.Content = "INGREDIENT";
+            btnIngrédient.Height = 70;
+            btnIngrédient.Width = 210;
+            btnIngrédient.HorizontalAlignment = HorizontalAlignment.Left;
+            btnIngrédient.FontWeight = FontWeights.Bold;
+            btnIngrédient.FontSize = 20;
+            btnIngrédient.Background = Brushes.LimeGreen;
+            btnIngrédient.Foreground = Brushes.White;
+            btnIngrédient.Click += new RoutedEventHandler(Click_catalogue);
+
+            selectionAffichage.Children.Add(btnIngrédient);
+            grdMain.Children.Add(selectionAffichage);
+
+
             Button btnDéconnexion = new Button();
-            btnDéconnexion.Content = "DÉCONNEXION";
+            btnDéconnexion.Content = "X";
             btnDéconnexion.Background = Brushes.Red;
             btnDéconnexion.FontWeight = FontWeights.Bold;
             btnDéconnexion.Click += new RoutedEventHandler(Click_Exit);
-            btnDéconnexion.Height = 58;
-            btnDéconnexion.Width = 219;
+            btnDéconnexion.Height = 40;
+            btnDéconnexion.Width = 40;
             btnDéconnexion.VerticalAlignment = VerticalAlignment.Top;
             btnDéconnexion.HorizontalAlignment = HorizontalAlignment.Left;
             Grid.SetColumn(btnDéconnexion, 0);
             Grid.SetRow(btnDéconnexion, 0);
+            grdMain.Children.Add(btnDéconnexion);
+
             //-------------------------------------------------------------------------------------------------------
             //------------------------------------------Création Vue Milieu------------------------------------------ 
             WrapPanel taillePizza = new WrapPanel();
             WrapPanel typePate = new WrapPanel();
             WrapPanel suggestion = new WrapPanel();
+            WrapPanel choixSuggestion = new WrapPanel();
             WrapPanel pain = new WrapPanel();
             WrapPanel snacking = new WrapPanel();
             WrapPanel salade = new WrapPanel();
             WrapPanel dipy = new WrapPanel();
             WrapPanel dessert = new WrapPanel();
             WrapPanel boisson = new WrapPanel();
-            WrapPanel ingrédient = new WrapPanel();
+            RadioButton suggestionMedium = new RadioButton();
 
-            RadioButton allPizza = new RadioButton();
-            RadioButton traditionellePizza = new RadioButton();
-            RadioButton spécialPizza = new RadioButton();
-            RadioButton blanchePizza = new RadioButton();
-            RadioButton merPizza = new RadioButton();
+
             RadioButton radioTailleMédium = new RadioButton();
-            RadioButton radioTailleLarge = new RadioButton();
-            RadioButton radioPateRigatoni = new RadioButton();
-            RadioButton radioPateTagliatelle = new RadioButton();
-            RadioButton radioPateSpaghetti  = new RadioButton();
-            RadioButton radioPateTortellini = new RadioButton();
 
-            //Bouton Droite Spécifique
-            Button btnIngrédient = new Button();
-            pizza.Background = Brushes.DarkKhaki;
             Grid.SetColumn(pizza, 1);
             Grid.SetRow(pizza, 1);
             Grid.SetRowSpan(pizza, 3);
 
-
-            Grid.SetColumn(taillePizza, 1);
+            Grid.SetColumn(taillePizza, 1); 
             Grid.SetRow(taillePizza, 0);
 
-            pate.Background = Brushes.DarkKhaki;
             pate.Visibility = Visibility.Collapsed;
             Grid.SetColumn(pate, 1);
             Grid.SetRow(pate, 1);
@@ -196,68 +162,63 @@ namespace CrispyLo.Views
             Grid.SetColumn(typePate, 1);
             Grid.SetRow(typePate, 0);
 
-            suggestion.Background = Brushes.DarkKhaki;
             suggestion.Visibility = Visibility.Collapsed;
             Grid.SetColumn(suggestion, 1);
             Grid.SetRow(suggestion, 1);
             Grid.SetRowSpan(suggestion, 3);
 
-            pain.Background = Brushes.DarkKhaki;
             pain.Visibility = Visibility.Collapsed;
             Grid.SetColumn(pain, 1);
             Grid.SetRow(pain, 1);
             Grid.SetRowSpan(pain, 3);
 
-            snacking.Background = Brushes.DarkKhaki;
             snacking.Visibility = Visibility.Collapsed;
             Grid.SetColumn(snacking, 1);
             Grid.SetRow(snacking, 1);
             Grid.SetRowSpan(snacking, 3);
 
-            salade.Background = Brushes.DarkKhaki;
             salade.Visibility = Visibility.Collapsed;
             Grid.SetColumn(salade, 1);
             Grid.SetRow(salade, 1);
             Grid.SetRowSpan(salade, 3);
             
-            dipy.Background = Brushes.DarkKhaki;
             dipy.Visibility = Visibility.Collapsed;
             Grid.SetColumn(dipy, 1);
             Grid.SetRow(dipy, 1);
             Grid.SetRowSpan(dipy, 3);
 
-            dessert.Background = Brushes.DarkKhaki;
             dessert.Visibility = Visibility.Collapsed;
             Grid.SetColumn(dessert, 1);
             Grid.SetRow(dessert, 1);
             Grid.SetRowSpan(dessert, 3);
 
-            boisson.Background = Brushes.DarkKhaki;
             boisson.Visibility = Visibility.Collapsed;
             Grid.SetColumn(boisson, 1);
             Grid.SetRow(boisson, 1);
             Grid.SetRowSpan(boisson, 3);
 
-            ingrédient.Background = Brushes.DarkKhaki;
             ingrédient.Visibility = Visibility.Collapsed;
             Grid.SetColumn(ingrédient, 1);
             Grid.SetRow(ingrédient, 1);
             Grid.SetRowSpan(ingrédient, 3);
 
-            
+            choixSuggestion.Visibility = Visibility.Collapsed;
+            Grid.SetColumn(choixSuggestion, 1);
+            Grid.SetRow(choixSuggestion, 0);
+
+
             //All Bouton salade
             sql.AllProduitByTypeProduit(3, out data, out nbrRow);
             for (int i = 0; i < nbrRow; i++)
             {
                 Button btn = new Button();
-                btn.Content = data.Rows[i]["libelle"].ToString().ToUpper();
-                btn.Tag = i + 1;
+                btn.Content = RemplisageBouton(false, data.Rows[i]["libelle"].ToString(), (double)data.Rows[i]["prix"]);
+                btn.Tag = data.Rows[i]["id"];
                 btn.Width = 100;
                 btn.Height = 100;
-                btn.Background = Brushes.Yellow;
-                btn.FontWeight = FontWeights.Bold;
-                btn.Margin = new Thickness(5);
-                btn.Click += new RoutedEventHandler(Click_pizza);
+                btn.Background = Brushes.Gold;
+                btn.Margin = new Thickness(2);
+                btn.Click += new RoutedEventHandler(Click_Produit);
                 salade.Children.Add(btn);
             }
             //All Bouton pain
@@ -265,44 +226,51 @@ namespace CrispyLo.Views
             for (int i = 0; i < nbrRow; i++)
             {
                 Button btn = new Button();
-                btn.Content = data.Rows[i]["libelle"].ToString().ToUpper();
-                btn.Tag = i + 1;
+                btn.Content = RemplisageBouton(false, data.Rows[i]["libelle"].ToString(), (double)data.Rows[i]["prix"]);
+                btn.Tag = data.Rows[i]["id"];
                 btn.Width = 100;
                 btn.Height = 100;
-                btn.Background = Brushes.Yellow;
-                btn.FontWeight = FontWeights.Bold;
-                btn.Margin = new Thickness(5);
-                btn.Click += new RoutedEventHandler(Click_pizza);
+                btn.Background = Brushes.Gold;
+                btn.Margin = new Thickness(2);
+                btn.Click += new RoutedEventHandler(Click_Produit);
                 pain.Children.Add(btn);
             }
             //All Bouton snacking
             sql.AllProduitByTypeProduit(5, out data, out nbrRow);
             for (int i = 0; i < nbrRow; i++)
             {
+                string nom = data.Rows[i]["libelle"].ToString() + "\n" + data.Rows[i]["quantite"].ToString() + "pc";
                 Button btn = new Button();
-                btn.Content = data.Rows[i]["libelle"].ToString().ToUpper();
-                btn.Tag = i + 1;
+                btn.Content = RemplisageBouton(false, nom, (double)data.Rows[i]["prix"]);
+                btn.Tag = data.Rows[i]["id"];
                 btn.Width = 100;
                 btn.Height = 100;
-                btn.Background = Brushes.Yellow;
-                btn.FontWeight = FontWeights.Bold;
-                btn.Margin = new Thickness(5);
-                btn.Click += new RoutedEventHandler(Click_pizza);
+                btn.Background = Brushes.Gold;
+                btn.Margin = new Thickness(2);
+                btn.Click += new RoutedEventHandler(Click_Produit);
                 snacking.Children.Add(btn);
             }
             //All Bouton dessert
             sql.AllProduitByTypeProduit(6, out data, out nbrRow);
             for (int i = 0; i < nbrRow; i++)
             {
+                string nom;
                 Button btn = new Button();
-                btn.Content = data.Rows[i]["libelle"].ToString().ToUpper();
-                btn.Tag = i + 1;
+                if (data.Rows[i]["libelle"].ToString() == "Moelleux au chocolat")
+                {
+                    nom = data.Rows[i]["libelle"].ToString() + "\n" + data.Rows[i]["quantite"].ToString() + " pc";
+                }
+                else
+                {
+                    nom = data.Rows[i]["libelle"].ToString();
+                }
+                btn.Content = RemplisageBouton(false, nom, (double)data.Rows[i]["prix"]);
+                btn.Tag = data.Rows[i]["id"];
                 btn.Width = 100;
                 btn.Height = 100;
-                btn.Background = Brushes.Yellow;
-                btn.FontWeight = FontWeights.Bold;
-                btn.Margin = new Thickness(5);
-                btn.Click += new RoutedEventHandler(Click_pizza);
+                btn.Background = Brushes.Gold;
+                btn.Margin = new Thickness(2);
+                btn.Click += new RoutedEventHandler(Click_Produit);
                 dessert.Children.Add(btn);
             }
             //All Bouton boisson
@@ -310,14 +278,14 @@ namespace CrispyLo.Views
             for (int i = 0; i < nbrRow; i++)
             {
                 Button btn = new Button();
-                btn.Content = data.Rows[i]["libelle"].ToString().ToUpper();
-                btn.Tag = i + 1;
+                string nom = data.Rows[i]["libelle"].ToString() + "\n" + data.Rows[i]["centilitre"].ToString();
+                btn.Content = RemplisageBouton(false, nom, (double)data.Rows[i]["prix"]);
+                btn.Tag = data.Rows[i]["id"];
                 btn.Width = 100;
                 btn.Height = 100;
-                btn.Background = Brushes.Yellow;
-                btn.FontWeight = FontWeights.Bold;
-                btn.Margin = new Thickness(5);
-                btn.Click += new RoutedEventHandler(Click_pizza);
+                btn.Background = Brushes.Gold;
+                btn.Margin = new Thickness(2);
+                btn.Click += new RoutedEventHandler(Click_Produit);
                 boisson.Children.Add(btn);
             }
             //All Bouton dipy
@@ -325,34 +293,19 @@ namespace CrispyLo.Views
             for (int i = 0; i < nbrRow; i++)
             {
                 Button btn = new Button();
-                btn.Content = data.Rows[i]["libelle"].ToString().ToUpper();
-                btn.Tag = i + 1;
+                btn.Content = RemplisageBouton(false, data.Rows[i]["libelle"].ToString(), (double)data.Rows[i]["prix"]);
+                btn.Tag = data.Rows[i]["id"];
                 btn.Width = 100;
                 btn.Height = 100;
-                btn.Background = Brushes.Yellow;
-                btn.FontWeight = FontWeights.Bold;
-                btn.Margin = new Thickness(5);
-                btn.Click += new RoutedEventHandler(Click_pizza);
+                btn.Background = Brushes.Gold;
+                btn.Margin = new Thickness(2);
+                btn.Click += new RoutedEventHandler(Click_Produit);
                 dipy.Children.Add(btn);
-            }
-            //All Bouton suggestion
-            sql.AllProduitByTypeProduit(9, out data, out nbrRow);
-            for (int i = 0; i < nbrRow; i++)
-            {
-                Button btn = new Button();
-                btn.Content = data.Rows[i]["libelle"].ToString().ToUpper();
-                btn.Tag = i + 1;
-                btn.Width = 100;
-                btn.Height = 100;
-                btn.Background = Brushes.Yellow;
-                btn.FontWeight = FontWeights.Bold;
-                btn.Margin = new Thickness(5);
-                btn.Click += new RoutedEventHandler(Click_pizza);
-                suggestion.Children.Add(btn);
             }
 
             ControlTemplate radioStyle = VisuelCSS.CreateButtonStyleTemplate();
 
+            //Pizza catégorie
             allPizza.Content = "ALL";
             allPizza.FontWeight = FontWeights.Bold;
             allPizza.GroupName = "pizza";
@@ -405,30 +358,32 @@ namespace CrispyLo.Views
             taillePizza.Children.Add(blanchePizza);
             taillePizza.Children.Add(merPizza);
 
+            //Pizza taille
             radioTailleMédium.Content = "RÉGULAR";
             radioTailleMédium.FontWeight = FontWeights.Bold;
             radioTailleMédium.GroupName = "taillePizza";
-            //radioTailleMédium.Checked = TaillePizza_Checked;
             radioTailleMédium.Margin = new Thickness(200,5,5,5);
             radioTailleMédium.Template = radioStyle;
             radioTailleMédium.Width = 100;
             radioTailleMédium.Height = 40;
             radioTailleMédium.IsChecked = true;
             radioTailleMédium.HorizontalAlignment = HorizontalAlignment.Right;
+            radioTailleMédium.Checked += Click_TaillePizza;
 
             radioTailleLarge.Content = "LARGE";
             radioTailleLarge.FontWeight = FontWeights.Bold;
             radioTailleLarge.GroupName = "taillePizza";
-            //radioTailleLarge.Checked = TaillePizza_Checked;
             radioTailleLarge.Margin = new Thickness(5);
             radioTailleLarge.Template = radioStyle;
             radioTailleLarge.Width = 100;
             radioTailleLarge.Height = 40;
             radioTailleLarge.HorizontalAlignment = HorizontalAlignment.Right;
+            radioTailleLarge.Checked += Click_TaillePizza;
 
             taillePizza.Children.Add(radioTailleMédium);
             taillePizza.Children.Add(radioTailleLarge);
 
+            //Type pate
             radioPateRigatoni.Content = "RIGATONI";
             radioPateRigatoni.FontWeight = FontWeights.Bold;
             radioPateRigatoni.GroupName = "pate";
@@ -466,10 +421,76 @@ namespace CrispyLo.Views
             radioPateTortellini.Width = 100;
             radioPateTortellini.Height = 40;
 
+            radioPateCanneloni.Content = "CANNELONI";
+            radioPateCanneloni.FontWeight = FontWeights.Bold;
+            radioPateCanneloni.GroupName = "pate";
+            radioPateCanneloni.Checked += Pate_Checked;
+            radioPateCanneloni.Margin = new Thickness(5);
+            radioPateCanneloni.Template = radioStyle;
+            radioPateCanneloni.Width = 100;
+            radioPateCanneloni.Height = 40; 
+
             typePate.Children.Add(radioPateRigatoni);
-            typePate.Children.Add(radioPateTagliatelle);
             typePate.Children.Add(radioPateSpaghetti);
+            typePate.Children.Add(radioPateTagliatelle);
             typePate.Children.Add(radioPateTortellini);
+            typePate.Children.Add(radioPateCanneloni);
+
+            //parametre suggestion
+            suggestionMedium.Content = "RÉGULAR";
+            suggestionMedium.FontWeight = FontWeights.Bold;
+            suggestionMedium.GroupName = "suggestionPizza";
+            suggestionMedium.Margin = new Thickness(200, 5, 5, 5);
+            suggestionMedium.Template = radioStyle;
+            suggestionMedium.Width = 100;
+            suggestionMedium.Height = 40;
+            suggestionMedium.IsChecked = true;
+            suggestionMedium.HorizontalAlignment = HorizontalAlignment.Right;
+            suggestionMedium.Checked += Suggestion_Checked;
+
+            suggestionLarge.Content = "LARGE";
+            suggestionLarge.FontWeight = FontWeights.Bold;
+            suggestionLarge.GroupName = "suggestionPizza";
+            suggestionLarge.Margin = new Thickness(5);
+            suggestionLarge.Template = radioStyle;
+            suggestionLarge.Width = 100;
+            suggestionLarge.Height = 40;
+            suggestionLarge.HorizontalAlignment = HorizontalAlignment.Right;
+            suggestionLarge.Checked += Suggestion_Checked;
+
+            suggestionRigatoni.Content = "RIGATONI";
+            suggestionRigatoni.FontWeight = FontWeights.Bold;
+            suggestionRigatoni.GroupName = "suggestionPate";
+            suggestionRigatoni.Checked += Suggestion_Checked;
+            suggestionRigatoni.IsChecked = true;
+            suggestionRigatoni.Margin = new Thickness(5);
+            suggestionRigatoni.Template = radioStyle;
+            suggestionRigatoni.Width = 100;
+            suggestionRigatoni.Height = 40;
+
+            suggestionTagliatelle.Content = "TAGLIATELLE";
+            suggestionTagliatelle.FontWeight = FontWeights.Bold;
+            suggestionTagliatelle.GroupName = "suggestionPate";
+            suggestionTagliatelle.Checked += Suggestion_Checked;
+            suggestionTagliatelle.Margin = new Thickness(5);
+            suggestionTagliatelle.Template = radioStyle;
+            suggestionTagliatelle.Width = 100;
+            suggestionTagliatelle.Height = 40;
+
+            suggestionSpaghetti.Content = "SPAGHETTI";
+            suggestionSpaghetti.FontWeight = FontWeights.Bold;
+            suggestionSpaghetti.GroupName = "suggestionPate";
+            suggestionSpaghetti.Checked += Suggestion_Checked;
+            suggestionSpaghetti.Margin = new Thickness(5);
+            suggestionSpaghetti.Template = radioStyle;
+            suggestionSpaghetti.Width = 100;
+            suggestionSpaghetti.Height = 40;
+
+            choixSuggestion.Children.Add(suggestionRigatoni);
+            choixSuggestion.Children.Add(suggestionSpaghetti);
+            choixSuggestion.Children.Add(suggestionTagliatelle);
+            choixSuggestion.Children.Add(suggestionMedium);
+            choixSuggestion.Children.Add(suggestionLarge);
             //-------------------------------------------------------------------------------------------------------
 
             //------------------------------------------Création Vue Droite------------------------------------------
@@ -493,27 +514,84 @@ namespace CrispyLo.Views
             catalogueWrap.Add("PÂTE", pate);
             catalogueWrap.Add("TYPEPATE", typePate);
             catalogueWrap.Add("SUGGESTION", suggestion);
+            catalogueWrap.Add("CHOIXSUGGESTION", choixSuggestion);
             catalogueWrap.Add("PAIN", pain);
             catalogueWrap.Add("SALADE", salade);
             catalogueWrap.Add("DESSERT", dessert);
             catalogueWrap.Add("BOISSON", boisson);
             catalogueWrap.Add("DIPY", dipy);
             catalogueWrap.Add("SNACKING", snacking);
+            catalogueWrap.Add("INGREDIENT", ingrédient);
 
             foreach (var wrap in catalogueWrap.Values)
             {
                 grdMain.Children.Add(wrap);
             }
-            grdMain.Children.Add(selectionAffichage);
-            grdMain.Children.Add(btnDéconnexion);
             //-------------------------------------------------------------------------------------------------------
+            //faire un nouveau wrap panel avec les taille pizza et type patte et tout faire dans le click_Suggestion/ pizza pate pain salade
         }
 
 
 
-        public void Click_pizza(object sender, RoutedEventArgs e)
+        public void Click_Produit(object sender, RoutedEventArgs e)
         {
             Button btn = (Button)sender;
+            DataTable data;
+            double prix;
+            string pate = "";
+            string libelle;
+
+            if (btn.Tag is int)
+            {
+                sql.ProduitById((int)btn.Tag, out data);
+            }
+            else
+            {
+                sql.ProduitByLibelle(btn.Tag.ToString(), out data);
+            }
+
+            libelle = data.Rows[0]["libelle"].ToString();
+            if ((int)data.Rows[0]["idTypeProduit"] == 5 || data.Rows[0]["libelle"].ToString() == "moelleux au chocolat")
+            {
+                libelle = data.Rows[0]["libelle"].ToString() + " " + data.Rows[0]["quantite"].ToString() + "pc";
+            }
+            prix = (double)data.Rows[0]["prix"];
+            if ((int)data.Rows[0]["idTypeProduit"] == 1)
+            {
+                if (radioTailleLarge.IsChecked == true)
+                {
+                    prix = (double)data.Rows[0]["prixLarge"];
+                }
+            }
+            if ((int)data.Rows[0]["idTypeProduit"] == 2)
+            {
+                if (radioPateRigatoni.IsChecked == true)
+                {
+                    pate = "Rigatoni";
+                }
+                else if (radioPateSpaghetti.IsChecked == true)
+                {
+                    pate = "Spaghetti";
+                }
+                else if (radioPateTagliatelle.IsChecked == true)
+                {
+                    pate = "Tagliatelle";
+                }
+                else
+                {
+                    pate = "Tortellini";
+                }
+            }
+
+            PagePrincipale.Panier.Add(new Produit
+            {
+                Id = (int)data.Rows[0]["id"],
+                Libelle = data.Rows[0]["libelle"].ToString(),
+                Prix = prix,
+                EstLarge = (bool)radioTailleLarge.IsChecked,
+                TypePate = pate,
+                IdTypeProduit = (int)data.Rows[0]["idTypeProduit"]
+            });
         }
 
         public void Click_catalogue(object sender, RoutedEventArgs e)
@@ -532,6 +610,10 @@ namespace CrispyLo.Views
             {
                 catalogueWrap["TYPEPATE"].Visibility = Visibility.Visible;
             }
+            else if(categori == "SUGGESTION")
+            {
+                catalogueWrap["CHOIXSUGGESTION"].Visibility = Visibility.Visible;
+            }
             catalogueWrap[categori].Visibility = Visibility.Visible;
 
         }
@@ -542,92 +624,99 @@ namespace CrispyLo.Views
             PagePrincipale.MainInfo.Content = new Déconnexion();
         }
 
+        public void Click_TaillePizza(object sender, RoutedEventArgs e)
+        {
+           Pizza_Checked(sender, e);
+        }
+
         public void Pizza_Checked(object sender, RoutedEventArgs e)
         {
             pizza.Children.Clear();
-            RadioButton rb = (RadioButton)sender;
-            if (rb.Content == "ALL")
+            string maxi = "";
+            string prix = "prix";
+            if (radioTailleLarge.IsChecked == true)
+            {
+                maxi = "MAXI ";
+                prix = "prixLarge";
+            }
+            if (allPizza.IsChecked == true)
             {
                 sql.AllProduitByTypeProduit(1, out DataTable data, out int nbrRow);
                 for (int i = 0; i < nbrRow; i++)
                 {
                     Button btn = new Button();
-                    btn.Content = data.Rows[i]["libelle"].ToString().ToUpper();
-                    btn.Tag = i + 1;
+                    btn.Content = RemplisageBouton(true, maxi + data.Rows[i]["libelle"].ToString(), (double)data.Rows[i][prix]);
+                    btn.Tag = data.Rows[i]["id"];
                     btn.Width = 100;
                     btn.Height = 100;
-                    btn.Background = Brushes.Yellow;
-                    btn.FontWeight = FontWeights.Bold;
-                    btn.Margin = new Thickness(5);
-                    btn.Click += new RoutedEventHandler(Click_pizza);
+                    btn.Background = Brushes.Gold;
+                    btn.Margin = new Thickness(2);
+                    btn.Click += new RoutedEventHandler(Click_Produit);
                     pizza.Children.Add(btn);
                 }
             }
-            else if (rb.Content == "TRADITIONELLE")
+            else if (traditionellePizza.IsChecked == true)
             {
                 sql.AllPizzaByTypeProduit(1, out DataTable data, out int nbrRow);
                 for (int i = 0; i < nbrRow; i++)
                 {
                     Button btn = new Button();
-                    btn.Content = data.Rows[i]["libelle"].ToString().ToUpper();
-                    btn.Tag = i + 1;
+                    btn.Content = RemplisageBouton(true, maxi + data.Rows[i]["libelle"].ToString(), (double)data.Rows[i][prix]);
+                    btn.Tag = data.Rows[i]["id"];
                     btn.Width = 100;
                     btn.Height = 100;
-                    btn.Background = Brushes.Yellow;
-                    btn.FontWeight = FontWeights.Bold;
-                    btn.Margin = new Thickness(5);
-                    btn.Click += new RoutedEventHandler(Click_pizza);
+                    btn.Background = Brushes.Gold;
+                    btn.Margin = new Thickness(2);
+                    btn.Click += new RoutedEventHandler(Click_Produit);
                     pizza.Children.Add(btn);
                 }
             }
-            else if (rb.Content == "SPÉCIALE")
+            else if (spécialPizza.IsChecked == true)
             {
                 sql.AllPizzaByTypeProduit(2, out DataTable data, out int nbrRow);
                 for (int i = 0; i < nbrRow; i++)
                 {
                     Button btn = new Button();
-                    btn.Content = data.Rows[i]["libelle"].ToString().ToUpper();
-                    btn.Tag = i + 1;
+                    btn.Content = RemplisageBouton(true, maxi + data.Rows[i]["libelle"].ToString(), (double)data.Rows[i][prix]);
+                    btn.Tag = data.Rows[i]["id"];
                     btn.Width = 100;
                     btn.Height = 100;
-                    btn.Background = Brushes.Yellow;
+                    btn.Background = Brushes.Gold;
                     btn.FontWeight = FontWeights.Bold;
-                    btn.Margin = new Thickness(5);
-                    btn.Click += new RoutedEventHandler(Click_pizza);
+                    btn.Margin = new Thickness(2);
+                    btn.Click += new RoutedEventHandler(Click_Produit);
                     pizza.Children.Add(btn);
                 }
             }
-            else if (rb.Content == "BLANCHE")
+            else if (blanchePizza.IsChecked == true)
             {
                 sql.AllPizzaByTypeProduit(3, out DataTable data, out int nbrRow);
                 for (int i = 0; i < nbrRow; i++)
                 {
                     Button btn = new Button();
-                    btn.Content = data.Rows[i]["libelle"].ToString().ToUpper();
-                    btn.Tag = i + 1;
+                    btn.Content = RemplisageBouton(true, maxi + data.Rows[i]["libelle"].ToString(), (double)data.Rows[i][prix]);
+                    btn.Tag = data.Rows[i]["id"];
                     btn.Width = 100;
                     btn.Height = 100;
-                    btn.Background = Brushes.Yellow;
-                    btn.FontWeight = FontWeights.Bold;
-                    btn.Margin = new Thickness(5);
-                    btn.Click += new RoutedEventHandler(Click_pizza);
+                    btn.Background = Brushes.Gold;
+                    btn.Margin = new Thickness(2);
+                    btn.Click += new RoutedEventHandler(Click_Produit);
                     pizza.Children.Add(btn);
                 }
             }
-            else if (rb.Content == "DE LA MER")
+            else if (merPizza.IsChecked == true)
             {
                 sql.AllPizzaByTypeProduit(4, out DataTable data, out int nbrRow);
                 for (int i = 0; i < nbrRow; i++)
                 {
                     Button btn = new Button();
-                    btn.Content = data.Rows[i]["libelle"].ToString().ToUpper();
-                    btn.Tag = i + 1;
+                    btn.Content = RemplisageBouton(true, maxi + data.Rows[i]["libelle"].ToString(), (double)data.Rows[i][prix]);
+                    btn.Tag = data.Rows[i]["id"];
                     btn.Width = 100;
                     btn.Height = 100;
-                    btn.Background = Brushes.Yellow;
-                    btn.FontWeight = FontWeights.Bold;
-                    btn.Margin = new Thickness(5);
-                    btn.Click += new RoutedEventHandler(Click_pizza);
+                    btn.Background = Brushes.Gold;
+                    btn.Margin = new Thickness(2);
+                    btn.Click += new RoutedEventHandler(Click_Produit);
                     pizza.Children.Add(btn);
                 }
             }
@@ -638,6 +727,7 @@ namespace CrispyLo.Views
         {
             pate.Children.Clear();
             RadioButton rb = (RadioButton)sender;
+            string nom = rb.Content.ToString();
             if (rb.Content == "TORTELLINI")
             {
                 string libelle = "Tomate crème";
@@ -645,17 +735,30 @@ namespace CrispyLo.Views
                 {
                     sql.ProduitByLibelle(libelle, out DataTable data);
                     Button btn = new Button();
-                    btn.Content = data.Rows[0]["libelle"].ToString().ToUpper();
-                    btn.Tag = i + 1;
+                    btn.Content = RemplisageBouton(false, data.Rows[0]["libelle"].ToString(), (double)data.Rows[0]["prix"] + 1);
                     btn.Width = 100;
                     btn.Height = 100;
-                    btn.Background = Brushes.Yellow;
-                    btn.FontWeight = FontWeights.Bold;
-                    btn.Margin = new Thickness(5);
-                    btn.Click += new RoutedEventHandler(Click_pizza);
+                    btn.Background = Brushes.Gold;
+                    btn.Tag = libelle;
+                    btn.Margin = new Thickness(2);
+                    btn.Click += new RoutedEventHandler(Click_Produit);
                     pate.Children.Add(btn);
                     libelle = "Jambon crème";
                 }
+            }
+            else if (rb.Content == "CANNELONI")
+            {
+                string libelle = "Canneloni ricota";
+                sql.ProduitByLibelle(libelle, out DataTable data);
+                Button btn = new Button();
+                btn.Content = RemplisageBouton(false, data.Rows[0]["libelle"].ToString(), (double)data.Rows[0]["prix"]);
+                btn.Width = 100;
+                btn.Height = 100;
+                btn.Background = Brushes.Gold;
+                btn.Tag = libelle;
+                btn.Margin = new Thickness(2);
+                btn.Click += new RoutedEventHandler(Click_Produit);
+                pate.Children.Add(btn);
             }
             else
             {
@@ -663,18 +766,76 @@ namespace CrispyLo.Views
                 sql.AllProduitByTypeProduit(2, out DataTable data, out int nbrRow);
                 for (int i = 0; i < nbrRow; i++)
                 {
+                    double prix = (radioPateTagliatelle.IsChecked == true ? 1 : 0);
                     Button btn = new Button();
-                    btn.Content = data.Rows[i]["libelle"].ToString().ToUpper();
-                    btn.Tag = i + 1;
+                    btn.Content = RemplisageBouton(false, data.Rows[i]["libelle"].ToString(), (double)data.Rows[i]["prix"] + prix);
+                    btn.Tag = data.Rows[i]["id"];
                     btn.Width = 100;
                     btn.Height = 100;
-                    btn.Background = Brushes.Yellow;
-                    btn.FontWeight = FontWeights.Bold;
-                    btn.Margin = new Thickness(5);
-                    btn.Click += new RoutedEventHandler(Click_pizza);
+                    btn.Background = Brushes.Gold;
+                    btn.Margin = new Thickness(2);
+                    btn.Click += new RoutedEventHandler(Click_Produit);
                     pate.Children.Add(btn);
                 }
             }
+        }
+
+        public Grid RemplisageBouton(Boolean pizza, string libelle, double prix)
+        {
+            Grid contenue = new Grid();
+            contenue.HorizontalAlignment = HorizontalAlignment.Stretch;
+            contenue.VerticalAlignment = VerticalAlignment.Stretch;
+            contenue.Width = 100;
+            contenue.Height = 100;
+
+            if (pizza == true)
+            {
+                Image img = new Image();
+                string src = "../images/" + libelle + ".png";
+                img.Source = new BitmapImage(new Uri(src, UriKind.Relative));
+                img.Stretch = Stretch.Fill;
+                contenue.Children.Add(img);
+            }
+
+            TextBlock textNom = new TextBlock();
+            textNom.Text = libelle.ToUpper();
+            textNom.FontWeight = FontWeights.Bold;
+            textNom.TextWrapping = TextWrapping.Wrap;
+            textNom.HorizontalAlignment = HorizontalAlignment.Center;
+            textNom.VerticalAlignment = VerticalAlignment.Center;
+            textNom.TextAlignment = TextAlignment.Center;
+            contenue.Children.Add(textNom);
+
+            TextBlock textPrix = new TextBlock();
+            textPrix.Text = prix.ToString();
+            textPrix.Foreground = Brushes.White;
+            textPrix.FontWeight = FontWeights.Bold;
+            textPrix.VerticalAlignment = VerticalAlignment.Bottom;
+            textPrix.HorizontalAlignment = HorizontalAlignment.Right;
+            textPrix.Margin = new Thickness(0, 0, 5, 5);
+            contenue.Children.Add(textPrix);
+
+            return contenue;
+        }
+
+        public void Suggestion_Checked(object sender, RoutedEventArgs e)
+        {
+            string maxi = "";
+            string prix = "prix";
+            sql.AllProduitByTypeProduit(9, out DataTable data, out int nbrRow);
+            for (int i = 0; i < nbrRow; i++)
+            {
+                Button btn = new Button();
+                btn.Content = RemplisageBouton(false, maxi + data.Rows[i]["libelle"].ToString(), (double)data.Rows[i][prix]);
+                btn.Tag = data.Rows[i]["id"];
+                btn.Width = 100;
+                btn.Height = 100;
+                btn.Background = Brushes.Gold;
+                btn.Margin = new Thickness(2);
+                btn.Click += new RoutedEventHandler(Click_Produit);
+                pizza.Children.Add(btn);
+            }
+            //reagrder si c'est pizza afiiche comme ca etc et avec les chechek pour maxi et pate
         }
     }
 }

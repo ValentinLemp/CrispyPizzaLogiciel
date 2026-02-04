@@ -11,6 +11,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 //permet de voir cette page 
 using CrispyLo.Views;
+using CrispyLo.Classes;
 
 namespace CrispyLo
 {
@@ -19,7 +20,8 @@ namespace CrispyLo
     /// </summary>
     public partial class MainWindow : Window
     {
-        private String restaurent;
+        public String Restaurent { get; set; }
+        public List<Produit> Panier { get; set; } = new List<Produit>();
         public MainWindow()
         {
             InitializeComponent();
@@ -30,18 +32,6 @@ namespace CrispyLo
         {
             Main.Content = new Home();
             //Main.Content = new Login();
-        }
-
-        public String Restaurent
-        {
-            get
-            {
-                return restaurent;  
-            }
-            set
-            {
-                restaurent = value;
-            }
         }
     }
 }
