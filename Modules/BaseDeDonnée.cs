@@ -47,7 +47,26 @@ namespace CrispyLo.Modules
 
             try
             {
-                string query = "SELECT * FROM produit WHERE idTypeProduit =" + id;
+                string query = "SELECT * FROM produit WHERE idTypeProduit =" + id + " AND estSuggestion = 0";
+                MySqlDataAdapter Data = new MySqlDataAdapter(query, maConnexion);
+                Data.Fill(dataT);
+                nbrRow = dataT.Rows.Count;
+                maConnexion.Close();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+                throw;
+            }
+        }
+        public void AllProduitByEstSuggestion(out DataTable dataT, out int nbrRow)
+        {
+            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
+            dataT = new DataTable();
+
+            try
+            {
+                string query = "SELECT * FROM produit WHERE estSuggestion = 1";
                 MySqlDataAdapter Data = new MySqlDataAdapter(query, maConnexion);
                 Data.Fill(dataT);
                 nbrRow = dataT.Rows.Count;
@@ -87,7 +106,7 @@ namespace CrispyLo.Modules
 
             try
             {
-                string query = "SELECT * FROM produit WHERE idTypePizza = " + id  + " AND idTypeProduit = 1";
+                string query = "SELECT * FROM produit WHERE idTypePizza = " + id  + " AND idTypeProduit = 1 AND estSuggestion = 0";
                 MySqlDataAdapter Data = new MySqlDataAdapter(query, maConnexion);
                 Data.Fill(dataT);
                 nbrRow = dataT.Rows.Count;

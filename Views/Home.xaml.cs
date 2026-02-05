@@ -41,6 +41,7 @@ namespace CrispyLo.Views
         WrapPanel pizza = new WrapPanel();
         WrapPanel pate = new WrapPanel();
         WrapPanel ingrédient = new WrapPanel();
+        WrapPanel suggestion = new WrapPanel();
 
         RadioButton radioTailleLarge = new RadioButton();
         RadioButton allPizza = new RadioButton();
@@ -100,6 +101,18 @@ namespace CrispyLo.Views
 
                     selectionAffichage.Children.Add(btnCatalogue);
             }
+            Button btnSCatalogue = new Button();
+            btnSCatalogue.Content = "SUGGESTION";
+            btnSCatalogue.Height = 70;
+            btnSCatalogue.Width = 210;
+            btnSCatalogue.HorizontalAlignment = HorizontalAlignment.Left;
+            btnSCatalogue.FontWeight = FontWeights.Bold;
+            btnSCatalogue.FontSize = 20;
+            btnSCatalogue.Background = Brushes.LimeGreen;
+            btnSCatalogue.Foreground = Brushes.White;
+            btnSCatalogue.Click += new RoutedEventHandler(Click_catalogue);
+            selectionAffichage.Children.Add(btnSCatalogue);
+
 
             Button btnIngrédient = new Button();
             btnIngrédient.Content = "INGREDIENT";
@@ -133,7 +146,6 @@ namespace CrispyLo.Views
             //------------------------------------------Création Vue Milieu------------------------------------------ 
             WrapPanel taillePizza = new WrapPanel();
             WrapPanel typePate = new WrapPanel();
-            WrapPanel suggestion = new WrapPanel();
             WrapPanel choixSuggestion = new WrapPanel();
             WrapPanel pain = new WrapPanel();
             WrapPanel snacking = new WrapPanel();
@@ -727,7 +739,8 @@ namespace CrispyLo.Views
         {
             pate.Children.Clear();
             RadioButton rb = (RadioButton)sender;
-            string nom = rb.Content.ToString();
+            string nom = rb.Content.ToString() + " ";
+
             if (rb.Content == "TORTELLINI")
             {
                 string libelle = "Tomate crème";
@@ -735,7 +748,7 @@ namespace CrispyLo.Views
                 {
                     sql.ProduitByLibelle(libelle, out DataTable data);
                     Button btn = new Button();
-                    btn.Content = RemplisageBouton(false, data.Rows[0]["libelle"].ToString(), (double)data.Rows[0]["prix"] + 1);
+                    btn.Content = RemplisageBouton(false, nom + data.Rows[0]["libelle"].ToString(), (double)data.Rows[0]["prix"] + 1);
                     btn.Width = 100;
                     btn.Height = 100;
                     btn.Background = Brushes.Gold;
@@ -768,7 +781,7 @@ namespace CrispyLo.Views
                 {
                     double prix = (radioPateTagliatelle.IsChecked == true ? 1 : 0);
                     Button btn = new Button();
-                    btn.Content = RemplisageBouton(false, data.Rows[i]["libelle"].ToString(), (double)data.Rows[i]["prix"] + prix);
+                    btn.Content = RemplisageBouton(false, nom + data.Rows[i]["libelle"].ToString(), (double)data.Rows[i]["prix"] + prix);
                     btn.Tag = data.Rows[i]["id"];
                     btn.Width = 100;
                     btn.Height = 100;
@@ -820,22 +833,44 @@ namespace CrispyLo.Views
 
         public void Suggestion_Checked(object sender, RoutedEventArgs e)
         {
-            string maxi = "";
-            string prix = "prix";
-            sql.AllProduitByTypeProduit(9, out DataTable data, out int nbrRow);
-            for (int i = 0; i < nbrRow; i++)
+            
+            sql.AllProduitByEstSuggestion(out DataTable data, out int nbrRow);
+            if (data != null)
             {
-                Button btn = new Button();
-                btn.Content = RemplisageBouton(false, maxi + data.Rows[i]["libelle"].ToString(), (double)data.Rows[i][prix]);
-                btn.Tag = data.Rows[i]["id"];
-                btn.Width = 100;
-                btn.Height = 100;
-                btn.Background = Brushes.Gold;
-                btn.Margin = new Thickness(2);
-                btn.Click += new RoutedEventHandler(Click_Produit);
-                pizza.Children.Add(btn);
+                suggestion.Children.Clear();
+                for (int i = 0; i < nbrRow; i++)
+                {
+                    string phrase = "";
+                    double prix = (double)data.Rows[i]["prix"];
+                    if (suggestionLarge.IsChecked == true && (int)data.Rows[i]["idTypeProduit"] == 1)
+                    {
+                        phrase = "maxi ";
+                        prix = (double)data.Rows[i]["prixLarge"];
+                    }
+                    else if (suggestionRigatoni.IsChecked == true && (int)data.Rows[i]["idTypeProduit"] == 2)
+                    {
+                        phrase = "rigatoni ";
+                    }
+                    else if (suggestionSpaghetti.IsChecked == true && (int)data.Rows[i]["idTypeProduit"] == 2)
+                    {
+                        phrase = "spaghetti ";
+                    }
+                    else if (suggestionTagliatelle.IsChecked == true && (int)data.Rows[i]["idTypeProduit"] == 2)
+                    {
+                        phrase = "tagliatelle ";
+                        prix = (double)data.Rows[i]["prix"] + 1;
+                    }
+                    Button btn = new Button();
+                    btn.Content = RemplisageBouton(false, phrase + data.Rows[i]["libelle"].ToString(), prix);
+                    btn.Tag = data.Rows[i]["id"];
+                    btn.Width = 100;
+                    btn.Height = 100;
+                    btn.Background = Brushes.Gold;
+                    btn.Margin = new Thickness(2);
+                    btn.Click += new RoutedEventHandler(Click_Produit);
+                    suggestion.Children.Add(btn);
+                }
             }
-            //reagrder si c'est pizza afiiche comme ca etc et avec les chechek pour maxi et pate
         }
     }
 }
