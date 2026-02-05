@@ -49,5 +49,37 @@ namespace CrispyLo.Modules
 
             return template;
         }
+
+        public static ControlTemplate CreatePanierRadioTemplate()
+        {
+            ControlTemplate template = new ControlTemplate(typeof(RadioButton));
+
+            FrameworkElementFactory border = new FrameworkElementFactory(typeof(Border));
+            border.Name = "border";
+            border.SetValue(Border.BackgroundProperty, Brushes.Transparent);
+            border.SetValue(Border.BorderBrushProperty, Brushes.Transparent);
+            border.SetValue(Border.BorderThicknessProperty, new Thickness(1));
+
+            FrameworkElementFactory content = new FrameworkElementFactory(typeof(ContentPresenter));
+            content.SetValue(ContentPresenter.HorizontalAlignmentProperty, HorizontalAlignment.Stretch);
+            content.SetValue(ContentPresenter.VerticalAlignmentProperty, VerticalAlignment.Center);
+            border.AppendChild(content);
+
+            template.VisualTree = border;
+
+            Trigger hoverTrigger = new Trigger();
+            hoverTrigger.Property = RadioButton.IsMouseOverProperty;
+            hoverTrigger.Value = true;
+            hoverTrigger.Setters.Add(new Setter(Border.BorderBrushProperty, Brushes.Black, "border"));
+            template.Triggers.Add(hoverTrigger);
+
+            Trigger checkedTrigger = new Trigger();
+            checkedTrigger.Property = RadioButton.IsCheckedProperty;
+            checkedTrigger.Value = true;
+            checkedTrigger.Setters.Add(new Setter(Border.BackgroundProperty, Brushes.Silver, "border"));
+            template.Triggers.Add(checkedTrigger);
+
+            return template;
+        }
     }
 }

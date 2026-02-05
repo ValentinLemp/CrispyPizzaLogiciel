@@ -156,5 +156,44 @@ namespace CrispyLo.Modules
                 throw;
             }
         }
+
+        public void AllIngredientByCategorieIng(int id, string libelle, out DataTable dataT, out int nbrRow)
+        {
+            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
+            dataT = new DataTable();
+
+            try
+            {
+                string query = "SELECT * FROM ingredient where idCategorieIngredient = " + id + " AND " + libelle + " = 1";
+                MySqlDataAdapter Data = new MySqlDataAdapter(query, maConnexion);
+                Data.Fill(dataT);
+                nbrRow = dataT.Rows.Count;
+                maConnexion.Close();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+                throw;
+            }
+        }
+
+        public void IngredientById(int id, out DataTable dataT)
+        {
+            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
+            dataT = new DataTable();
+
+            try
+            {
+                string query = "SELECT * FROM produit WHERE id = " + id;
+                MySqlDataAdapter Data = new MySqlDataAdapter(query, maConnexion);
+                Data.Fill(dataT);
+                maConnexion.Close();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+                throw;
+            }
+        }
     }
 }
