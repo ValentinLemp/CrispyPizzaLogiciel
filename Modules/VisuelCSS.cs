@@ -7,6 +7,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace CrispyLo.Modules
 {
@@ -80,6 +81,44 @@ namespace CrispyLo.Modules
             template.Triggers.Add(checkedTrigger);
 
             return template;
+        }
+
+        public static Grid RemplisageBouton(Boolean pizza, string libelle, double prix)
+        {
+            Grid contenue = new Grid();
+            contenue.HorizontalAlignment = HorizontalAlignment.Stretch;
+            contenue.VerticalAlignment = VerticalAlignment.Stretch;
+            contenue.Width = 100;
+            contenue.Height = 100;
+
+            if (pizza == true)
+            {
+                Image img = new Image();
+                string src = "../images/" + libelle + ".png";
+                img.Source = new BitmapImage(new Uri(src, UriKind.Relative));
+                img.Stretch = Stretch.Fill;
+                contenue.Children.Add(img);
+            }
+
+            TextBlock textNom = new TextBlock();
+            textNom.Text = libelle.ToUpper();
+            textNom.FontWeight = FontWeights.Bold;
+            textNom.TextWrapping = TextWrapping.Wrap;
+            textNom.HorizontalAlignment = HorizontalAlignment.Center;
+            textNom.VerticalAlignment = VerticalAlignment.Center;
+            textNom.TextAlignment = TextAlignment.Center;
+            contenue.Children.Add(textNom);
+
+            TextBlock textPrix = new TextBlock();
+            textPrix.Text = prix.ToString();
+            textPrix.Foreground = Brushes.White;
+            textPrix.FontWeight = FontWeights.Bold;
+            textPrix.VerticalAlignment = VerticalAlignment.Bottom;
+            textPrix.HorizontalAlignment = HorizontalAlignment.Right;
+            textPrix.Margin = new Thickness(0, 0, 5, 5);
+            contenue.Children.Add(textPrix);
+
+            return contenue;
         }
     }
 }

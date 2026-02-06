@@ -13,8 +13,8 @@ namespace CrispyLo.Classes
         private double prix;
 
         public int Id { get; set; }
-        public int Libelle { get; set; }
+        public string Libelle { get; set; }
         public double Prix { get; set; }
-        public Boolean EstSuplement { get; set; }
+        public Boolean EstSupplement { get; set; }
     }
 }

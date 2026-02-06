@@ -184,7 +184,7 @@ namespace CrispyLo.Modules
 
             try
             {
-                string query = "SELECT * FROM produit WHERE id = " + id;
+                string query = "SELECT * FROM ingredient WHERE id = " + id;
                 MySqlDataAdapter Data = new MySqlDataAdapter(query, maConnexion);
                 Data.Fill(dataT);
                 maConnexion.Close();
