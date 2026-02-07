@@ -18,6 +18,7 @@ using System.Windows.Shapes;
 //------
 using System.Data;
 using CrispyLo.Classes;
+using Org.BouncyCastle.Utilities.IO;
 
 
 namespace CrispyLo.Views
@@ -82,8 +83,8 @@ namespace CrispyLo.Views
             //Grille Ligne
             grdMain.RowDefinitions.Add(new RowDefinition { Height = new GridLength(60) });
             grdMain.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
-            grdMain.RowDefinitions.Add(new RowDefinition { Height = new GridLength(40) });
-            grdMain.RowDefinitions.Add(new RowDefinition { Height = new GridLength(124) });
+            grdMain.RowDefinitions.Add(new RowDefinition { Height = new GridLength(60) });
+            grdMain.RowDefinitions.Add(new RowDefinition { Height = new GridLength(144) });
 
             //------------------------------------------Création Vue Gauche------------------------------------------ 
             StackPanel selectionAffichage = new StackPanel();
@@ -146,8 +147,9 @@ namespace CrispyLo.Views
 
             Button btnDéconnexion = new Button();
             btnDéconnexion.Content = "X";
+            btnDéconnexion.Foreground = Brushes.White;
             btnDéconnexion.Background = Brushes.Red;
-            btnDéconnexion.FontWeight = FontWeights.Bold;
+            btnDéconnexion.FontWeight = FontWeights.Black;
             btnDéconnexion.Click += new RoutedEventHandler(Click_Exit);
             btnDéconnexion.Height = 25;
             btnDéconnexion.Width = 25;
@@ -611,23 +613,59 @@ namespace CrispyLo.Views
 
             //------------------------------------------Création Vue Droite------------------------------------------
             StackPanel actionHaut = new StackPanel();
-            StackPanel actionBas = new StackPanel();
+            WrapPanel actionBas = new WrapPanel();
 
+            Button supprimer = new Button();
+            Button vider = new Button();
+            Button remise = new Button();
+            Button calculatrice = new Button();
+
+            supprimer.Content = "Suppprimer";
+            supprimer.Background = Brushes.PowderBlue;
+            supprimer.Height = 40;
+            supprimer.Width = 80;
+            supprimer.Click += new RoutedEventHandler(Click_Supprimer);
+
+            vider.Content = "Vider";
+            vider.Background = Brushes.PowderBlue;
+            vider.Height = 40;
+            vider.Width = 80;
+            vider.Click += new RoutedEventHandler(Click_Vider);
+
+            remise.Content = "Remise";
+            remise.Background = Brushes.PowderBlue;
+            remise.Height = 40;
+            remise.Width = 80;
+            remise.Click += new RoutedEventHandler(Click_Remise);
+
+            calculatrice.Content = "Calculette";
+            calculatrice.Background = Brushes.PowderBlue;
+            calculatrice.Height = 40;
+            calculatrice.Width = 80;
+            calculatrice.Click += new RoutedEventHandler(Click_Calculette);
+
+            actionBas.VerticalAlignment = VerticalAlignment.Center;
+            actionBas.HorizontalAlignment = HorizontalAlignment.Stretch;
             Grid.SetColumn(actionHaut, 2);
             Grid.SetRow(actionHaut, 0);
 
+            Grid.SetColumn(actionBas, 2);
+            Grid.SetRow(actionBas, 2);
+
+            actionBas.Children.Add(supprimer);
+            actionBas.Children.Add(vider);
+            actionBas.Children.Add(remise);
+            actionBas.Children.Add(calculatrice);
+
+            grdMain.Children.Add(actionBas);
+
             panier.Background = Brushes.White;
-            panier.Width = 310;
-            panier.HorizontalAlignment = HorizontalAlignment.Left;
             Grid.SetColumn(panier, 2);
             Grid.SetRow(panier, 1);
             grdMain.Children.Add(panier);
-
-            Grid.SetColumn(actionBas, 2);
-            Grid.SetRow(actionBas, 3);
             //-------------------------------------------------------------------------------------------------------
 
-            //---------------------------------------------Création Ajout--------------------------------------------
+            //---------------------------------------------Création catalogue--------------------------------------------
             catalogueWrap.Add("PIZZA", pizza);
             catalogueWrap.Add("TAILLEPIZZA", taillePizza);
             catalogueWrap.Add("PÂTE", pate);
@@ -646,6 +684,11 @@ namespace CrispyLo.Views
             foreach (var wrap in catalogueWrap.Values)
             {
                 grdMain.Children.Add(wrap);
+            }
+
+            if (PagePrincipale.Panier.Count > 0)
+            {
+                affichePanier();
             }
             //-------------------------------------------------------------------------------------------------------
         }
@@ -1005,7 +1048,7 @@ namespace CrispyLo.Views
                     Grid.SetColumn(textIng, 0);
                     grilleIng.Children.Add(textIng);
 
-                    grilleIng.Width = panier.Width - 2;
+                    grilleIng.Width = panier.ActualWidth - 2;
                     text.Children.Add(grilleIng);
                     text.Height = 20;
                     text.HorizontalAlignment = HorizontalAlignment.Stretch;
@@ -1185,6 +1228,55 @@ namespace CrispyLo.Views
                     radio.IsChecked = true;
                     break;
                 }
+            }
+        }
+
+        public void Click_Supprimer(object sender, RoutedEventArgs e)
+        {
+            RadioButton rdtbtn = panier.Children.OfType<RadioButton>().FirstOrDefault(rb => rb.IsChecked == true);
+            if(rdtbtn != null)
+            {
+                int index = (int)rdtbtn.Tag;
+                PagePrincipale.Panier.RemoveAt(index);
+                affichePanier();
+            }
+        }
+
+        public void Click_Vider(object sender, RoutedEventArgs e)
+        {
+            PagePrincipale.Panier.Clear();
+            panier.Children.Clear();
+        }
+            
+        public async void Click_Remise(object sender, RoutedEventArgs e)
+        {
+            RadioButton rdtbtn = panier.Children.OfType<RadioButton>().FirstOrDefault(rb => rb.IsChecked == true);
+            if (rdtbtn != null)
+            {
+                PagePrincipale.MainInfo.Content = new Remise((int)rdtbtn.Tag);
+                PagePrincipale.MainInfo.Visibility = Visibility.Visible;
+
+                var tcs = new TaskCompletionSource<bool>();
+                void handler(object s, DependencyPropertyChangedEventArgs args)
+                {
+                    if (PagePrincipale.MainInfo.Visibility != Visibility.Visible)
+                        tcs.SetResult(true);
+                }
+                PagePrincipale.MainInfo.IsVisibleChanged += handler;
+                await tcs.Task;
+                PagePrincipale.MainInfo.IsVisibleChanged -= handler;
+
+                affichePanier();
+            }
+        }
+
+        public void Click_Calculette(object sender, RoutedEventArgs e)
+        {
+            RadioButton rdtbtn = panier.Children.OfType<RadioButton>().FirstOrDefault(rb => rb.IsChecked == true);
+            if (rdtbtn != null)
+            {
+                PagePrincipale.MainInfo.Content = new Calculette((int)rdtbtn.Tag);
+                PagePrincipale.MainInfo.Visibility = Visibility.Visible; // sur prix total
             }
         }
     }
