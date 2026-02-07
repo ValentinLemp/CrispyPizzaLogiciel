@@ -11,7 +11,7 @@
     <Grid Background="Wheat">
         <Button Background="Red" Foreground="White" Content="X" Click="Click_Leave" Margin="326,10,10,411" FontWeight="Black"></Button>
         <TextBox x:Name="argentReçu" Margin="40,104,230,309" TextChanged="ReçuChanger" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" FontSize="20"></TextBox>
-        <TextBox x:Name="prixCommande" Margin="230,104,40,309" IsReadOnly="False" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" FontSize="20"></TextBox>
+        <TextBox x:Name="prixCommande" TextChanged="prixCommandeChanger" Margin="230,104,40,309" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" FontSize="20"></TextBox>
         <TextBlock Background="Black" Margin="170,122,169,324"></TextBlock>
         <TextBlock Background="Transparent" Margin="55,83,0,0" Text="Argent reçu" VerticalAlignment="Top" HorizontalAlignment="Left"></TextBlock>
         <TextBlock Background="Transparent" Margin="236,83,0,0" Text="Prix commande" VerticalAlignment="Top" HorizontalAlignment="Left"></TextBlock>

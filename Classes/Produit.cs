@@ -15,6 +15,6 @@ namespace CrispyLo.Classes
         public string TypePate { get; set; }
         public int IdTypeProduit { get; set; }
         public List<Ingredient> Ingredients { get; set; }
-        public double prixTotal => (Prix + (TypePate != null && TypePate == "tagliatelle" || TypePate == "tortellini" ? 1 : 0) + Ingredients.Sum(i => (i.EstSupplement?i.Prix:0)));
+        public double prixTotal => (Prix + (TypePate != null && (TypePate == "tagliatelle" || TypePate == "tortellini") ? 1 : 0) + Ingredients.Sum(i => (i.EstSupplement ? i.Prix : 0)));
     }
 }

@@ -83,7 +83,7 @@ namespace CrispyLo.Modules
             return template;
         }
 
-        public static Grid RemplisageBouton(Boolean pizza, string libelle, double prix)
+        public static Grid RemplisageBouton(Boolean pizza, Boolean estLarge,string libelle, double prix)
         {
             Grid contenue = new Grid();
             contenue.HorizontalAlignment = HorizontalAlignment.Stretch;
@@ -94,10 +94,14 @@ namespace CrispyLo.Modules
             if (pizza == true)
             {
                 Image img = new Image();
-                string src = "../images/" + libelle + ".png";
-                img.Source = new BitmapImage(new Uri(src, UriKind.Relative));
+                string src = "pack://application:,,,/images/" + libelle.ToLower() + ".png";
+                img.Source = new BitmapImage(new Uri(src));
                 img.Stretch = Stretch.Fill;
                 contenue.Children.Add(img);
+            }
+            if (estLarge == true)
+            {
+                libelle = "maxi " + libelle;
             }
 
             TextBlock textNom = new TextBlock();

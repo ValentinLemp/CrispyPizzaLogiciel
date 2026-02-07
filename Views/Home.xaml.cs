@@ -247,7 +247,7 @@ namespace CrispyLo.Views
             for (int i = 0; i < nbrRow; i++)
             {
                 Button btn = new Button();
-                btn.Content = VisuelCSS.RemplisageBouton(false, data.Rows[i]["libelle"].ToString(), (double)data.Rows[i]["prix"]);
+                btn.Content = VisuelCSS.RemplisageBouton(false, false, data.Rows[i]["libelle"].ToString(), (double)data.Rows[i]["prix"]);
                 btn.Tag = data.Rows[i]["id"];
                 btn.Width = 100;
                 btn.Height = 100;
@@ -261,7 +261,7 @@ namespace CrispyLo.Views
             for (int i = 0; i < nbrRow; i++)
             {
                 Button btn = new Button();
-                btn.Content = VisuelCSS.RemplisageBouton(false, data.Rows[i]["libelle"].ToString(), (double)data.Rows[i]["prix"]);
+                btn.Content = VisuelCSS.RemplisageBouton(false, false, data.Rows[i]["libelle"].ToString(), (double)data.Rows[i]["prix"]);
                 btn.Tag = data.Rows[i]["id"];
                 btn.Width = 100;
                 btn.Height = 100;
@@ -276,7 +276,7 @@ namespace CrispyLo.Views
             {
                 string nom = data.Rows[i]["libelle"].ToString() + "\n" + data.Rows[i]["quantite"].ToString() + "pc";
                 Button btn = new Button();
-                btn.Content = VisuelCSS.RemplisageBouton(false, nom, (double)data.Rows[i]["prix"]);
+                btn.Content = VisuelCSS.RemplisageBouton(false, false, nom, (double)data.Rows[i]["prix"]);
                 btn.Tag = data.Rows[i]["id"];
                 btn.Width = 100;
                 btn.Height = 100;
@@ -299,7 +299,7 @@ namespace CrispyLo.Views
                 {
                     nom = data.Rows[i]["libelle"].ToString();
                 }
-                btn.Content = VisuelCSS.RemplisageBouton(false, nom, (double)data.Rows[i]["prix"]);
+                btn.Content = VisuelCSS.RemplisageBouton(false, false, nom, (double)data.Rows[i]["prix"]);
                 btn.Tag = data.Rows[i]["id"];
                 btn.Width = 100;
                 btn.Height = 100;
@@ -314,7 +314,7 @@ namespace CrispyLo.Views
             {
                 Button btn = new Button();
                 string nom = data.Rows[i]["libelle"].ToString() + "\n" + data.Rows[i]["centilitre"].ToString();
-                btn.Content = VisuelCSS.RemplisageBouton(false, nom, (double)data.Rows[i]["prix"]);
+                btn.Content = VisuelCSS.RemplisageBouton(false, false, nom, (double)data.Rows[i]["prix"]);
                 btn.Tag = data.Rows[i]["id"];
                 btn.Width = 100;
                 btn.Height = 100;
@@ -328,7 +328,7 @@ namespace CrispyLo.Views
             for (int i = 0; i < nbrRow; i++)
             {
                 Button btn = new Button();
-                btn.Content = VisuelCSS.RemplisageBouton(false, data.Rows[i]["libelle"].ToString(), (double)data.Rows[i]["prix"]);
+                btn.Content = VisuelCSS.RemplisageBouton(false, false, data.Rows[i]["libelle"].ToString(), (double)data.Rows[i]["prix"]);
                 btn.Tag = data.Rows[i]["id"];
                 btn.Width = 100;
                 btn.Height = 100;
@@ -623,29 +623,34 @@ namespace CrispyLo.Views
             supprimer.Content = "Suppprimer";
             supprimer.Background = Brushes.PowderBlue;
             supprimer.Height = 40;
-            supprimer.Width = 80;
+            supprimer.Width = 79;
             supprimer.Click += new RoutedEventHandler(Click_Supprimer);
+            supprimer.FontWeight = FontWeights.Bold;
 
             vider.Content = "Vider";
             vider.Background = Brushes.PowderBlue;
             vider.Height = 40;
-            vider.Width = 80;
+            vider.Width = 78;
             vider.Click += new RoutedEventHandler(Click_Vider);
+            vider.FontWeight = FontWeights.Bold;
 
             remise.Content = "Remise";
             remise.Background = Brushes.PowderBlue;
             remise.Height = 40;
-            remise.Width = 80;
+            remise.Width = 79;
             remise.Click += new RoutedEventHandler(Click_Remise);
+            remise.FontWeight = FontWeights.Bold;
 
             calculatrice.Content = "Calculette";
             calculatrice.Background = Brushes.PowderBlue;
             calculatrice.Height = 40;
-            calculatrice.Width = 80;
+            calculatrice.Width = 79;
             calculatrice.Click += new RoutedEventHandler(Click_Calculette);
+            calculatrice.FontWeight = FontWeights.Bold;
 
             actionBas.VerticalAlignment = VerticalAlignment.Center;
             actionBas.HorizontalAlignment = HorizontalAlignment.Stretch;
+            actionBas.Margin = new Thickness(0, 0, 5, 0);
             Grid.SetColumn(actionHaut, 2);
             Grid.SetRow(actionHaut, 0);
 
@@ -660,9 +665,13 @@ namespace CrispyLo.Views
             grdMain.Children.Add(actionBas);
 
             panier.Background = Brushes.White;
-            Grid.SetColumn(panier, 2);
-            Grid.SetRow(panier, 1);
-            grdMain.Children.Add(panier);
+            ScrollViewer scrollPanier = new ScrollViewer();
+            scrollPanier.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
+            scrollPanier.Content = panier;
+            scrollPanier.Margin = new Thickness(0,0,5,0);
+            Grid.SetColumn(scrollPanier, 2);
+            Grid.SetRow(scrollPanier, 1);
+            grdMain.Children.Add(scrollPanier);
             //-------------------------------------------------------------------------------------------------------
 
             //---------------------------------------------Création catalogue--------------------------------------------
@@ -817,12 +826,12 @@ namespace CrispyLo.Views
         public void Pizza_Checked(object sender, RoutedEventArgs e)
         {
             pizza.Children.Clear();
-            string maxi = "";
             string prix = "prix";
+            Boolean estLarge = false;
             int id = 0;
             if (radioTailleLarge.IsChecked == true)
             {
-                maxi = "MAXI ";
+                estLarge = true;
                 prix = "prixLarge";
             }
 
@@ -832,7 +841,7 @@ namespace CrispyLo.Views
                 for (int i = 0; i < nbrRow; i++)
                 {
                     Button btn = new Button();
-                    btn.Content = VisuelCSS.RemplisageBouton(true, maxi + data.Rows[i]["libelle"].ToString(), (double)data.Rows[i][prix]);
+                    btn.Content = VisuelCSS.RemplisageBouton(true, estLarge,data.Rows[i]["libelle"].ToString(), (double)data.Rows[i][prix]);
                     btn.Tag = data.Rows[i]["id"];
                     btn.Width = 100;
                     btn.Height = 100;
@@ -864,7 +873,7 @@ namespace CrispyLo.Views
                 for (int i = 0; i < nbrRow; i++)
                 {
                     Button btn = new Button();
-                    btn.Content = VisuelCSS.RemplisageBouton(true, maxi + data.Rows[i]["libelle"].ToString(), (double)data.Rows[i][prix]);
+                    btn.Content = VisuelCSS.RemplisageBouton(true, false, data.Rows[i]["libelle"].ToString(), (double)data.Rows[i][prix]);
                     btn.Tag = data.Rows[i]["id"];
                     btn.Width = 100;
                     btn.Height = 100;
@@ -889,7 +898,7 @@ namespace CrispyLo.Views
                 {
                     sql.ProduitByLibelle(libelle, out DataTable data);
                     Button btn = new Button();
-                    btn.Content = VisuelCSS.RemplisageBouton(false, nom + data.Rows[0]["libelle"].ToString(), (double)data.Rows[0]["prix"] + 1);
+                    btn.Content = VisuelCSS.RemplisageBouton(false, false, nom + data.Rows[0]["libelle"].ToString(), (double)data.Rows[0]["prix"] + 1);
                     btn.Width = 100;
                     btn.Height = 100;
                     btn.Background = Brushes.Gold;
@@ -905,7 +914,7 @@ namespace CrispyLo.Views
                 string libelle = "Canneloni ricota";
                 sql.ProduitByLibelle(libelle, out DataTable data);
                 Button btn = new Button();
-                btn.Content = VisuelCSS.RemplisageBouton(false, data.Rows[0]["libelle"].ToString(), (double)data.Rows[0]["prix"]);
+                btn.Content = VisuelCSS.RemplisageBouton(false, false, data.Rows[0]["libelle"].ToString(), (double)data.Rows[0]["prix"]);
                 btn.Width = 100;
                 btn.Height = 100;
                 btn.Background = Brushes.Gold;
@@ -922,7 +931,7 @@ namespace CrispyLo.Views
                 {
                     double prix = (radioPateTagliatelle.IsChecked == true ? 1 : 0);
                     Button btn = new Button();
-                    btn.Content = VisuelCSS.RemplisageBouton(false, nom + data.Rows[i]["libelle"].ToString(), (double)data.Rows[i]["prix"] + prix);
+                    btn.Content = VisuelCSS.RemplisageBouton(false, false, nom + data.Rows[i]["libelle"].ToString(), (double)data.Rows[i]["prix"] + prix);
                     btn.Tag = data.Rows[i]["id"];
                     btn.Width = 100;
                     btn.Height = 100;
@@ -944,10 +953,12 @@ namespace CrispyLo.Views
                 for (int i = 0; i < nbrRow; i++)
                 {
                     string phrase = "";
+                    Boolean estLarge = false;
+
                     double prix = (double)data.Rows[i]["prix"];
                     if (suggestionLarge.IsChecked == true && (int)data.Rows[i]["idTypeProduit"] == 1)
                     {
-                        phrase = "maxi ";
+                        estLarge = true;
                         prix = (double)data.Rows[i]["prixLarge"];
                     }
                     else if (suggestionRigatoni.IsChecked == true && (int)data.Rows[i]["idTypeProduit"] == 2)
@@ -964,7 +975,7 @@ namespace CrispyLo.Views
                         prix = (double)data.Rows[i]["prix"] + 1;
                     }
                     Button btn = new Button();
-                    btn.Content = VisuelCSS.RemplisageBouton(false, phrase + data.Rows[i]["libelle"].ToString(), prix);
+                    btn.Content = VisuelCSS.RemplisageBouton(false, estLarge, phrase + data.Rows[i]["libelle"].ToString(), prix);
                     btn.Tag = data.Rows[i]["id"];
                     btn.Width = 100;
                     btn.Height = 100;
@@ -1105,7 +1116,7 @@ namespace CrispyLo.Views
                                     break;
                                 }
                             }
-                            btn.Content = VisuelCSS.RemplisageBouton(false, data.Rows[i]["libelle"].ToString(), (double)data.Rows[i][prix]);
+                            btn.Content = VisuelCSS.RemplisageBouton(false, false, data.Rows[i]["libelle"].ToString(), (double)data.Rows[i][prix]);
                             btn.Tag = data.Rows[i]["id"];
                             btn.Width = 100;
                             btn.Height = 100;
@@ -1132,7 +1143,7 @@ namespace CrispyLo.Views
                                     break;
                                 }
                             }
-                            btn.Content = VisuelCSS.RemplisageBouton(false, tabIng[i], prixIng);
+                            btn.Content = VisuelCSS.RemplisageBouton(false, false, tabIng[i], prixIng);
                             btn.Width = 100;
                             btn.Height = 100;
                             btn.Tag = tabIng[i];
@@ -1155,7 +1166,7 @@ namespace CrispyLo.Views
             if (btn.Background == Brushes.Gold)
             {
                 btn.Background = Brushes.Crimson;
-                btn.Content = VisuelCSS.RemplisageBouton(false, btn.Tag.ToString(), -1); 
+                btn.Content = VisuelCSS.RemplisageBouton(false, false, btn.Tag.ToString(), -1); 
                 p.Ingredients.Add(new Ingredient
                 {
                     Id = 0,
@@ -1167,7 +1178,7 @@ namespace CrispyLo.Views
             else
             {
                 btn.Background = Brushes.Gold;
-                btn.Content = VisuelCSS.RemplisageBouton(false, btn.Tag.ToString(), 0);
+                btn.Content = VisuelCSS.RemplisageBouton(false, false, btn.Tag.ToString(), 0);
                 foreach (Ingredient ing in p.Ingredients)
                 {
                     if (ing.Libelle == btn.Tag.ToString())
@@ -1272,12 +1283,8 @@ namespace CrispyLo.Views
 
         public void Click_Calculette(object sender, RoutedEventArgs e)
         {
-            RadioButton rdtbtn = panier.Children.OfType<RadioButton>().FirstOrDefault(rb => rb.IsChecked == true);
-            if (rdtbtn != null)
-            {
-                PagePrincipale.MainInfo.Content = new Calculette((int)rdtbtn.Tag);
-                PagePrincipale.MainInfo.Visibility = Visibility.Visible; // sur prix total
-            }
+            PagePrincipale.MainInfo.Content = new Calculette(Traitement.prixTotal());
+            PagePrincipale.MainInfo.Visibility = Visibility.Visible;
         }
     }
 }

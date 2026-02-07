@@ -22,20 +22,21 @@ namespace CrispyLo.Views.Info
     public partial class Calculette : Page
     {
         MainWindow PagePrincipale = (MainWindow)App.Current.MainWindow;
-        public Calculette(int index)
+        double montantTotal;
+        public Calculette(double index)
         {
             InitializeComponent();
             PrepareInitialize(index);
         }
 
-        public void PrepareInitialize(int index)
+        public void PrepareInitialize(double index)
         {
             this.Height = 450;
             this.Width = 365;
-            Produit p = PagePrincipale.Panier[index];
-            prixCommande.Text = p.Prix + " €";
-            prixCommande.Tag = p.Prix;
+            montantTotal = index;
             argentReçu.Tag = 0.0;
+            prixCommande.Text = index.ToString();
+            prixCommande.Tag = index;
         }
 
         public void Click_Montant(object sender, RoutedEventArgs e)
@@ -49,6 +50,8 @@ namespace CrispyLo.Views.Info
         {
             argentReçu.Tag = 0.0;
             argentReçu.Text = "";
+            prixCommande.Tag = montantTotal;
+            prixCommande.Text = montantTotal.ToString();
         }
 
         public void Click_Leave(object sender, RoutedEventArgs e)
@@ -56,7 +59,35 @@ namespace CrispyLo.Views.Info
             PagePrincipale.MainInfo.Visibility = Visibility.Collapsed;
         }
 
-        public void ReçuChanger(object sender, RoutedEventArgs e)
+        public void ReçuChanger(object sender, TextChangedEventArgs e)
+        {
+            if (argentReçu.Text == "")
+            {
+                argentReçu.Tag = 0.0;
+                affichePrix();
+            }
+            if (double.TryParse(argentReçu.Text, out double montant))
+            {
+                argentReçu.Tag = montant;
+                affichePrix();
+            }
+        }
+
+        public void prixCommandeChanger(object sender, TextChangedEventArgs e)
+        {
+            if (prixCommande.Text == "")
+            {
+                prixCommande.Tag = 0.0;
+                affichePrix();
+            }
+            if (double.TryParse(prixCommande.Text, out double montant))
+            {
+                prixCommande.Tag = montant;
+                affichePrix();
+            }
+        }
+
+        public void affichePrix()
         {
             rendre.Text = (double)argentReçu.Tag - (double)prixCommande.Tag + " €";
         }
