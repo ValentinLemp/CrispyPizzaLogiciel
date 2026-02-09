@@ -65,5 +65,18 @@ namespace CrispyLo.Views.Info
             p.Prix = double.Parse(texte.Text);
             PagePrincipale.MainInfo.Visibility = Visibility.Collapsed;
         }
+
+        public void Click_GratuitTotal(object sender, RoutedEventArgs e)
+        {
+            foreach (Produit pAll in PagePrincipale.Panier)
+            {
+                pAll.Prix = 0;
+                foreach (Ingredient ing in pAll.Ingredients)
+                {
+                    ing.Prix = 0;
+                }
+            }
+            texte.Text = "0";
+        }
     }
 }

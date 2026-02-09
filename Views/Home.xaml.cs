@@ -71,6 +71,8 @@ namespace CrispyLo.Views
 
         StackPanel panier = new StackPanel();
 
+        TextBlock affichePrix = new TextBlock();
+
 
         public void PrepareInitialize()
         {
@@ -106,7 +108,7 @@ namespace CrispyLo.Views
                 btnCatalogue.FontSize = 20;
                 btnCatalogue.Background = Brushes.GreenYellow;
                 btnCatalogue.Foreground = Brushes.White;
-                btnCatalogue.Margin = new Thickness(5,0,0,0);
+                btnCatalogue.Margin = new Thickness(5, 0, 0, 0);
                 btnCatalogue.Click += new RoutedEventHandler(Click_catalogue);
                 if (data.Rows[i]["libelle"].ToString() == "pizza")
                 {
@@ -586,7 +588,7 @@ namespace CrispyLo.Views
             ajoutIng.FontWeight = FontWeights.Bold;
             ajoutIng.GroupName = "choixIngredient";
             ajoutIng.Checked += Ingredient_Checked;
-            ajoutIng.Margin = new Thickness(100,5,5,5);
+            ajoutIng.Margin = new Thickness(100, 5, 5, 5);
             ajoutIng.Template = radioStyle;
             ajoutIng.IsChecked = true;
             ajoutIng.Width = 100;
@@ -614,11 +616,14 @@ namespace CrispyLo.Views
             //------------------------------------------Création Vue Droite------------------------------------------
             StackPanel actionHaut = new StackPanel();
             WrapPanel actionBas = new WrapPanel();
+            WrapPanel commander = new WrapPanel();
 
             Button supprimer = new Button();
             Button vider = new Button();
             Button remise = new Button();
             Button calculatrice = new Button();
+
+            Button commande = new Button();
 
             supprimer.Content = "Suppprimer";
             supprimer.Background = Brushes.PowderBlue;
@@ -668,10 +673,38 @@ namespace CrispyLo.Views
             ScrollViewer scrollPanier = new ScrollViewer();
             scrollPanier.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
             scrollPanier.Content = panier;
-            scrollPanier.Margin = new Thickness(0,0,5,0);
+            scrollPanier.Margin = new Thickness(0, 0, 5, 0);
             Grid.SetColumn(scrollPanier, 2);
             Grid.SetRow(scrollPanier, 1);
             grdMain.Children.Add(scrollPanier);
+
+            commander.Background = Brushes.LightGray;
+            commander.Margin = new Thickness(0, 0, 5, 5);
+            Grid.SetColumn(commander, 2);
+            Grid.SetRow(commander, 3);
+
+            commande.Content = "🛒";
+            commande.Height = 60;
+            commande.Width = 90;
+            commande.Background = Brushes.Transparent;
+            commande.Margin = new Thickness(40, 35, 0, 0);
+            commande.VerticalAlignment = VerticalAlignment.Center;
+            commande.FontSize = 40;
+            commande.FontWeight = FontWeights.Bold;
+            commande.Click += new RoutedEventHandler(Click_Commande);
+
+            affichePrix.Text = "0 €";
+            affichePrix.Height = 60;
+            affichePrix.Width = 140;
+            affichePrix.Background = Brushes.Transparent;
+            affichePrix.Margin = new Thickness(40, 35, 5, 0);
+            affichePrix.VerticalAlignment = VerticalAlignment.Center;
+            affichePrix.FontSize = 40;
+            affichePrix.TextAlignment = TextAlignment.Right;
+
+            commander.Children.Add(commande);
+            commander.Children.Add(affichePrix);
+            grdMain.Children.Add(commander);
             //-------------------------------------------------------------------------------------------------------
 
             //---------------------------------------------Création catalogue--------------------------------------------
@@ -841,7 +874,7 @@ namespace CrispyLo.Views
                 for (int i = 0; i < nbrRow; i++)
                 {
                     Button btn = new Button();
-                    btn.Content = VisuelCSS.RemplisageBouton(true, estLarge,data.Rows[i]["libelle"].ToString(), (double)data.Rows[i][prix]);
+                    btn.Content = VisuelCSS.RemplisageBouton(true, estLarge, data.Rows[i]["libelle"].ToString(), (double)data.Rows[i][prix]);
                     btn.Tag = data.Rows[i]["id"];
                     btn.Width = 100;
                     btn.Height = 100;
@@ -988,6 +1021,14 @@ namespace CrispyLo.Views
         }
         public void affichePanier()
         {
+            if (PagePrincipale.Panier.Count == 0)
+            {
+                affichePrix.Text = "0 €";
+            }
+            else
+            {
+                affichePrix.Text = Traitement.prixTotal() + " €";
+            }
             panier.Children.Clear();
             for (int i = 0; i < PagePrincipale.Panier.Count; i++)
             {
@@ -1093,7 +1134,7 @@ namespace CrispyLo.Views
                     {
                         string libelle = "forPizza";
                         if (p.IdTypeProduit == 2) { libelle = "forPate"; }
-                        else if(p.IdTypeProduit == 3) { libelle = "forSalade"; }
+                        else if (p.IdTypeProduit == 3) { libelle = "forSalade"; }
                         int id = 0;
                         if (ingViande.IsChecked == true) { id = 1; }
                         else if (ingFromage.IsChecked == true) { id = 2; }
@@ -1153,8 +1194,8 @@ namespace CrispyLo.Views
                         }
                     }
                 }
-                
-            } 
+
+            }
         }
 
         public void Click_IngredientMoins(object sender, RoutedEventArgs e)
@@ -1166,7 +1207,7 @@ namespace CrispyLo.Views
             if (btn.Background == Brushes.Gold)
             {
                 btn.Background = Brushes.Crimson;
-                btn.Content = VisuelCSS.RemplisageBouton(false, false, btn.Tag.ToString(), -1); 
+                btn.Content = VisuelCSS.RemplisageBouton(false, false, btn.Tag.ToString(), -1);
                 p.Ingredients.Add(new Ingredient
                 {
                     Id = 0,
@@ -1245,7 +1286,7 @@ namespace CrispyLo.Views
         public void Click_Supprimer(object sender, RoutedEventArgs e)
         {
             RadioButton rdtbtn = panier.Children.OfType<RadioButton>().FirstOrDefault(rb => rb.IsChecked == true);
-            if(rdtbtn != null)
+            if (rdtbtn != null)
             {
                 int index = (int)rdtbtn.Tag;
                 PagePrincipale.Panier.RemoveAt(index);
@@ -1257,8 +1298,9 @@ namespace CrispyLo.Views
         {
             PagePrincipale.Panier.Clear();
             panier.Children.Clear();
+            affichePrix.Text = "0 €";
         }
-            
+
         public async void Click_Remise(object sender, RoutedEventArgs e)
         {
             RadioButton rdtbtn = panier.Children.OfType<RadioButton>().FirstOrDefault(rb => rb.IsChecked == true);
@@ -1285,6 +1327,11 @@ namespace CrispyLo.Views
         {
             PagePrincipale.MainInfo.Content = new Calculette(Traitement.prixTotal());
             PagePrincipale.MainInfo.Visibility = Visibility.Visible;
+        }
+
+        public void Click_Commande(object sender, RoutedEventArgs e)
+        {
+            PagePrincipale.Main.Content = new NewCommande();
         }
     }
 }

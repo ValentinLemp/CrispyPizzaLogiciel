@@ -90,6 +90,9 @@ namespace CrispyLo.Modules
             contenue.VerticalAlignment = VerticalAlignment.Stretch;
             contenue.Width = 100;
             contenue.Height = 100;
+            TextBlock textNom = new TextBlock();
+            textNom.VerticalAlignment = VerticalAlignment.Center;
+
 
             if (pizza == true)
             {
@@ -98,18 +101,18 @@ namespace CrispyLo.Modules
                 img.Source = new BitmapImage(new Uri(src));
                 img.Stretch = Stretch.Fill;
                 contenue.Children.Add(img);
+                textNom.VerticalAlignment = VerticalAlignment.Top;
+
             }
             if (estLarge == true)
             {
                 libelle = "maxi " + libelle;
             }
 
-            TextBlock textNom = new TextBlock();
             textNom.Text = libelle.ToUpper();
             textNom.FontWeight = FontWeights.Bold;
             textNom.TextWrapping = TextWrapping.Wrap;
             textNom.HorizontalAlignment = HorizontalAlignment.Center;
-            textNom.VerticalAlignment = VerticalAlignment.Center;
             textNom.TextAlignment = TextAlignment.Center;
             contenue.Children.Add(textNom);
 

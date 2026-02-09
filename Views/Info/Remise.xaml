@@ -11,9 +11,10 @@
     <Grid Background="Wheat">
         <TextBlock Margin="128,10,128,437" Text="REMISE" FontSize="40" FontWeight="Black"></TextBlock>
         <TextBox x:Name="texte" Margin="100,84,100,357" Text="€" FontSize="41" HorizontalContentAlignment="Center" VerticalContentAlignment="top" IsReadOnly="True"></TextBox>
-        <Button Margin="100,196,100,250" Content="Mod. prix" FontSize="35" FontWeight="Bold" Click="Click_Prix"></Button>
-        <Button Margin="100,271,100,175" Content="Gratuit" FontSize="35" FontWeight="Bold" Click="Click_Gratuit"></Button>
-        <Button Margin="100,347,100,99" Content="Fidélité" FontSize="35" FontWeight="Bold" Click="Click_Fidélité"></Button>
+        <Button Margin="95,196,95,250" Content="Mod. prix" FontSize="35" FontWeight="Bold" Click="Click_Prix"></Button>
+        <Button Margin="95,271,95,175" Content="Gratuit" FontSize="35" FontWeight="Bold" Click="Click_Gratuit"></Button>
+        <Button Margin="95,347,95,99" Content="Fidélité" FontSize="35" FontWeight="Bold" Click="Click_Fidélité"></Button>
+        <Button Margin="95,426,95,20" Content="Gratuit Total" FontSize="35" FontWeight="Bold" Click="Click_GratuitTotal"></Button>
         <Button Background="Red" Foreground="White" Content="X" Click="Click_Leave" Margin="361,10,10,464" FontWeight="Black"></Button>
     </Grid>
 </Page>
