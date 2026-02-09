@@ -30,6 +30,7 @@ namespace CrispyLo.Views
     {
         //---------------------
         MainWindow PagePrincipale = (MainWindow)App.Current.MainWindow;
+        ControlTemplate radioStyle = VisuelCSS.CreateButtonStyleTemplate();
         BaseDeDonnée sql = new BaseDeDonnée();
         //---------------------
         public Home()
@@ -340,7 +341,6 @@ namespace CrispyLo.Views
                 dipy.Children.Add(btn);
             }
 
-            ControlTemplate radioStyle = VisuelCSS.CreateButtonStyleTemplate();
 
             //Pizza catégorie
             allPizza.Content = "ALL";
@@ -1331,6 +1331,7 @@ namespace CrispyLo.Views
 
         public void Click_Commande(object sender, RoutedEventArgs e)
         {
+ 
             PagePrincipale.Main.Content = new NewCommande();
         }
     }
