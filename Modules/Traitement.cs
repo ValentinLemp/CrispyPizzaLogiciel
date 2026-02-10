@@ -119,5 +119,66 @@ namespace CrispyLo.Modules
             double c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
             return R * c;
         }
+
+        public static void CalculRésumé(out string[] result)
+        {
+            MainWindow PagePrincipale = (MainWindow)App.Current.MainWindow;
+            int[] nbAliment = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+            foreach (Produit p in PagePrincipale.Panier)
+            {
+                if (p.IdTypeProduit == 1)
+                {
+                    if (p.EstLarge == false)
+                    {
+                        nbAliment[0]++;
+                    }
+                    else
+                    {
+                        nbAliment[1]++;
+                    }
+                }
+                else if (p.IdTypeProduit == 2)
+                {
+                    nbAliment[2]++;
+                }
+                else if (p.IdTypeProduit == 3)
+                {
+                    nbAliment[3]++;
+                }
+                else if (p.IdTypeProduit == 4)
+                {
+                    nbAliment[4]++;
+                }
+                else if (p.IdTypeProduit == 5)
+                {
+                    nbAliment[5]++;
+                }
+                else if (p.IdTypeProduit == 6)
+                {
+                    nbAliment[6]++;
+                }
+                else if (p.IdTypeProduit == 7)
+                {
+                    nbAliment[7]++;
+                }
+                else if (p.IdTypeProduit == 8)
+                {
+                    nbAliment[8]++;
+                }
+            }
+            result = new string[] {"X Pizza", "X Maxi pizza", "X Pâte", "X Salade", "X Pain", "X Snacking", "X Dessert", "X Boisson", "X Dipy" };
+
+            for (int i = 0; i < nbAliment.Length; i++)
+            {
+                if (nbAliment[i] > 0)
+                {
+                    result[i] = nbAliment[i] + result[i];
+                }
+                else
+                {
+                    result[i] = "";
+                }
+            }
+        }
     }
 }

@@ -195,5 +195,113 @@ namespace CrispyLo.Modules
                 throw;
             }
         }
+
+        public void AllClientByTelephone(string phone, out DataTable dataT, out int nbrRow)
+        {
+            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
+            dataT = new DataTable();
+
+            try
+            {
+                string query = "SELECT * FROM client where numero = " + phone;
+                MySqlDataAdapter Data = new MySqlDataAdapter(query, maConnexion);
+                Data.Fill(dataT);
+                nbrRow = dataT.Rows.Count;
+                maConnexion.Close();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+                throw;
+            }
+        }
+
+        public void AdresseByClient(int id, out DataTable dataT)
+        {
+            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
+            dataT = new DataTable();
+
+            try
+            {
+                string query = "SELECT * FROM adresse where id = " + id;
+                MySqlDataAdapter Data = new MySqlDataAdapter(query, maConnexion);
+                Data.Fill(dataT);
+                maConnexion.Close();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+                throw;
+            }
+        }
+
+        public void SupprimerClient(int idClient)
+        {
+            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
+
+            try
+            {
+                maConnexion.Open();
+
+                string queryAdresse = "SELECT idAdresse FROM client WHERE id = " + idClient;
+                MySqlCommand cmdAdresse = new MySqlCommand(queryAdresse, maConnexion);
+                int idAdresse = Convert.ToInt32(cmdAdresse.ExecuteScalar());
+
+                string queryClient = "DELETE FROM client WHERE id = " + idClient;
+                MySqlCommand cmdClient = new MySqlCommand(queryClient, maConnexion);
+                cmdClient.ExecuteNonQuery();
+
+                string queryDeleteAdresse = "DELETE FROM adresse WHERE id = " + idAdresse;
+                MySqlCommand cmdDeleteAdresse = new MySqlCommand(queryDeleteAdresse, maConnexion);
+                cmdDeleteAdresse.ExecuteNonQuery();
+
+                maConnexion.Close();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+                throw;
+            }
+        }
+
+        public int AjouterAdresse(double codePostal, string nomRue, string numeroRue, string localite)
+        {
+            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
+
+            try
+            {
+                maConnexion.Open();
+                string query = "INSERT INTO adresse(codePostal, nomRue, numeroRue, localite) VALUES(" + codePostal + ", '" + nomRue + "', '" + numeroRue + "', '" + localite + "')";
+                MySqlCommand cmd = new MySqlCommand(query, maConnexion);
+                cmd.ExecuteNonQuery();
+                int id = (int)cmd.LastInsertedId;
+                maConnexion.Close();
+                return id;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+                throw;
+            }
+        }
+
+        public void AjouterClient(string nom, string prenom, string numero, int idAdresse)
+        {
+            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
+
+            try
+            {
+                maConnexion.Open();
+                string query = "INSERT INTO client(nom, prenom, numero, idAdresse) VALUES('" + nom + "', '" + prenom + "', '" + numero + "', " + idAdresse + ")";
+                MySqlCommand cmd = new MySqlCommand(query, maConnexion);
+                cmd.ExecuteNonQuery();
+                maConnexion.Close();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+                throw;
+            }
+        }
     }
 }

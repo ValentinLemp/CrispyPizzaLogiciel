@@ -30,8 +30,8 @@ namespace CrispyLo
 
         public void PrepareInitialize()
         {
-            Main.Content = new NewCommande();
-            //Main.Content = new Login();
+            //Main.Content = new NewCommande();
+            Main.Content = new Login();
         }
     }
 }

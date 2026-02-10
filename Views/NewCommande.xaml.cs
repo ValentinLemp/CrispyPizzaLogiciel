@@ -2,6 +2,7 @@
 using CrispyLo.Modules;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -32,7 +33,8 @@ namespace CrispyLo.Views
             InitializeComponent();
             PrepareInitialize();
         }
-        StackPanel panelGénéral = new StackPanel();
+        StackPanel panelGénéralHeure = new StackPanel();
+        StackPanel panelGénéralRésumé = new StackPanel();
 
         StackPanel encodage = new StackPanel();
         ListBox suggestions = new ListBox();
@@ -47,10 +49,13 @@ namespace CrispyLo.Views
         TextBox Telephone = new TextBox();
         TextBox Nom = new TextBox();
         TextBox Prenom = new TextBox();
+
+        TextBox Heures = new TextBox();
+        DataGrid tableauClients = new DataGrid();
+        List<Client> listeClients = new List<Client>();
+
         public void PrepareInitialize()
         {
-            //this.Background = Brushes.White;
-
             grdMain.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
             grdMain.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
 
@@ -60,10 +65,15 @@ namespace CrispyLo.Views
 
             StackPanel panelCouleur = new StackPanel();
             panelCouleur.Background = Brushes.White;
-            Grid.SetColumn(panelCouleur, 0);
-            Grid.SetRow(panelCouleur, 1);
-            Grid.SetRowSpan(panelCouleur, 2);
+            Grid.SetRowSpan(panelCouleur, 3);
+            Grid.SetColumnSpan(panelCouleur, 3);
             grdMain.Children.Add(panelCouleur);
+
+            StackPanel panelC = new StackPanel();
+            panelC.Background = Brushes.DarkGray;
+            Grid.SetRow(panelC, 0);
+            Grid.SetColumnSpan(panelC, 2);
+            grdMain.Children.Add(panelC);
 
             WrapPanel typeCommande = new WrapPanel();
             Grid.SetColumn(typeCommande, 0);
@@ -75,16 +85,6 @@ namespace CrispyLo.Views
             Grid.SetColumn(encodage, 0);
             Grid.SetRow(encodage, 1);
             encodage.Background = Brushes.Transparent;
-
-            WrapPanel heure = new WrapPanel();
-            Grid.SetColumn(heure, 1);
-            Grid.SetRow(heure, 1);
-            heure.Background = Brushes.AliceBlue;
-
-            WrapPanel resume = new WrapPanel();
-            Grid.SetColumn(resume, 1);
-            Grid.SetRow(resume, 2);
-            resume.Background = Brushes.Khaki;
 
             RadioButton rdEmporter = new RadioButton();
             RadioButton rdLivraison = new RadioButton();
@@ -156,6 +156,7 @@ namespace CrispyLo.Views
             Telephone.Width = 200;
             Telephone.Height = 25;
             Telephone.FontSize = 15;
+            Telephone.TextChanged += Telephone_TextChanged;
             panel2.Margin = new Thickness(20, 15, 0, 0);
             panel2.Children.Add(telephone);
             panel2.Children.Add(Telephone);
@@ -249,67 +250,97 @@ namespace CrispyLo.Views
             Grid.SetRow(panel5, 1);
             grdMain.Children.Add(panel5);
 
-            grdMain.Children.Add(resume);
-            grdMain.Children.Add(heure);
             grdMain.Children.Add(typeCommande);
             grdMain.Children.Add(encodage);
 
             Horloge();
             Heure();
-            grdMain.Children.Add(panelGénéral);
+            grdMain.Children.Add(panelGénéralHeure);
+            Resume();
+            TableauClient();
+
+            Button retour = new Button();
+            retour.Content = "🔙";
+            retour.FontWeight = FontWeights.Bold;
+            retour.FontSize = 20;
+            retour.Foreground = Brushes.White;
+            retour.Background = Brushes.Red;
+            retour.Width = 35;
+            retour.Height = 35;
+            retour.Margin = new Thickness(10);
+            retour.HorizontalAlignment = HorizontalAlignment.Right;
+            retour.VerticalAlignment = VerticalAlignment.Top;
+            retour.Click += new RoutedEventHandler(Click_Retour);
+            Grid.SetColumn(retour, 1);
+            Grid.SetRow(retour, 0);
+            grdMain.Children.Add(retour);
+
+            Button sauvegarder = new Button();
+            sauvegarder.Content = "💾";
+            sauvegarder.FontWeight = FontWeights.Bold;
+            sauvegarder.FontSize = 20;
+            sauvegarder.Foreground = Brushes.White;
+            sauvegarder.Background = Brushes.Green;
+            sauvegarder.Width = 35;
+            sauvegarder.Height = 35;
+            sauvegarder.Margin = new Thickness(50, 10, 10, 10);
+            sauvegarder.HorizontalAlignment = HorizontalAlignment.Right;
+            sauvegarder.VerticalAlignment = VerticalAlignment.Top;
+            sauvegarder.Click += new RoutedEventHandler(Click_Sauvegarder);
+            Grid.SetColumn(sauvegarder, 0);
+            Grid.SetRow(sauvegarder, 1);
+            grdMain.Children.Add(sauvegarder);
         }
 
         public void Horloge()
         {
-            Grid.SetColumn(panelGénéral, 1);
-            Grid.SetRow(panelGénéral, 1);
+            panelGénéralHeure.HorizontalAlignment = HorizontalAlignment.Left;
+            panelGénéralHeure.VerticalAlignment = VerticalAlignment.Top;
+            Grid.SetColumn(panelGénéralHeure, 1);
+            Grid.SetRow(panelGénéralHeure, 1);
 
             WrapPanel wrap = new WrapPanel();
             TextBlock date = new TextBlock();
             DatePicker Date = new DatePicker();
 
             date.Text = "Date prévu : ";
-            date.Width = 100;
+            date.Width = 125;
             date.Height = 25;
             date.FontWeight = FontWeights.Bold;
-            date.FontSize = 15;
-            date.Margin = new Thickness(0, 0, 10, 0);
+            date.FontSize = 20;
             Date.SelectedDate = DateTime.Now;
             Date.Width = 115;
             Date.Height = 25;
-            wrap.HorizontalAlignment = HorizontalAlignment.Right;
-            wrap.VerticalAlignment = VerticalAlignment.Top;
             wrap.Margin = new Thickness(20);
             wrap.Children.Add(date);
             wrap.Children.Add(Date);
-            panelGénéral.Children.Add(wrap);
+            panelGénéralHeure.Children.Add(wrap);
         }
 
         public void Heure()
         {
             WrapPanel wrap = new WrapPanel();
             TextBlock heure = new TextBlock();
-            TextBox Heure = new TextBox();
 
             heure.Text = "Heure prévue :";
-            heure.Width = 110;
+            heure.Width = 140;
             heure.Height = 25;
             heure.FontWeight = FontWeights.Bold;
-            heure.FontSize = 15;
+            heure.FontSize = 20;
             heure.Margin = new Thickness(0, 0, 10, 0);
-            Heure.Text = DateTime.Now.ToString("HH:mm");
-            Heure.Width = 115;
-            Heure.Height = 25;
-            Heure.FontSize = 15;
-            Heure.FontWeight= FontWeights.Bold;
-            Heure.BorderThickness = new Thickness(0);
-            Heure.Background = Brushes.Transparent;
+            Heures.Text = DateTime.Now.ToString("HH:mm");
+            Heures.Width = 115;
+            Heures.Height = 25;
+            Heures.FontSize = 20;
+            Heures.FontWeight= FontWeights.Bold;
+            Heures.BorderThickness = new Thickness(0);
+            Heures.Background = Brushes.Transparent;
             wrap.HorizontalAlignment = HorizontalAlignment.Right;
             wrap.VerticalAlignment = VerticalAlignment.Top;
-            wrap.Margin = new Thickness(20);
+            wrap.Margin = new Thickness(20,20,20,10);
             wrap.Children.Add(heure);
-            wrap.Children.Add(Heure);
-            panelGénéral.Children.Add(wrap);
+            wrap.Children.Add(Heures);
+            panelGénéralHeure.Children.Add(wrap);
 
             StackPanel panel = new StackPanel();
             panel.HorizontalAlignment = HorizontalAlignment.Right;
@@ -318,26 +349,29 @@ namespace CrispyLo.Views
             WrapPanel ligne = new WrapPanel();
             Button btn = new Button();
             btn.Content = "11";
-            btn.Height = 50;
-            btn.Width = 50;
+            btn.FontWeight = FontWeights.Bold;
+            btn.Height = 60;
+            btn.Width = 60;
             btn.Margin = new Thickness(3);
             btn.Click += new RoutedEventHandler(Click_Heure);
             ligne.Children.Add(btn);
 
             Button btn1 = new Button();
             btn1.Content = "12";
-            btn1.Height = 50;
-            btn1.Width = 50;
+            btn1.FontWeight = FontWeights.Bold;
+            btn1.Height = 60;
+            btn1.Width = 60;
             btn1.Margin = new Thickness(3,3,15,3);
             btn1.Click += new RoutedEventHandler(Click_Heure);
             ligne.Children.Add(btn1);
 
             Button btn2 = new Button();
             btn2.Content = "00";
-            btn2.Height = 50;
-            btn2.Width = 50;
+            btn2.FontWeight = FontWeights.Bold;
+            btn2.Height = 60;
+            btn2.Width = 60;
             btn2.Margin = new Thickness(3);
-            btn2.Foreground = Brushes.Violet;
+            btn2.Foreground = Brushes.Magenta;
             btn2.Click += new RoutedEventHandler(Click_Minute);
             ligne.Children.Add(btn2);
 
@@ -346,26 +380,29 @@ namespace CrispyLo.Views
             WrapPanel ligne1 = new WrapPanel();
             Button btn3 = new Button();
             btn3.Content = "13";
-            btn3.Height = 50;
-            btn3.Width = 50;
+            btn3.FontWeight = FontWeights.Bold;
+            btn3.Height = 60;
+            btn3.Width = 60;
             btn3.Margin = new Thickness(3);
             btn3.Click += new RoutedEventHandler(Click_Heure);
             ligne1.Children.Add(btn3);
 
             Button btn4 = new Button();
             btn4.Content = "14";
-            btn4.Height = 50;
-            btn4.Width = 50;
+            btn4.FontWeight = FontWeights.Bold;
+            btn4.Height = 60;
+            btn4.Width = 60;
             btn4.Margin = new Thickness(3, 3, 15, 3);
             btn4.Click += new RoutedEventHandler(Click_Heure);
             ligne1.Children.Add(btn4);
 
             Button btn5 = new Button();
             btn5.Content = "15";
-            btn5.Height = 50;
-            btn5.Width = 50;
+            btn5.FontWeight = FontWeights.Bold;
+            btn5.Height = 60;
+            btn5.Width = 60;
             btn5.Margin = new Thickness(3);
-            btn5.Foreground = Brushes.Violet;
+            btn5.Foreground = Brushes.Magenta;
             btn5.Click += new RoutedEventHandler(Click_Minute);
             ligne1.Children.Add(btn5);
 
@@ -374,26 +411,29 @@ namespace CrispyLo.Views
             WrapPanel ligne2 = new WrapPanel();
             Button btn6 = new Button();
             btn6.Content = "18";
-            btn6.Height = 50;
-            btn6.Width = 50;
+            btn6.FontWeight = FontWeights.Bold;
+            btn6.Height = 60;
+            btn6.Width = 60;
             btn6.Margin = new Thickness(3);
             btn6.Click += new RoutedEventHandler(Click_Heure);
             ligne2.Children.Add(btn6);
 
             Button btn7 = new Button();
             btn7.Content = "19";
-            btn7.Height = 50;
-            btn7.Width = 50;
+            btn7.FontWeight = FontWeights.Bold;
+            btn7.Height = 60;
+            btn7.Width = 60;
             btn7.Margin = new Thickness(3, 3, 15, 3);
             btn7.Click += new RoutedEventHandler(Click_Heure);
             ligne2.Children.Add(btn7);
 
             Button btn8 = new Button();
             btn8.Content = "30";
-            btn8.Height = 50;
-            btn8.Width = 50;
+            btn8.FontWeight = FontWeights.Bold;
+            btn8.Height = 60;
+            btn8.Width = 60;
             btn8.Margin = new Thickness(3);
-            btn8.Foreground = Brushes.Violet;
+            btn8.Foreground = Brushes.Magenta;
             btn8.Click += new RoutedEventHandler(Click_Minute);
             ligne2.Children.Add(btn8);
 
@@ -402,32 +442,69 @@ namespace CrispyLo.Views
             WrapPanel ligne3 = new WrapPanel();
             Button btn9 = new Button();
             btn9.Content = "20";
-            btn9.Height = 50;
-            btn9.Width = 50;
+            btn9.FontWeight = FontWeights.Bold;
+            btn9.Height = 60;
+            btn9.Width = 60;
             btn9.Margin = new Thickness(3);
             btn9.Click += new RoutedEventHandler(Click_Heure);
             ligne3.Children.Add(btn9);
 
             Button btn10 = new Button();
             btn10.Content = "21";
-            btn10.Height = 50;
-            btn10.Width = 50;
+            btn10.FontWeight = FontWeights.Bold;
+            btn10.Height = 60;
+            btn10.Width = 60;
             btn10.Margin = new Thickness(3, 3, 15, 3);
             btn10.Click += new RoutedEventHandler(Click_Heure);
             ligne3.Children.Add(btn10);
 
             Button btn11 = new Button();
             btn11.Content = "45";
-            btn11.Height = 50;
-            btn11.Width = 50;
+            btn11.FontWeight = FontWeights.Bold;
+            btn11.Height = 60;
+            btn11.Width = 60;
             btn11.Margin = new Thickness(3);
-            btn11.Foreground = Brushes.Violet;
+            btn11.Foreground = Brushes.Magenta;
             btn11.Click += new RoutedEventHandler(Click_Minute);
             ligne3.Children.Add(btn11);
 
             panel.Children.Add(ligne3);
 
-            panelGénéral.Children.Add(panel);
+            panelGénéralHeure.Children.Add(panel);
+        }
+
+        public void Resume()
+        {
+            panelGénéralRésumé.Margin = new Thickness(0,20,200,0);
+            panelGénéralRésumé.HorizontalAlignment = HorizontalAlignment.Right;
+            panelGénéralRésumé.VerticalAlignment = VerticalAlignment.Top;
+            Grid.SetColumn(panelGénéralRésumé, 1);
+            Grid.SetRow(panelGénéralRésumé, 1);
+
+            TextBlock titre = new TextBlock();
+            titre.Text = "Résumé";
+            titre.FontWeight = FontWeights.Black;
+            titre.FontSize = 20;
+            titre.Background = Brushes.Transparent;
+            panelGénéralRésumé.Children.Add(titre);
+            Traitement.CalculRésumé(out string[] result);
+            for (int i = 0; i < result.Length; i++)
+            {
+                if (result[i] != "")
+                {
+                    TextBlock phrase = new TextBlock();
+                    phrase.Text = result[i];
+                    phrase.FontWeight = FontWeights.Bold;
+                    phrase.FontSize = 15;
+                    panelGénéralRésumé.Children.Add(phrase);
+                }
+            }
+            TextBlock montant = new TextBlock();
+            montant.Text = Traitement.prixTotal().ToString() + " €";
+            montant.FontSize = 15;
+            montant.FontWeight = FontWeights.Bold;
+            panelGénéralRésumé.Children.Add(montant);
+            grdMain.Children.Add(panelGénéralRésumé);
         }
         private async void Adresse_TextChanged(object sender, TextChangedEventArgs e)
         {
@@ -507,10 +584,160 @@ namespace CrispyLo.Views
         }
 
         public void Click_Minute(object sender, RoutedEventArgs e)
-        { 
+        {
+            Button btn = (Button)sender;
+            DateTime heure = DateTime.Parse(Heures.Text);
+            Heures.Text = heure.ToString("HH") + ":" + btn.Content.ToString();
         }
         public void Click_Heure(object sender, RoutedEventArgs e)
         {
+            Button btn = (Button)sender;
+            DateTime heure = DateTime.Parse(Heures.Text);
+            Heures.Text = btn.Content.ToString() + ":" + heure.ToString("mm");
+        }
+
+        public void TableauClient()
+        {
+            StackPanel panelTableau = new StackPanel();
+            panelTableau.Margin = new Thickness(20, 15, 20, 10);
+            Grid.SetRow(panelTableau, 2);
+            Grid.SetColumn(panelTableau, 0);
+            Grid.SetColumnSpan(panelTableau, 2);
+
+            tableauClients.AutoGenerateColumns = false;
+            tableauClients.IsReadOnly = true;
+            tableauClients.SelectionMode = DataGridSelectionMode.Single;
+            tableauClients.MaxHeight = 200;
+            tableauClients.HorizontalScrollBarVisibility = ScrollBarVisibility.Auto;
+            tableauClients.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
+
+            tableauClients.Columns.Add(new DataGridTextColumn { Header = "Nom", Binding = new Binding("Nom"), Width = 120 });
+            tableauClients.Columns.Add(new DataGridTextColumn { Header = "Prénom", Binding = new Binding("Prenom"), Width = 120 });
+            tableauClients.Columns.Add(new DataGridTextColumn { Header = "Téléphone", Binding = new Binding("telephone"), Width = 130 });
+            tableauClients.Columns.Add(new DataGridTextColumn { Header = "Rue", Binding = new Binding("Adresse.Rue"), Width = 200 });
+            tableauClients.Columns.Add(new DataGridTextColumn { Header = "N°", Binding = new Binding("Adresse.Numero"), Width = 60 });
+            tableauClients.Columns.Add(new DataGridTextColumn { Header = "CP", Binding = new Binding("Adresse.CodePostal"), Width = 70 });
+            tableauClients.Columns.Add(new DataGridTextColumn { Header = "Localité", Binding = new Binding("Adresse.Ville"), Width = 120 });
+
+            panelTableau.Children.Add(tableauClients);
+
+            WrapPanel panelBoutons = new WrapPanel();
+            panelBoutons.Margin = new Thickness(0, 10, 0, 0);
+
+            Button btnSelectionner = new Button();
+            btnSelectionner.Content = "Sélectionner";
+            btnSelectionner.Width = 120;
+            btnSelectionner.Height = 35;
+            btnSelectionner.Margin = new Thickness(0, 0, 10, 0);
+            btnSelectionner.FontWeight = FontWeights.Bold;
+            btnSelectionner.Click += new RoutedEventHandler(Click_Selectionner);
+            panelBoutons.Children.Add(btnSelectionner);
+
+            Button btnSupprimer = new Button();
+            btnSupprimer.Content = "Supprimer";
+            btnSupprimer.Width = 120;
+            btnSupprimer.Height = 35;
+            btnSupprimer.FontWeight = FontWeights.Bold;
+            btnSupprimer.Background = Brushes.Red;
+            btnSupprimer.Foreground = Brushes.White;
+            btnSupprimer.Click += new RoutedEventHandler(Click_Supprimer);
+            panelBoutons.Children.Add(btnSupprimer);
+
+            panelTableau.Children.Add(panelBoutons);
+            grdMain.Children.Add(panelTableau);
+        }
+
+        private void Telephone_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            string phone = Telephone.Text;
+            if (phone.Length < 3)
+            {
+                listeClients.Clear();
+                tableauClients.ItemsSource = null;
+                return;
+            }
+
+            BaseDeDonnée bd = new BaseDeDonnée();
+            bd.AllClientByTelephone(phone, out DataTable dataT, out int nbrRow);
+
+            listeClients.Clear();
+            for (int i = 0; i < nbrRow; i++)
+            {
+                int idAdresse = Convert.ToInt32(dataT.Rows[i]["idAdresse"]);
+                bd.AdresseByClient(idAdresse, out DataTable dataAdr);
+
+                Client client = new Client();
+                client.Id = Convert.ToInt32(dataT.Rows[i]["id"]);
+                client.Nom = dataT.Rows[i]["nom"].ToString();
+                client.Prenom = dataT.Rows[i]["prenom"].ToString();
+                client.telephone = dataT.Rows[i]["numero"].ToString();
+                client.Adresse = new Adresse();
+                if (dataAdr.Rows.Count > 0)
+                {
+                    client.Adresse.Rue = dataAdr.Rows[0]["nomRue"].ToString();
+                    client.Adresse.Numero = dataAdr.Rows[0]["numeroRue"].ToString();
+                    client.Adresse.CodePostal = dataAdr.Rows[0]["codePostal"].ToString();
+                    client.Adresse.Ville = dataAdr.Rows[0]["localite"].ToString();
+                }
+                listeClients.Add(client);
+            }
+            tableauClients.ItemsSource = null;
+            tableauClients.ItemsSource = listeClients;
+        }
+
+        private void Click_Selectionner(object sender, RoutedEventArgs e)
+        {
+            if (tableauClients.SelectedItem == null) return;
+
+            Client client = (Client)tableauClients.SelectedItem;
+            selectionEnCours = true;
+            Nom.Text = client.Nom;
+            Prenom.Text = client.Prenom;
+            Telephone.Text = client.telephone;
+            if (client.Adresse != null)
+            {
+                Adresse.Text = client.Adresse.Rue;
+                Numero.Text = client.Adresse.Numero;
+                Localite.Text = client.Adresse.CodePostal;
+                Ville.Text = client.Adresse.Ville;
+            }
+            selectionEnCours = false;
+        }
+
+        private void Click_Supprimer(object sender, RoutedEventArgs e)
+        {
+            if (tableauClients.SelectedItem == null) return;
+
+            Client client = (Client)tableauClients.SelectedItem;
+            BaseDeDonnée bd = new BaseDeDonnée();
+            bd.SupprimerClient(client.Id);
+
+            listeClients.Remove(client);
+            tableauClients.ItemsSource = null;
+            tableauClients.ItemsSource = listeClients;
+        }
+
+        private void Click_Sauvegarder(object sender, RoutedEventArgs e)
+        {
+            string nom = Nom.Text.Trim();
+            string prenom = Prenom.Text.Trim() == "" ? "" : Prenom.Text.Trim();
+            string telephone = Telephone.Text.Trim();
+            string rue = Adresse.Text.Trim();
+            string numero = Numero.Text.Trim();
+            string codePostal = Localite.Text.Trim();
+            string ville = Ville.Text.Trim();
+
+            if (nom == "" || telephone == "" || rue == "" || numero == "" || codePostal == "" || ville == "")
+            {
+                MessageBox.Show("Veuillez remplir tous les champs obligatoires (Nom, Téléphone, Rue, Numéro, Localité, Ville).");
+                return;
+            }
+
+            BaseDeDonnée bd = new BaseDeDonnée();
+            int idAdresse = bd.AjouterAdresse(double.Parse(codePostal), rue, numero, ville);
+            bd.AjouterClient(nom, prenom, telephone, idAdresse);
+
+            MessageBox.Show("Client sauvegardé avec succès !");
         }
     }
 }
