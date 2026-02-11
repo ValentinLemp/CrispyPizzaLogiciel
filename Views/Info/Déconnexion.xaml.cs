@@ -76,6 +76,7 @@ namespace CrispyLo.Views.Info
         {
             PagePrincipale.MainInfo.Visibility = Visibility.Collapsed;
             PagePrincipale.Main.Content = new Login();
+            PagePrincipale.Panier.Clear();
         }
 
         public void Click_no(object sender, RoutedEventArgs e) 

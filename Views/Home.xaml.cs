@@ -622,40 +622,64 @@ namespace CrispyLo.Views
             Button vider = new Button();
             Button remise = new Button();
             Button calculatrice = new Button();
+            Button note = new Button();
 
             Button commande = new Button();
 
-            supprimer.Content = "Suppprimer";
-            supprimer.Background = Brushes.PowderBlue;
-            supprimer.Height = 40;
-            supprimer.Width = 79;
+            supprimer.Content = "❌";
+            supprimer.Background = Brushes.Transparent;
+            supprimer.Height = 50;
+            supprimer.Width = 50;
+            supprimer.FontSize = 20;
+            supprimer.Foreground = Brushes.Black;
+            supprimer.Margin = new Thickness(15,5,5,5);
             supprimer.Click += new RoutedEventHandler(Click_Supprimer);
             supprimer.FontWeight = FontWeights.Bold;
 
-            vider.Content = "Vider";
-            vider.Background = Brushes.PowderBlue;
-            vider.Height = 40;
-            vider.Width = 78;
+            vider.Content = "🗑️";
+            vider.Background = Brushes.Transparent;
+            vider.Height = 50;
+            vider.Width = 50;
+            vider.FontSize = 20;
+            vider.Foreground = Brushes.Black;
+            vider.Margin = new Thickness(5);
             vider.Click += new RoutedEventHandler(Click_Vider);
             vider.FontWeight = FontWeights.Bold;
 
-            remise.Content = "Remise";
-            remise.Background = Brushes.PowderBlue;
-            remise.Height = 40;
-            remise.Width = 79;
+            remise.Content = "🏷️";
+            remise.Background = Brushes.Transparent;
+            remise.Height = 50;
+            remise.Width = 50;
+            remise.FontSize = 25;
+            remise.Foreground = Brushes.Black;
+            remise.Margin = new Thickness(5);
             remise.Click += new RoutedEventHandler(Click_Remise);
             remise.FontWeight = FontWeights.Bold;
 
-            calculatrice.Content = "Calculette";
-            calculatrice.Background = Brushes.PowderBlue;
-            calculatrice.Height = 40;
-            calculatrice.Width = 79;
+            calculatrice.Content = "🧮";
+            calculatrice.Background = Brushes.Transparent;
+            calculatrice.Height = 50;
+            calculatrice.Width = 50;
+            calculatrice.FontSize = 25;
+            calculatrice.Margin = new Thickness(5);
+            calculatrice.Foreground = Brushes.Black;
             calculatrice.Click += new RoutedEventHandler(Click_Calculette);
             calculatrice.FontWeight = FontWeights.Bold;
 
-            actionBas.VerticalAlignment = VerticalAlignment.Center;
+            note.Content = "🧾";
+            note.Background = Brushes.Transparent;
+            note.Height = 50;
+            note.Width = 50;
+            note.FontSize = 20;
+            note.Foreground = Brushes.Black;
+            note.Margin = new Thickness(5);
+            note.Click += new RoutedEventHandler(Click_Note);
+            note.FontWeight = FontWeights.Bold;
+
+            actionBas.VerticalAlignment = VerticalAlignment.Top;
             actionBas.HorizontalAlignment = HorizontalAlignment.Stretch;
             actionBas.Margin = new Thickness(0, 0, 5, 0);
+            actionBas.Background = Brushes.White;
             Grid.SetColumn(actionHaut, 2);
             Grid.SetRow(actionHaut, 0);
 
@@ -665,6 +689,7 @@ namespace CrispyLo.Views
             actionBas.Children.Add(supprimer);
             actionBas.Children.Add(vider);
             actionBas.Children.Add(remise);
+            actionBas.Children.Add(note);
             actionBas.Children.Add(calculatrice);
 
             grdMain.Children.Add(actionBas);
@@ -679,13 +704,13 @@ namespace CrispyLo.Views
             grdMain.Children.Add(scrollPanier);
 
             commander.Background = Brushes.LightGray;
-            commander.Margin = new Thickness(0, 0, 5, 5);
+            commander.Margin = new Thickness(0, 10, 5, 5);
             Grid.SetColumn(commander, 2);
             Grid.SetRow(commander, 3);
 
             commande.Content = "🛒";
-            commande.Height = 60;
-            commande.Width = 90;
+            commande.Height = 55;
+            commande.Width = 85;
             commande.Background = Brushes.Transparent;
             commande.Margin = new Thickness(40, 35, 0, 0);
             commande.VerticalAlignment = VerticalAlignment.Center;
@@ -808,7 +833,8 @@ namespace CrispyLo.Views
                 EstLarge = (bool)radioTailleLarge.IsChecked,
                 TypePate = pate,
                 IdTypeProduit = (int)data.Rows[0]["idTypeProduit"],
-                Ingredients = new List<Ingredient>()
+                Ingredients = new List<Ingredient>(),
+                Note = null
             });
             affichePanier();
             RadioButton radiobtn = (RadioButton)panier.Children[panier.Children.Count - 1];
@@ -1108,6 +1134,20 @@ namespace CrispyLo.Views
 
                     panier.Children.Add(text);
                 }
+
+                if (p.Note != null)
+                {
+                    TextBlock text = new TextBlock();
+                    text.Text = PagePrincipale.Panier[i].Note;
+                    text.FontWeight = FontWeights.Bold;
+                    text.VerticalAlignment = VerticalAlignment.Center;
+                    text.HorizontalAlignment = HorizontalAlignment.Stretch;
+                    text.Background = Brushes.PeachPuff;
+                    text.Margin = new Thickness(1);
+                    text.Height = 20;
+
+                    panier.Children.Add(text);
+                }
             }
         }
 
@@ -1327,6 +1367,29 @@ namespace CrispyLo.Views
         {
             PagePrincipale.MainInfo.Content = new Calculette(Traitement.prixTotal());
             PagePrincipale.MainInfo.Visibility = Visibility.Visible;
+        }
+
+        public async void Click_Note(object sender, RoutedEventArgs e)
+        {
+            RadioButton rdtbtn = panier.Children.OfType<RadioButton>().FirstOrDefault(rb => rb.IsChecked == true);
+            if (rdtbtn != null)
+            {
+                int index = (int)rdtbtn.Tag;
+                PagePrincipale.MainInfo.Content = new WriteNote(index);
+                PagePrincipale.MainInfo.Visibility = Visibility.Visible;
+
+                var tcs = new TaskCompletionSource<bool>();
+                void handler(object s, DependencyPropertyChangedEventArgs args)
+                {
+                    if (PagePrincipale.MainInfo.Visibility != Visibility.Visible)
+                        tcs.SetResult(true);
+                }
+                PagePrincipale.MainInfo.IsVisibleChanged += handler;
+                await tcs.Task;
+                PagePrincipale.MainInfo.IsVisibleChanged -= handler;
+
+                affichePanier();
+            }
         }
 
         public void Click_Commande(object sender, RoutedEventArgs e)

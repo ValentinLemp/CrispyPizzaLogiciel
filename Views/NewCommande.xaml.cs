@@ -33,6 +33,8 @@ namespace CrispyLo.Views
             InitializeComponent();
             PrepareInitialize();
         }
+        RadioButton rdLivraison = new RadioButton();
+
         StackPanel panelGénéralHeure = new StackPanel();
         StackPanel panelGénéralRésumé = new StackPanel();
 
@@ -65,8 +67,8 @@ namespace CrispyLo.Views
 
             StackPanel panelCouleur = new StackPanel();
             panelCouleur.Background = Brushes.White;
-            Grid.SetRowSpan(panelCouleur, 3);
-            Grid.SetColumnSpan(panelCouleur, 3);
+            Grid.SetRow(panelCouleur, 1);
+            Grid.SetColumn(panelCouleur, 0);
             grdMain.Children.Add(panelCouleur);
 
             StackPanel panelC = new StackPanel();
@@ -74,6 +76,18 @@ namespace CrispyLo.Views
             Grid.SetRow(panelC, 0);
             Grid.SetColumnSpan(panelC, 2);
             grdMain.Children.Add(panelC);
+
+            StackPanel panelC1 = new StackPanel();
+            panelC1.Background = Brushes.WhiteSmoke;
+            Grid.SetRow(panelC1, 1);
+            Grid.SetColumn(panelC1, 1);
+            grdMain.Children.Add(panelC1);
+
+            StackPanel panelC2 = new StackPanel();
+            panelC2.Background = Brushes.Gainsboro;
+            Grid.SetRow(panelC2, 2);
+            Grid.SetColumnSpan(panelC2, 2);
+            grdMain.Children.Add(panelC2);
 
             WrapPanel typeCommande = new WrapPanel();
             Grid.SetColumn(typeCommande, 0);
@@ -87,7 +101,6 @@ namespace CrispyLo.Views
             encodage.Background = Brushes.Transparent;
 
             RadioButton rdEmporter = new RadioButton();
-            RadioButton rdLivraison = new RadioButton();
 
             rdEmporter.Content = "EMPORTER";
             rdEmporter.FontWeight = FontWeights.Bold;
@@ -212,7 +225,7 @@ namespace CrispyLo.Views
             Localite.Width = 200;
             Localite.Height = 25;
             Localite.FontSize = 15;
-            Localite.Margin = new Thickness(0, 0, 30, 0);
+            Localite.Margin = new Thickness(0, 0, 55, 0);
             panel4.Margin = new Thickness(20, 15, 0, 0);
             panel4.Children.Add(localite);
             panel4.Children.Add(Localite);
@@ -239,8 +252,9 @@ namespace CrispyLo.Views
             commentaire.FontSize = 15;
             commentaire.HorizontalAlignment = HorizontalAlignment.Left;
             Commentaire.Width = 500;
-            Commentaire.Height = 100;
+            Commentaire.Height = 80;
             Commentaire.FontSize = 15;
+            Commentaire.Margin = new Thickness(0, 0, 0, 10);
             panel5.Children.Add(commentaire);
             panel5.Children.Add(Commentaire);
             panel5.VerticalAlignment = VerticalAlignment.Bottom;
@@ -311,7 +325,7 @@ namespace CrispyLo.Views
             Date.SelectedDate = DateTime.Now;
             Date.Width = 115;
             Date.Height = 25;
-            wrap.Margin = new Thickness(20);
+            wrap.Margin = new Thickness(20,20,20,10);
             wrap.Children.Add(date);
             wrap.Children.Add(Date);
             panelGénéralHeure.Children.Add(wrap);
@@ -463,13 +477,14 @@ namespace CrispyLo.Views
             btn11.FontWeight = FontWeights.Bold;
             btn11.Height = 60;
             btn11.Width = 60;
-            btn11.Margin = new Thickness(3);
+            btn11.Margin = new Thickness(3,3,3,3);
             btn11.Foreground = Brushes.Magenta;
             btn11.Click += new RoutedEventHandler(Click_Minute);
             ligne3.Children.Add(btn11);
 
             panel.Children.Add(ligne3);
 
+            panelGénéralHeure.Margin = new Thickness(0,0,0,10);
             panelGénéralHeure.Children.Add(panel);
         }
 
@@ -719,25 +734,28 @@ namespace CrispyLo.Views
 
         private void Click_Sauvegarder(object sender, RoutedEventArgs e)
         {
-            string nom = Nom.Text.Trim();
-            string prenom = Prenom.Text.Trim() == "" ? "" : Prenom.Text.Trim();
-            string telephone = Telephone.Text.Trim();
-            string rue = Adresse.Text.Trim();
-            string numero = Numero.Text.Trim();
-            string codePostal = Localite.Text.Trim();
-            string ville = Ville.Text.Trim();
-
-            if (nom == "" || telephone == "" || rue == "" || numero == "" || codePostal == "" || ville == "")
+            if (rdLivraison.IsChecked == true)
             {
-                MessageBox.Show("Veuillez remplir tous les champs obligatoires (Nom, Téléphone, Rue, Numéro, Localité, Ville).");
-                return;
+                string nom = Nom.Text.Trim();
+                string prenom = Prenom.Text.Trim() == "" ? "" : Prenom.Text.Trim();
+                string telephone = Telephone.Text.Trim();
+                string rue = Adresse.Text.Trim();
+                string numero = Numero.Text.Trim();
+                string codePostal = Localite.Text.Trim();
+                string ville = Ville.Text.Trim();
+
+                if (nom == "" || telephone == "" || rue == "" || numero == "" || codePostal == "" || ville == "")
+                {
+                    MessageBox.Show("Veuillez remplir tous les champs obligatoires (Nom, Téléphone, Rue, Numéro, Localité, Ville).");
+                    return;
+                }
+
+                BaseDeDonnée bd = new BaseDeDonnée();
+                int idAdresse = bd.AjouterAdresse(double.Parse(codePostal), rue, numero, ville);
+                bd.AjouterClient(nom, prenom, telephone, idAdresse);
+
+                MessageBox.Show("Client sauvegardé avec succès !");
             }
-
-            BaseDeDonnée bd = new BaseDeDonnée();
-            int idAdresse = bd.AjouterAdresse(double.Parse(codePostal), rue, numero, ville);
-            bd.AjouterClient(nom, prenom, telephone, idAdresse);
-
-            MessageBox.Show("Client sauvegardé avec succès !");
         }
     }
 }
