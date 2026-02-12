@@ -97,7 +97,7 @@ namespace CrispyLo.Views.Info
             Grid.SetColumn(supprimer, 0);
             Grid.SetRow(supprimer, 1);
 
-            if (PagePrincipale.Panier[Index].Note == null)
+            if (PagePrincipale.Panier[Index].Note == "")
             {
                 supprimer.Visibility = Visibility.Collapsed;
             }
@@ -115,15 +115,15 @@ namespace CrispyLo.Views.Info
 
         public void Click_Enregistrer(object sender, RoutedEventArgs e)
         {
-            if (text.Text != "")
+            if (text.Text.Trim() != "")
             {
-                PagePrincipale.Panier[Index].Note = "--> " + text.Text;
+                PagePrincipale.Panier[Index].Note = "--> " + text.Text.Trim();
                 PagePrincipale.MainInfo.Visibility = Visibility.Collapsed;
             }
         }
         public void Click_Supprimer(object sender, RoutedEventArgs e)
         {
-            PagePrincipale.Panier[Index].Note = null;
+            PagePrincipale.Panier[Index].Note = "";
             PagePrincipale.MainInfo.Visibility = Visibility.Collapsed;
         }
         public void Click_Quitter(object sender, RoutedEventArgs e)

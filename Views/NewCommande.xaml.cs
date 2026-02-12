@@ -12,6 +12,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Markup;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
@@ -27,6 +28,7 @@ namespace CrispyLo.Views
     {
         MainWindow PagePrincipale = (MainWindow)App.Current.MainWindow;
         ControlTemplate radioStyle = VisuelCSS.CreateButtonStyleTemplate();
+        BaseDeDonnée bd = new BaseDeDonnée();
 
         public NewCommande()
         {
@@ -52,6 +54,7 @@ namespace CrispyLo.Views
         TextBox Nom = new TextBox();
         TextBox Prenom = new TextBox();
 
+        DatePicker datePicker = new DatePicker();
         TextBox Heures = new TextBox();
         DataGrid tableauClients = new DataGrid();
         List<Client> listeClients = new List<Client>();
@@ -281,7 +284,7 @@ namespace CrispyLo.Views
             retour.Background = Brushes.Red;
             retour.Width = 35;
             retour.Height = 35;
-            retour.Margin = new Thickness(10);
+            retour.Margin = new Thickness(17);
             retour.HorizontalAlignment = HorizontalAlignment.Right;
             retour.VerticalAlignment = VerticalAlignment.Top;
             retour.Click += new RoutedEventHandler(Click_Retour);
@@ -315,19 +318,18 @@ namespace CrispyLo.Views
 
             WrapPanel wrap = new WrapPanel();
             TextBlock date = new TextBlock();
-            DatePicker Date = new DatePicker();
 
             date.Text = "Date prévu : ";
             date.Width = 125;
             date.Height = 25;
             date.FontWeight = FontWeights.Bold;
             date.FontSize = 20;
-            Date.SelectedDate = DateTime.Now;
-            Date.Width = 115;
-            Date.Height = 25;
+            datePicker.SelectedDate = DateTime.Now;
+            datePicker.Width = 115;
+            datePicker.Height = 25;
             wrap.Margin = new Thickness(20,20,20,10);
             wrap.Children.Add(date);
-            wrap.Children.Add(Date);
+            wrap.Children.Add(datePicker);
             panelGénéralHeure.Children.Add(wrap);
         }
 
@@ -672,7 +674,6 @@ namespace CrispyLo.Views
                 return;
             }
 
-            BaseDeDonnée bd = new BaseDeDonnée();
             bd.AllClientByTelephone(phone, out DataTable dataT, out int nbrRow);
 
             listeClients.Clear();
@@ -724,7 +725,6 @@ namespace CrispyLo.Views
             if (tableauClients.SelectedItem == null) return;
 
             Client client = (Client)tableauClients.SelectedItem;
-            BaseDeDonnée bd = new BaseDeDonnée();
             bd.SupprimerClient(client.Id);
 
             listeClients.Remove(client);
@@ -734,8 +734,17 @@ namespace CrispyLo.Views
 
         private void Click_Sauvegarder(object sender, RoutedEventArgs e)
         {
-            if (rdLivraison.IsChecked == true)
+            if (PagePrincipale.Panier.Count != 0)
             {
+                if (!TimeSpan.TryParseExact(Heures.Text, "hh\\:mm", null, out _))
+                {
+                    MessageBox.Show("Format heure pas bonne (HH:MM) !");
+                    return;
+                }
+                bool livraison = (bool)rdLivraison.IsChecked;
+                double prixTotal = Traitement.prixTotal();
+                int idRest = PagePrincipale.Restaurent;
+
                 string nom = Nom.Text.Trim();
                 string prenom = Prenom.Text.Trim() == "" ? "" : Prenom.Text.Trim();
                 string telephone = Telephone.Text.Trim();
@@ -743,19 +752,44 @@ namespace CrispyLo.Views
                 string numero = Numero.Text.Trim();
                 string codePostal = Localite.Text.Trim();
                 string ville = Ville.Text.Trim();
+                string commentaire = Commentaire.Text.Trim();
+                DateTime date = datePicker.SelectedDate.Value.Date + TimeSpan.Parse(Heures.Text);
 
-                if (nom == "" || telephone == "" || rue == "" || numero == "" || codePostal == "" || ville == "")
+                if (rdLivraison.IsChecked == true)
                 {
-                    MessageBox.Show("Veuillez remplir tous les champs obligatoires (Nom, Téléphone, Rue, Numéro, Localité, Ville).");
-                    return;
+                    if (nom == "" || telephone == "" || rue == "" || numero == "" || codePostal == "" || ville == "")
+                    {
+                        MessageBox.Show("Veuillez remplir tous les champs obligatoires (Nom, Téléphone, Rue, Numéro, Localité, Ville).");
+                        return;
+                    }
+
+                    int idAdresse = bd.AjouterAdresse(double.Parse(codePostal), rue, numero, ville);
+                    int idClient = bd.AjouterClient(nom, prenom, telephone, idAdresse);
+                    int idCommande = bd.NewCommande(nom, prenom, livraison, date, prixTotal, commentaire, idRest, 1, idClient);
+                    Traitement.CreationLigne(idCommande);
+
+                }
+                else if (rdLivraison.IsChecked == false)
+                {
+                    if (nom == "")
+                    {
+                        MessageBox.Show("Veuillez remplir le champ nom");
+                        return;
+                    }
+
+                    int idCommande = bd.NewCommande(nom, prenom, livraison, date, prixTotal, commentaire, idRest, 1, null);
+                    Traitement.CreationLigne(idCommande);
                 }
 
-                BaseDeDonnée bd = new BaseDeDonnée();
-                int idAdresse = bd.AjouterAdresse(double.Parse(codePostal), rue, numero, ville);
-                bd.AjouterClient(nom, prenom, telephone, idAdresse);
-
-                MessageBox.Show("Client sauvegardé avec succès !");
+                MessageBox.Show("Commade sauvegarder avec succès !");
+                PagePrincipale.Panier.Clear();
+                PagePrincipale.Main.Content = new Home();
             }
+            else
+            {
+                MessageBox.Show("Le panier est vide !");
+            }
+
         }
     }
 }

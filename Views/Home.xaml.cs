@@ -834,7 +834,7 @@ namespace CrispyLo.Views
                 TypePate = pate,
                 IdTypeProduit = (int)data.Rows[0]["idTypeProduit"],
                 Ingredients = new List<Ingredient>(),
-                Note = null
+                Note = ""
             });
             affichePanier();
             RadioButton radiobtn = (RadioButton)panier.Children[panier.Children.Count - 1];
@@ -1135,7 +1135,7 @@ namespace CrispyLo.Views
                     panier.Children.Add(text);
                 }
 
-                if (p.Note != null)
+                if (p.Note != "")
                 {
                     TextBlock text = new TextBlock();
                     text.Text = PagePrincipale.Panier[i].Note;

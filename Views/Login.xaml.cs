@@ -1,6 +1,7 @@
 ﻿using CrispyLo.Modules;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -71,25 +72,16 @@ namespace CrispyLo.Views
 
         public void Validation_Click(object sender, RoutedEventArgs e)
         {
-            sql.VerificationMDP(out string mdp1, out string mdp2, out string mdpAdmin);
-            if (text.Text == mdp1)
+            sql.VerificationMDP(out DataTable data, out int nbrRow);
+            for (int i = 0; i < data.Rows.Count; i++)
             {
-                PagePrincipale.Restaurent = "meux";
-                PagePrincipale.Main.Content = new Home();
+                if (data.Rows[i]["motdepasse"].ToString() == text.Text && (bool)data.Rows[i]["modeAdmin"] == false)
+                {
+                    PagePrincipale.Main.Content = new Home();
+                    PagePrincipale.Restaurent = (int)data.Rows[i]["id"];
+                }
             }
-            else if (text.Text == mdp2)
-            {
-                PagePrincipale.Restaurent = "ramillies";
-                PagePrincipale.Main.Content = new Home();
-            }
-            else if (text.Text == mdpAdmin)
-            {
-                PagePrincipale.Main.Content = new AdminHome();
-            }
-            else
-            {
-                text.Text = "";
-            }
+            text.Text = "";
         }
     }
 }

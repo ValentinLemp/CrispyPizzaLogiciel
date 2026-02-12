@@ -41,14 +41,14 @@ namespace CrispyLo.Modules
         public static async Task<List<Adresse>> RechercherAdresse(string recherche)
         {
             MainWindow PagePrincipale = (MainWindow)App.Current.MainWindow;
-            string lat, lon;
-            if (PagePrincipale.Restaurent == "meux")
+            string lat = "0", lon = "0";
+            if (PagePrincipale.Restaurent == 1)
             {
                 // Centre : Rue du Chainia 62, 5081 Meux
                 lat = "50.5515";
                 lon = "4.8016";
             }
-            else
+            else if(PagePrincipale.Restaurent == 2)
             {
                 // Centre : Avenue des déportés 45A, 1367 Ramillies
                 lat = "50.6457";
@@ -177,6 +177,39 @@ namespace CrispyLo.Modules
                 else
                 {
                     result[i] = "";
+                }
+            }
+        }
+
+        public static void CreationLigne(int idCom)
+        {
+            MainWindow PagePrincipale = (MainWindow)App.Current.MainWindow;
+            BaseDeDonnée bd = new BaseDeDonnée();
+
+            foreach (Produit p in PagePrincipale.Panier)
+            {
+                int Ligne = bd.NewLigne(p.prixTotal, p.EstLarge, p.TypePate,p.Note, p.IdTypeProduit, idCom);
+                string ingP = "";
+                string ingM = "";
+                foreach (Ingredient ing in p.Ingredients)
+                {
+                    if (ing.EstSupplement == true)
+                    {
+                        ingP += ing.Libelle + ", ";
+                    }
+                    else
+                    {
+                        ingM += ing.Libelle + ", ";
+                    }
+                }
+
+                if (ingP != "")
+                {
+                    bd.NewLigneIngredient(Ligne, ingP, true);
+                }
+                if (ingM != "")
+                {
+                    bd.NewLigneIngredient(Ligne, ingM, false);
                 }
             }
         }

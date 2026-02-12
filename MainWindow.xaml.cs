@@ -20,7 +20,7 @@ namespace CrispyLo
     /// </summary>
     public partial class MainWindow : Window
     {
-        public String Restaurent { get; set; }
+        public int Restaurent { get; set; }
         public List<Produit> Panier { get; set; } = new List<Produit>();
         public MainWindow()
         {
@@ -30,8 +30,8 @@ namespace CrispyLo
 
         public void PrepareInitialize()
         {
-            Main.Content = new NewCommande();
-            //Main.Content = new Login();
+            //Main.Content = new Home();
+            Main.Content = new Login();
         }
     }
 }
