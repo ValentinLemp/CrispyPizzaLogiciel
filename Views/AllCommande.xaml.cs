@@ -1,0 +1,226 @@
+﻿using CrispyLo.Modules;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
+using System.Windows.Controls.Primitives;
+using System.Windows.Shapes;
+
+namespace CrispyLo.Views
+{
+    /// <summary>
+    /// Logique d'interaction pour AllCommande.xaml
+    /// </summary>
+    public partial class AllCommande : Page
+    {
+        ControlTemplate radioStyle = VisuelCSS.CreateButtonStyleTemplate();
+        BaseDeDonnée sql = new BaseDeDonnée();
+        DataGrid tableauCommandes = new DataGrid();
+        StackPanel panier = new StackPanel();
+        RadioButton rdLivraison = new RadioButton();
+        RadioButton rdEmporter = new RadioButton();
+        DatePicker datePicker = new DatePicker();
+
+        public AllCommande()
+        {
+            InitializeComponent();
+            PrepareInitialize();
+        }
+
+        public void PrepareInitialize()
+        {
+            //Grille Colonne
+            grdMain.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            grdMain.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(320) });
+
+            //Grille Ligne
+            grdMain.RowDefinitions.Add(new RowDefinition { Height = new GridLength(60) });
+            grdMain.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+
+            Filtres();
+            Tableau();
+            Panier();
+            ChargerCommandes();
+        }
+
+        public void Filtres()
+        {
+            WrapPanel panelFiltres = new WrapPanel();
+            panelFiltres.VerticalAlignment = VerticalAlignment.Center;
+            panelFiltres.Margin = new Thickness(10, 0, 0, 0);
+            Grid.SetColumn(panelFiltres, 0);
+            Grid.SetRow(panelFiltres, 0);
+
+            rdLivraison.Content = "LIVRAISON";
+            rdLivraison.FontWeight = FontWeights.Bold;
+            rdLivraison.GroupName = "typeCommande";
+            rdLivraison.Template = radioStyle;
+            rdLivraison.Margin = new Thickness(5);
+            rdLivraison.Width = 130;
+            rdLivraison.Height = 40;
+            rdLivraison.Checked += Filtre_Changed;
+
+            rdEmporter.Content = "EMPORTER";
+            rdEmporter.FontWeight = FontWeights.Bold;
+            rdEmporter.GroupName = "typeCommande";
+            rdEmporter.IsChecked = true;
+            rdEmporter.Template = radioStyle;
+            rdEmporter.Margin = new Thickness(5);
+            rdEmporter.Width = 130;
+            rdEmporter.Height = 40;
+            rdEmporter.Checked += Filtre_Changed;
+
+            datePicker.SelectedDate = DateTime.Now;
+            datePicker.Width = 130;
+            datePicker.Height = 50;
+            datePicker.FontSize = 15;
+            datePicker.Background = Brushes.Transparent;
+            datePicker.BorderThickness = new Thickness(0);
+            datePicker.Margin = new Thickness(20, 20, 5, 5);
+            datePicker.SelectedDateChanged += DatePicker_Changed;
+
+            panelFiltres.Children.Add(rdLivraison);
+            panelFiltres.Children.Add(rdEmporter);
+            panelFiltres.Children.Add(datePicker);
+            grdMain.Children.Add(panelFiltres);
+        }
+
+        public void Tableau()
+        {
+            tableauCommandes.AutoGenerateColumns = false;
+            tableauCommandes.IsReadOnly = true;
+            tableauCommandes.SelectionMode = DataGridSelectionMode.Single;
+            tableauCommandes.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
+            tableauCommandes.HorizontalScrollBarVisibility = ScrollBarVisibility.Auto;
+            tableauCommandes.Margin = new Thickness(10, 0, 10, 10);
+            tableauCommandes.Background = Brushes.Transparent;
+            tableauCommandes.RowBackground = Brushes.Transparent;
+            tableauCommandes.AlternatingRowBackground = Brushes.Transparent;
+            tableauCommandes.Foreground = Brushes.White;
+            tableauCommandes.GridLinesVisibility = DataGridGridLinesVisibility.None;
+            tableauCommandes.BorderThickness = new Thickness(0);
+            tableauCommandes.HeadersVisibility = DataGridHeadersVisibility.Column;
+            tableauCommandes.FontSize = 16;
+            tableauCommandes.RowHeight = 30;
+            tableauCommandes.ColumnHeaderHeight = 30;
+            Style headerStyle = new Style(typeof(DataGridColumnHeader));
+            headerStyle.Setters.Add(new Setter(BackgroundProperty, Brushes.LightBlue));
+            headerStyle.Setters.Add(new Setter(ForegroundProperty, Brushes.Black));
+            headerStyle.Setters.Add(new Setter(DataGridColumnHeader.FontWeightProperty, FontWeights.Bold));
+            headerStyle.Setters.Add(new Setter(DataGridColumnHeader.PaddingProperty, new Thickness(5)));
+            tableauCommandes.ColumnHeaderStyle = headerStyle;
+
+            tableauCommandes.Columns.Add(new DataGridTextColumn { Header = "N°", Binding = new Binding("Id"), Width = 50 });
+            tableauCommandes.Columns.Add(new DataGridTextColumn { Header = "Date", Binding = new Binding("Date"), Width = 100 });
+            tableauCommandes.Columns.Add(new DataGridTextColumn { Header = "Heure", Binding = new Binding("Heure"), Width = 70 });
+            tableauCommandes.Columns.Add(new DataGridTextColumn { Header = "Client", Binding = new Binding("Client"), Width = 120 });
+            tableauCommandes.Columns.Add(new DataGridTextColumn { Header = "Adresse", Binding = new Binding("Adresse"), Width = new DataGridLength(1, DataGridLengthUnitType.Star) });
+            tableauCommandes.Columns.Add(new DataGridTextColumn { Header = "Montant", Binding = new Binding("Montant"), Width = 80 });
+
+            tableauCommandes.SelectionChanged += TableauCommandes_SelectionChanged;
+
+            Grid.SetColumn(tableauCommandes, 0);
+            Grid.SetRow(tableauCommandes, 1);
+            grdMain.Children.Add(tableauCommandes);
+        }
+
+        public void Panier()
+        {
+            panier.Background = Brushes.White;
+
+            ScrollViewer scrollPanier = new ScrollViewer();
+            scrollPanier.VerticalAlignment = VerticalAlignment.Top;
+            scrollPanier.Height = 600;
+            scrollPanier.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
+            scrollPanier.Content = panier;
+            scrollPanier.Margin = new Thickness(0, 0, 5, 0);
+            Grid.SetColumn(scrollPanier, 1);
+            Grid.SetRow(scrollPanier, 1);
+            grdMain.Children.Add(scrollPanier);
+        }
+
+        public void ChargerCommandes()
+        {
+            if (datePicker.SelectedDate == null) return;
+
+            bool estLivraison = rdLivraison.IsChecked == true;
+            DateTime date = datePicker.SelectedDate.Value;
+
+            sql.AllCommandeByDateAndType(date, estLivraison, out DataTable dataT, out int nbrRow);
+
+            List<object> commandes = new List<object>();
+            for (int i = 0; i < nbrRow; i++)
+            {
+                DateTime dateHeure = Convert.ToDateTime(dataT.Rows[i]["dateHeure"]);
+
+                string adresse = "";
+                if (dataT.Rows[i]["idClient"] != DBNull.Value)
+                {
+                    int idClient = Convert.ToInt32(dataT.Rows[i]["idClient"]);
+                    sql.ClientById(idClient, out DataTable dataC);
+                    if (dataC.Rows.Count > 0)
+                    {
+                        int idAdresse = Convert.ToInt32(dataC.Rows[0]["idAdresse"]);
+                        sql.AdresseByClient(idAdresse, out DataTable dataAdr);
+                        if (dataAdr.Rows.Count > 0)
+                        {
+                            adresse = dataAdr.Rows[0]["nomRue"].ToString() + " " +
+                                      dataAdr.Rows[0]["numeroRue"].ToString() + " " +
+                                      dataAdr.Rows[0]["localite"].ToString() + " " +
+                                      dataAdr.Rows[0]["codePostal"].ToString();
+                        }
+                    }
+                }
+
+                commandes.Add(new
+                {
+                    Id = dataT.Rows[i]["id"],
+                    Date = dateHeure.ToString("dd/MM/yyyy"),
+                    Heure = dateHeure.ToString("HH:mm"),
+                    Client = dataT.Rows[i]["nom"].ToString() + " " + dataT.Rows[i]["prenom"].ToString(),
+                    Adresse = adresse,
+                    Montant = dataT.Rows[i]["prixTotal"].ToString() + " €"
+                });
+            }
+
+            tableauCommandes.ItemsSource = null;
+            tableauCommandes.ItemsSource = commandes;
+        }
+
+        private void Filtre_Changed(object sender, RoutedEventArgs e)
+        {
+            ChargerCommandes();
+        }
+
+        private void DatePicker_Changed(object sender, SelectionChangedEventArgs e)
+        {
+            ChargerCommandes();
+        }
+
+        private void TableauCommandes_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (tableauCommandes.SelectedItem == null) return;
+
+            dynamic commande = tableauCommandes.SelectedItem;
+            int idCommande = Convert.ToInt32(commande.Id);
+
+            AfficherPanier(idCommande);
+        }
+
+        public void AfficherPanier(int idCommande)
+        {
+            panier.Children.Clear();
+            // TODO : remplir le panier avec les lignes de la commande sélectionnée
+        }
+    }
+}

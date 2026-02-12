@@ -730,6 +730,19 @@ namespace CrispyLo.Views
             commander.Children.Add(commande);
             commander.Children.Add(affichePrix);
             grdMain.Children.Add(commander);
+
+            //action du haut droite
+            Button allCommande = new Button();
+            allCommande.Content = "🗃️";
+            allCommande.FontSize = 20;
+            allCommande.Height = 40;
+            allCommande.Width = 40;
+            allCommande.Background = Brushes.DodgerBlue;
+            allCommande.Foreground = Brushes.White;
+            allCommande.Click += new RoutedEventHandler(Click_AllCommande);
+            Grid.SetColumn(allCommande, 2);
+            Grid.SetRow(allCommande, 0);
+            grdMain.Children.Add(allCommande);
             //-------------------------------------------------------------------------------------------------------
 
             //---------------------------------------------Création catalogue--------------------------------------------
@@ -1396,6 +1409,11 @@ namespace CrispyLo.Views
         {
  
             PagePrincipale.Main.Content = new NewCommande();
+        }
+
+        public void Click_AllCommande(object sender, RoutedEventArgs e)
+        {
+            PagePrincipale.Main.Content = new AllCommande();
         }
     }
 }

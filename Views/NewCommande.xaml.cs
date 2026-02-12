@@ -254,6 +254,7 @@ namespace CrispyLo.Views
             commentaire.Height = 25;
             commentaire.FontSize = 15;
             commentaire.HorizontalAlignment = HorizontalAlignment.Left;
+            commentaire.Margin = new Thickness(0, 10, 0, 0);
             Commentaire.Width = 500;
             Commentaire.Height = 80;
             Commentaire.FontSize = 15;
@@ -265,7 +266,7 @@ namespace CrispyLo.Views
             panel5.Margin = new Thickness(20, 0, 0, 0);
             Grid.SetColumn(panel5, 0);
             Grid.SetRow(panel5, 1);
-            grdMain.Children.Add(panel5);
+            encodage.Children.Add(panel5);
 
             grdMain.Children.Add(typeCommande);
             grdMain.Children.Add(encodage);

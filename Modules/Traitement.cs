@@ -188,7 +188,7 @@ namespace CrispyLo.Modules
 
             foreach (Produit p in PagePrincipale.Panier)
             {
-                int Ligne = bd.NewLigne(p.prixTotal, p.EstLarge, p.TypePate,p.Note, p.IdTypeProduit, idCom);
+                int Ligne = bd.NewLigne(p.prixTotal, p.EstLarge, p.TypePate, p.Note, p.IdTypeProduit, idCom);
                 string ingP = "";
                 string ingM = "";
                 foreach (Ingredient ing in p.Ingredients)
