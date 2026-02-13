@@ -826,7 +826,7 @@ namespace CrispyLo.Views
                     nom = "Tagliatelle ";
                     prix += 1;
                 }
-                else
+                else if(radioPateTortellini.IsChecked == true)
                 {
                     pate = "Tortellini ";
                     nom = "Tortellini ";

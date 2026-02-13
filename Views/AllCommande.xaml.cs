@@ -1,4 +1,5 @@
-﻿using CrispyLo.Modules;
+﻿using CrispyLo.Classes;
+using CrispyLo.Modules;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -7,13 +8,13 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-using System.Windows.Controls.Primitives;
 using System.Windows.Shapes;
 
 namespace CrispyLo.Views
@@ -23,8 +24,10 @@ namespace CrispyLo.Views
     /// </summary>
     public partial class AllCommande : Page
     {
+        MainWindow PagePrincipale = (MainWindow)App.Current.MainWindow;
         ControlTemplate radioStyle = VisuelCSS.CreateButtonStyleTemplate();
         BaseDeDonnée sql = new BaseDeDonnée();
+
         DataGrid tableauCommandes = new DataGrid();
         StackPanel panier = new StackPanel();
         RadioButton rdLivraison = new RadioButton();
@@ -89,8 +92,8 @@ namespace CrispyLo.Views
             datePicker.Margin = new Thickness(20, 20, 5, 5);
             datePicker.SelectedDateChanged += DatePicker_Changed;
 
-            panelFiltres.Children.Add(rdLivraison);
             panelFiltres.Children.Add(rdEmporter);
+            panelFiltres.Children.Add(rdLivraison);
             panelFiltres.Children.Add(datePicker);
             grdMain.Children.Add(panelFiltres);
         }
@@ -214,13 +217,163 @@ namespace CrispyLo.Views
             dynamic commande = tableauCommandes.SelectedItem;
             int idCommande = Convert.ToInt32(commande.Id);
 
-            AfficherPanier(idCommande);
+
+            RemplissageInfo(idCommande);
+            AfficherPanier();
         }
 
-        public void AfficherPanier(int idCommande)
+        public void RemplissageInfo(int idCom)
+        {
+            PagePrincipale.Panier.Clear();
+            sql.AllLigneByCommande(idCom, out DataTable dataLigne, out int nbrLigne);
+            for (int ligne = 0; ligne < nbrLigne; ligne++)
+            {
+                string libelle = "";
+                if ((bool)dataLigne.Rows[ligne]["tailleLarge"])
+                {
+                    libelle = "Maxi ";
+                }
+                libelle += dataLigne.Rows[ligne]["typePate"].ToString();
+
+                sql.ProduitById((int)dataLigne.Rows[ligne]["idProduit"], out DataTable p);
+                libelle += p.Rows[0]["libelle"].ToString();
+
+                if ((int)p.Rows[0]["idTypeProduit"] == 5 || libelle == "Moelleux au chocolat")
+                {
+                    libelle += " " + p.Rows[0]["quantite"] + "pc";
+                }
+
+                PagePrincipale.Panier.Add(new Produit
+                {
+                    Id = (int)p.Rows[0]["id"],
+                    Libelle = libelle.ToUpper(),
+                    Prix = (double)dataLigne.Rows[ligne]["prixProduit"],
+                    EstLarge = (bool)dataLigne.Rows[ligne]["tailleLarge"],
+                    TypePate = dataLigne.Rows[ligne]["typePate"].ToString(),
+                    IdTypeProduit = (int)p.Rows[0]["idTypeProduit"],
+                    Note = dataLigne.Rows[ligne]["note"].ToString(),
+                    Ingredients = new List<Ingredient>()
+                });
+
+                sql.AllIngredientByLigne((int)dataLigne.Rows[ligne]["id"], out DataTable dataIngredient, out int nbrIngredient);
+                for (int i = 0; i < nbrIngredient; i++)
+                {
+                    string[] tabIng = Traitement.descToIngredient(dataIngredient.Rows[i]["ingredient"].ToString());
+                    for (int j = 0; j < tabIng.Length; j++)
+                    {
+                        int id = 0;
+                        double prix = 0;
+                        if ((bool)dataIngredient.Rows[i]["ingredientEnPlus"])
+                        {
+                            sql.IngredientByLibelle(tabIng[j].Trim(), out DataTable data);
+                            id = (int)data.Rows[0]["id"];
+                            if ((bool)dataLigne.Rows[ligne]["tailleLarge"])
+                            {
+                                prix = (double)data.Rows[0]["prixLarge"];
+                            }
+                            else
+                            {
+                                prix = (double)data.Rows[0]["prixMedium"];
+                            }
+                        }
+
+                        Ingredient ingredient = new Ingredient();
+                        ingredient.Id = id;
+                        ingredient.Libelle = tabIng[j];
+                        ingredient.Prix = prix;
+                        ingredient.EstSupplement = (bool)dataIngredient.Rows[i]["ingredientEnPlus"];
+                        PagePrincipale.Panier[ligne].Ingredients.Add(ingredient);
+                    }
+                }
+            }
+        }
+
+        public void AfficherPanier()
         {
             panier.Children.Clear();
-            // TODO : remplir le panier avec les lignes de la commande sélectionnée
+            for (int i = 0; i < PagePrincipale.Panier.Count; i++)
+            {
+                Produit p = PagePrincipale.Panier[i];
+                Grid grille = new Grid();
+                grille.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+                grille.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+
+                TextBlock textNom = new TextBlock();
+                textNom.Text = " " + p.Libelle;
+                textNom.FontWeight = FontWeights.Bold;
+                textNom.VerticalAlignment = VerticalAlignment.Center;
+                Grid.SetColumn(textNom, 0);
+                grille.Children.Add(textNom);
+
+                TextBlock textPrix = new TextBlock();
+                textPrix.Text = p.Prix.ToString() + "€ ";
+                textPrix.FontWeight = FontWeights.Bold;
+                textPrix.VerticalAlignment = VerticalAlignment.Center;
+                textPrix.Margin = new Thickness(0, 0, 5, 0);
+                Grid.SetColumn(textPrix, 1);
+                grille.Children.Add(textPrix);
+                panier.Children.Add(grille);
+
+                foreach (Ingredient ing in p.Ingredients)
+                {
+                    Grid grilleIng = new Grid();
+                    grilleIng.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+
+                    string libelle = "";
+                    WrapPanel text = new WrapPanel();
+
+                    if (ing.EstSupplement == false)
+                    {
+                        libelle += " --> SS ";
+                        text.Background = Brushes.Coral;
+                    }
+                    else
+                    {
+                        libelle += " --> SUPP ";
+                        text.Background = Brushes.LightGreen;
+                        grilleIng.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+
+                        TextBlock prixIng = new TextBlock();
+                        prixIng.Text = ing.Prix + "€ ";
+                        prixIng.FontWeight = FontWeights.Bold;
+                        prixIng.VerticalAlignment = VerticalAlignment.Center;
+                        prixIng.HorizontalAlignment = HorizontalAlignment.Right;
+                        prixIng.Margin = new Thickness(0, 0, 5, 0);
+                        Grid.SetColumn(prixIng, 1);
+                        grilleIng.Children.Add(prixIng);
+                    }
+                    libelle += ing.Libelle;
+
+                    TextBlock textIng = new TextBlock();
+                    textIng.Text = " " + libelle;
+                    textIng.FontWeight = FontWeights.Bold;
+                    textIng.VerticalAlignment = VerticalAlignment.Center;
+                    Grid.SetColumn(textIng, 0);
+                    grilleIng.Children.Add(textIng);
+
+                    grilleIng.Width = panier.ActualWidth - 2;
+                    text.Children.Add(grilleIng);
+                    text.Height = 20;
+                    text.HorizontalAlignment = HorizontalAlignment.Stretch;
+                    text.Margin = new Thickness(1);
+
+                    panier.Children.Add(text);
+                }
+
+                if (p.Note != "")
+                {
+                    TextBlock text = new TextBlock();
+                    text.Text = PagePrincipale.Panier[i].Note;
+                    text.FontWeight = FontWeights.Bold;
+                    text.VerticalAlignment = VerticalAlignment.Center;
+                    text.HorizontalAlignment = HorizontalAlignment.Stretch;
+                    text.Background = Brushes.PeachPuff;
+                    text.Margin = new Thickness(1);
+                    text.Height = 20;
+
+                    panier.Children.Add(text);
+                }
+            }
         }
     }
 }

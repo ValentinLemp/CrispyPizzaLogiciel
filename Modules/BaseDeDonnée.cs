@@ -46,8 +46,10 @@ namespace CrispyLo.Modules
 
             try
             {
-                string query = "SELECT * FROM restaurant where id = " + id;
-                MySqlDataAdapter Data = new MySqlDataAdapter(query, maConnexion);
+                string query = "SELECT * FROM restaurant WHERE id = @id";
+                MySqlCommand cmd = new MySqlCommand(query, maConnexion);
+                cmd.Parameters.AddWithValue("@id", id);
+                MySqlDataAdapter Data = new MySqlDataAdapter(cmd);
                 Data.Fill(dataT);
                 maConnexion.Close();
             }
@@ -65,8 +67,10 @@ namespace CrispyLo.Modules
 
             try
             {
-                string query = "SELECT * FROM produit WHERE idTypeProduit =" + id + " AND estSuggestion = 0";
-                MySqlDataAdapter Data = new MySqlDataAdapter(query, maConnexion);
+                string query = "SELECT * FROM produit WHERE idTypeProduit = @id AND estSuggestion = 0";
+                MySqlCommand cmd = new MySqlCommand(query, maConnexion);
+                cmd.Parameters.AddWithValue("@id", id);
+                MySqlDataAdapter Data = new MySqlDataAdapter(cmd);
                 Data.Fill(dataT);
                 nbrRow = dataT.Rows.Count;
                 maConnexion.Close();
@@ -124,8 +128,10 @@ namespace CrispyLo.Modules
 
             try
             {
-                string query = "SELECT * FROM produit WHERE idTypePizza = " + id  + " AND idTypeProduit = 1 AND estSuggestion = 0";
-                MySqlDataAdapter Data = new MySqlDataAdapter(query, maConnexion);
+                string query = "SELECT * FROM produit WHERE idTypePizza = @id AND idTypeProduit = 1 AND estSuggestion = 0";
+                MySqlCommand cmd = new MySqlCommand(query, maConnexion);
+                cmd.Parameters.AddWithValue("@id", id);
+                MySqlDataAdapter Data = new MySqlDataAdapter(cmd);
                 Data.Fill(dataT);
                 nbrRow = dataT.Rows.Count;
                 maConnexion.Close();
@@ -144,8 +150,10 @@ namespace CrispyLo.Modules
 
             try
             {
-                string query = "SELECT * FROM produit WHERE id = " + id;
-                MySqlDataAdapter Data = new MySqlDataAdapter(query, maConnexion);
+                string query = "SELECT * FROM produit WHERE id = @id";
+                MySqlCommand cmd = new MySqlCommand(query, maConnexion);
+                cmd.Parameters.AddWithValue("@id", id);
+                MySqlDataAdapter Data = new MySqlDataAdapter(cmd);
                 Data.Fill(dataT);
                 maConnexion.Close();
             }
@@ -163,8 +171,10 @@ namespace CrispyLo.Modules
 
             try
             {
-                string query = "SELECT * FROM produit WHERE libelle = '" + libelle + "'";
-                MySqlDataAdapter Data = new MySqlDataAdapter(query, maConnexion);
+                string query = "SELECT * FROM produit WHERE libelle = @libelle";
+                MySqlCommand cmd = new MySqlCommand(query, maConnexion);
+                cmd.Parameters.AddWithValue("@libelle", libelle);
+                MySqlDataAdapter Data = new MySqlDataAdapter(cmd);
                 Data.Fill(dataT);
                 maConnexion.Close();
             }
@@ -182,8 +192,10 @@ namespace CrispyLo.Modules
 
             try
             {
-                string query = "SELECT * FROM ingredient where idCategorieIngredient = " + id + " AND " + libelle + " = 1";
-                MySqlDataAdapter Data = new MySqlDataAdapter(query, maConnexion);
+                string query = "SELECT * FROM ingredient WHERE idCategorieIngredient = @id AND " + libelle + " = 1";
+                MySqlCommand cmd = new MySqlCommand(query, maConnexion);
+                cmd.Parameters.AddWithValue("@id", id);
+                MySqlDataAdapter Data = new MySqlDataAdapter(cmd);
                 Data.Fill(dataT);
                 nbrRow = dataT.Rows.Count;
                 maConnexion.Close();
@@ -202,8 +214,10 @@ namespace CrispyLo.Modules
 
             try
             {
-                string query = "SELECT * FROM ingredient WHERE id = " + id;
-                MySqlDataAdapter Data = new MySqlDataAdapter(query, maConnexion);
+                string query = "SELECT * FROM ingredient WHERE id = @id";
+                MySqlCommand cmd = new MySqlCommand(query, maConnexion);
+                cmd.Parameters.AddWithValue("@id", id);
+                MySqlDataAdapter Data = new MySqlDataAdapter(cmd);
                 Data.Fill(dataT);
                 maConnexion.Close();
             }
@@ -221,8 +235,10 @@ namespace CrispyLo.Modules
 
             try
             {
-                string query = "SELECT * FROM ingredient WHERE libelle = " + libelle;
-                MySqlDataAdapter Data = new MySqlDataAdapter(query, maConnexion);
+                string query = "SELECT * FROM ingredient WHERE libelle = @libelle";
+                MySqlCommand cmd = new MySqlCommand(query, maConnexion);
+                cmd.Parameters.AddWithValue("@libelle", libelle);
+                MySqlDataAdapter Data = new MySqlDataAdapter(cmd);
                 Data.Fill(dataT);
                 maConnexion.Close();
             }
@@ -240,8 +256,10 @@ namespace CrispyLo.Modules
 
             try
             {
-                string query = "SELECT * FROM client where numero = " + phone;
-                MySqlDataAdapter Data = new MySqlDataAdapter(query, maConnexion);
+                string query = "SELECT * FROM client WHERE numero = @phone";
+                MySqlCommand cmd = new MySqlCommand(query, maConnexion);
+                cmd.Parameters.AddWithValue("@phone", phone);
+                MySqlDataAdapter Data = new MySqlDataAdapter(cmd);
                 Data.Fill(dataT);
                 nbrRow = dataT.Rows.Count;
                 maConnexion.Close();
@@ -260,8 +278,10 @@ namespace CrispyLo.Modules
 
             try
             {
-                string query = "SELECT * FROM adresse where id = " + id;
-                MySqlDataAdapter Data = new MySqlDataAdapter(query, maConnexion);
+                string query = "SELECT * FROM adresse WHERE id = @id";
+                MySqlCommand cmd = new MySqlCommand(query, maConnexion);
+                cmd.Parameters.AddWithValue("@id", id);
+                MySqlDataAdapter Data = new MySqlDataAdapter(cmd);
                 Data.Fill(dataT);
                 maConnexion.Close();
             }
@@ -280,16 +300,19 @@ namespace CrispyLo.Modules
             {
                 maConnexion.Open();
 
-                string queryAdresse = "SELECT idAdresse FROM client WHERE id = " + idClient;
+                string queryAdresse = "SELECT idAdresse FROM client WHERE id = @idClient";
                 MySqlCommand cmdAdresse = new MySqlCommand(queryAdresse, maConnexion);
+                cmdAdresse.Parameters.AddWithValue("@idClient", idClient);
                 int idAdresse = Convert.ToInt32(cmdAdresse.ExecuteScalar());
 
-                string queryClient = "DELETE FROM client WHERE id = " + idClient;
+                string queryClient = "DELETE FROM client WHERE id = @idClient2";
                 MySqlCommand cmdClient = new MySqlCommand(queryClient, maConnexion);
+                cmdClient.Parameters.AddWithValue("@idClient2", idClient);
                 cmdClient.ExecuteNonQuery();
 
-                string queryDeleteAdresse = "DELETE FROM adresse WHERE id = " + idAdresse;
+                string queryDeleteAdresse = "DELETE FROM adresse WHERE id = @idAdresse";
                 MySqlCommand cmdDeleteAdresse = new MySqlCommand(queryDeleteAdresse, maConnexion);
+                cmdDeleteAdresse.Parameters.AddWithValue("@idAdresse", idAdresse);
                 cmdDeleteAdresse.ExecuteNonQuery();
 
                 maConnexion.Close();
@@ -395,7 +418,7 @@ namespace CrispyLo.Modules
             try
             {
                 maConnexion.Open();
-                string query = "INSERT INTO ligneCommande(prixLigne, tailleMedium, typePate, note, idProduit, idCommande) VALUES(@prixLigne, @taille, @typePate, @note, @idProduit, @idCom)";
+                string query = "INSERT INTO ligneCommande(prixProduit, tailleLarge, typePate, note, idProduit, idCommande) VALUES(@prixLigne, @taille, @typePate, @note, @idProduit, @idCom)";
                 MySqlCommand cmd = new MySqlCommand(query, maConnexion);
                 cmd.Parameters.AddWithValue("@prixLigne", prixLigne);
                 cmd.Parameters.AddWithValue("@taille", taille);

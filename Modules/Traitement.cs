@@ -188,18 +188,32 @@ namespace CrispyLo.Modules
 
             foreach (Produit p in PagePrincipale.Panier)
             {
-                int Ligne = bd.NewLigne(p.prixTotal, p.EstLarge, p.TypePate, p.Note, p.IdTypeProduit, idCom);
+                int Ligne = bd.NewLigne(p.Prix, p.EstLarge, p.TypePate, p.Note, p.Id, idCom);
                 string ingP = "";
                 string ingM = "";
                 foreach (Ingredient ing in p.Ingredients)
                 {
                     if (ing.EstSupplement == true)
                     {
-                        ingP += ing.Libelle + ", ";
+                        if (ingP == "")
+                        {
+                            ingP += ing.Libelle;
+                        }
+                        else
+                        {
+                            ingP += ", " + ing.Libelle;
+                        }
                     }
                     else
                     {
-                        ingM += ing.Libelle + ", ";
+                        if (ingM == "")
+                        {
+                            ingM += ing.Libelle;
+                        }
+                        else
+                        {
+                            ingM += ", " + ing.Libelle;
+                        }
                     }
                 }
 
