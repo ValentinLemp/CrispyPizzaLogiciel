@@ -51,6 +51,7 @@ namespace CrispyLo.Views.Info
             yes.Height = 40;
             yes.Width = 80;
             yes.Background = Brushes.Red;
+            yes.Foreground = Brushes.White;
             yes.Click += new RoutedEventHandler(Click_yes);
             yes.HorizontalAlignment = HorizontalAlignment.Center;
             yes.VerticalAlignment = VerticalAlignment.Center;

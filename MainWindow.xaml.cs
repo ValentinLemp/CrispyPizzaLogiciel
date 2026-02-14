@@ -22,6 +22,7 @@ namespace CrispyLo
     {
         public int Restaurent { get; set; }
         public List<Produit> Panier { get; set; } = new List<Produit>();
+        public int IdCommande { get; set; }
         public MainWindow()
         {
             InitializeComponent();
@@ -30,6 +31,7 @@ namespace CrispyLo
 
         public void PrepareInitialize()
         {
+            IdCommande = -1;
             //Main.Content = new Home();
             Main.Content = new Login();
         }

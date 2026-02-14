@@ -33,6 +33,7 @@ namespace CrispyLo.Views
         RadioButton rdLivraison = new RadioButton();
         RadioButton rdEmporter = new RadioButton();
         DatePicker datePicker = new DatePicker();
+        TextBlock prix = new TextBlock();
 
         public AllCommande()
         {
@@ -50,9 +51,26 @@ namespace CrispyLo.Views
             grdMain.RowDefinitions.Add(new RowDefinition { Height = new GridLength(60) });
             grdMain.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
 
+            Button retour = new Button();
+            retour.Content = "🔙";
+            retour.FontWeight = FontWeights.Bold;
+            retour.FontSize = 20;
+            retour.Foreground = Brushes.White;
+            retour.Background = Brushes.Red;
+            retour.Width = 35;
+            retour.Height = 35;
+            retour.Margin = new Thickness(10);
+            retour.HorizontalAlignment = HorizontalAlignment.Right;
+            retour.VerticalAlignment = VerticalAlignment.Top;
+            retour.Click += new RoutedEventHandler(Click_Retour);
+            Grid.SetColumn(retour, 1);
+            Grid.SetRow(retour, 0);
+            grdMain.Children.Add(retour);
+
             Filtres();
             Tableau();
             Panier();
+            AfficheBas();
             ChargerCommandes();
         }
 
@@ -152,6 +170,65 @@ namespace CrispyLo.Views
             grdMain.Children.Add(scrollPanier);
         }
 
+        public void AfficheBas()
+        {
+            StackPanel panel = new StackPanel();
+            panel.Background = Brushes.LightGray;
+            panel.VerticalAlignment = VerticalAlignment.Bottom;
+            panel.HorizontalAlignment = HorizontalAlignment.Stretch;
+            panel.Margin = new Thickness(0, 0, 5, 5);
+            Grid.SetColumn(panel, 1);
+            Grid.SetRow(panel, 1);
+
+            prix.Height = 60;
+            prix.Width = 140;
+            prix.Background = Brushes.Transparent;
+            prix.FontSize = 40;
+            prix.TextAlignment = TextAlignment.Right;
+            prix.Margin = new Thickness(0, 0, 15, 10);
+            prix.HorizontalAlignment = HorizontalAlignment.Right;
+            panel.Children.Add(prix);
+
+            WrapPanel wrap = new WrapPanel();
+            wrap.Background = Brushes.Transparent;
+
+            Button imprimer = new Button();
+            Button modifier = new Button();
+
+            TextBlock txtImprimer = new TextBlock();
+            txtImprimer.Text = "🧾\nimprimer";
+            txtImprimer.TextAlignment = TextAlignment.Center;
+            imprimer.Content = txtImprimer;
+            imprimer.FontWeight = FontWeights.Bold;
+            imprimer.Height = 75;
+            imprimer.Width = 125;
+            imprimer.FontSize = 20;
+            imprimer.Margin = new Thickness(30, 5, 5, 5);
+            imprimer.HorizontalContentAlignment = HorizontalAlignment.Center;
+            imprimer.VerticalContentAlignment = VerticalAlignment.Center;
+            imprimer.Background = Brushes.Transparent;
+            imprimer.Click += new RoutedEventHandler(Click_Imprimer);
+
+            TextBlock txtModifier = new TextBlock();
+            txtModifier.Text = "📝\nmodifier";
+            txtModifier.TextAlignment = TextAlignment.Center;
+            modifier.Content = txtModifier;
+            modifier.FontWeight = FontWeights.Bold;
+            modifier.Height = 75;
+            modifier.Width = 125;
+            modifier.FontSize = 20;
+            modifier.Margin = new Thickness(15, 5, 5, 5);
+            modifier.HorizontalContentAlignment = HorizontalAlignment.Center;
+            modifier.VerticalContentAlignment = VerticalAlignment.Center;
+            modifier.Background = Brushes.Transparent;
+            modifier.Click += new RoutedEventHandler(Click_Modifier);
+
+            wrap.Children.Add(modifier);
+            wrap.Children.Add(imprimer);
+            panel.Children.Add(wrap);
+
+            grdMain.Children.Add(panel);
+        }
         public void ChargerCommandes()
         {
             if (datePicker.SelectedDate == null) return;
@@ -159,7 +236,7 @@ namespace CrispyLo.Views
             bool estLivraison = rdLivraison.IsChecked == true;
             DateTime date = datePicker.SelectedDate.Value;
 
-            sql.AllCommandeByDateAndType(date, estLivraison, out DataTable dataT, out int nbrRow);
+            sql.AllCommandeByDateAndType(date, estLivraison, PagePrincipale.Restaurent, out DataTable dataT, out int nbrRow);
 
             List<object> commandes = new List<object>();
             for (int i = 0; i < nbrRow; i++)
@@ -215,17 +292,21 @@ namespace CrispyLo.Views
             if (tableauCommandes.SelectedItem == null) return;
 
             dynamic commande = tableauCommandes.SelectedItem;
-            int idCommande = Convert.ToInt32(commande.Id);
+            PagePrincipale.IdCommande = Convert.ToInt32(commande.Id);
 
 
-            RemplissageInfo(idCommande);
+            RemplissageInfo();
             AfficherPanier();
         }
 
-        public void RemplissageInfo(int idCom)
+        public void RemplissageInfo()
         {
             PagePrincipale.Panier.Clear();
-            sql.AllLigneByCommande(idCom, out DataTable dataLigne, out int nbrLigne);
+
+            sql.CommandeById(PagePrincipale.IdCommande, out DataTable dataCom);
+            prix.Text = dataCom.Rows[0]["prixTotal"] + " €";
+
+            sql.AllLigneByCommande(PagePrincipale.IdCommande, out DataTable dataLigne, out int nbrLigne);
             for (int ligne = 0; ligne < nbrLigne; ligne++)
             {
                 string libelle = "";
@@ -373,6 +454,29 @@ namespace CrispyLo.Views
 
                     panier.Children.Add(text);
                 }
+            }
+        }
+
+        public void Click_Retour(object sender, RoutedEventArgs e)
+        {
+            PagePrincipale.Panier.Clear();
+            PagePrincipale.IdCommande = -1;
+            PagePrincipale.Main.Content = new Home();
+        }
+
+        public void Click_Modifier(object sender, RoutedEventArgs e)
+        {
+            if (PagePrincipale.IdCommande != -1)
+            {
+                PagePrincipale.Main.Content = new Home();
+            }
+        }
+
+        public void Click_Imprimer(object sender, RoutedEventArgs e)
+        {
+            if (PagePrincipale.IdCommande != -1)
+            {
+                //imprimer
             }
         }
     }

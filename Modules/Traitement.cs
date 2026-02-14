@@ -227,5 +227,33 @@ namespace CrispyLo.Modules
                 }
             }
         }
+        public static void ModificationLigneIngredient(int idLigne, Produit p)
+        {
+            BaseDeDonnée bd = new BaseDeDonnée();
+            string ingP = "";
+            string ingM = "";
+            foreach (Ingredient ing in p.Ingredients)
+            {
+                if (ing.EstSupplement == true)
+                {
+                    if (ingP == "")
+                        ingP += ing.Libelle;
+                    else
+                        ingP += ", " + ing.Libelle;
+                }
+                else
+                {
+                    if (ingM == "")
+                        ingM += ing.Libelle;
+                    else
+                        ingM += ", " + ing.Libelle;
+                }
+            }
+
+            if (ingP != "")
+                bd.NewLigneIngredient(idLigne, ingP, true);
+            if (ingM != "")
+                bd.NewLigneIngredient(idLigne, ingM, false);
+        }
     }
 }

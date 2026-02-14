@@ -17,7 +17,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CrispyLo.Views
 {
@@ -34,8 +33,59 @@ namespace CrispyLo.Views
         {
             InitializeComponent();
             PrepareInitialize();
+
+            if (PagePrincipale.IdCommande != -1)
+            {
+                RemplirChamps();
+            }
+        }
+
+        public void RemplirChamps()
+        {
+            bd.CommandeById(PagePrincipale.IdCommande, out DataTable dataCom);
+            if (dataCom.Rows.Count == 0) return;
+
+            Nom.Text = dataCom.Rows[0]["nom"].ToString();
+            Prenom.Text = dataCom.Rows[0]["prenom"].ToString();
+            Commentaire.Text = dataCom.Rows[0]["commetaire"].ToString();
+
+            DateTime dateHeure = Convert.ToDateTime(dataCom.Rows[0]["dateHeure"]);
+            datePicker.SelectedDate = dateHeure.Date;
+            Heures.Text = dateHeure.ToString("HH:mm");
+
+            bool estLivraison = Convert.ToBoolean(dataCom.Rows[0]["estLivraison"]);
+            if (estLivraison)
+            {
+                rdLivraison.IsChecked = true;
+                rdEmporter.IsChecked = false;
+            }
+            else
+            {
+                rdEmporter.IsChecked = true;
+                rdLivraison.IsChecked = false;
+            }
+
+            if (dataCom.Rows[0]["idClient"] != DBNull.Value)
+            {
+                int idClient = Convert.ToInt32(dataCom.Rows[0]["idClient"]);
+                bd.ClientById(idClient, out DataTable dataClient);
+                if (dataClient.Rows.Count > 0)
+                {
+                    Telephone.Text = dataClient.Rows[0]["numero"].ToString();
+                    int idAdresse = Convert.ToInt32(dataClient.Rows[0]["idAdresse"]);
+                    bd.AdresseByClient(idAdresse, out DataTable dataAdr);
+                    if (dataAdr.Rows.Count > 0)
+                    {
+                        Adresse.Text = dataAdr.Rows[0]["nomRue"].ToString();
+                        Numero.Text = dataAdr.Rows[0]["numeroRue"].ToString();
+                        Localite.Text = dataAdr.Rows[0]["codePostal"].ToString();
+                        Ville.Text = dataAdr.Rows[0]["localite"].ToString();
+                    }
+                }
+            }
         }
         RadioButton rdLivraison = new RadioButton();
+        RadioButton rdEmporter = new RadioButton();
 
         StackPanel panelGénéralHeure = new StackPanel();
         StackPanel panelGénéralRésumé = new StackPanel();
@@ -102,8 +152,6 @@ namespace CrispyLo.Views
             Grid.SetColumn(encodage, 0);
             Grid.SetRow(encodage, 1);
             encodage.Background = Brushes.Transparent;
-
-            RadioButton rdEmporter = new RadioButton();
 
             rdEmporter.Content = "EMPORTER";
             rdEmporter.FontWeight = FontWeights.Bold;
@@ -756,41 +804,128 @@ namespace CrispyLo.Views
                 string commentaire = Commentaire.Text.Trim();
                 DateTime date = datePicker.SelectedDate.Value.Date + TimeSpan.Parse(Heures.Text);
 
-                if (rdLivraison.IsChecked == true)
+                if (PagePrincipale.IdCommande != -1)
                 {
-                    if (nom == "" || telephone == "" || rue == "" || numero == "" || codePostal == "" || ville == "")
+                    // ---- MODE MODIFICATION ----
+                    int idCom = PagePrincipale.IdCommande;
+                    bd.CommandeById(idCom, out DataTable dataCom);
+                    int? ancienIdClient = dataCom.Rows[0]["idClient"] != DBNull.Value ? Convert.ToInt32(dataCom.Rows[0]["idClient"]) : (int?)null;
+
+                    int? idClient = null;
+
+                    if (livraison)
                     {
-                        MessageBox.Show("Veuillez remplir tous les champs obligatoires (Nom, Téléphone, Rue, Numéro, Localité, Ville).");
-                        return;
+                        if (nom == "" || telephone == "" || rue == "" || numero == "" || codePostal == "" || ville == "")
+                        {
+                            MessageBox.Show("Veuillez remplir tous les champs obligatoires (Nom, Téléphone, Rue, Numéro, Localité, Ville).");
+                            return;
+                        }
+
+                        if (ancienIdClient.HasValue)
+                        {
+                            // Client existait déjà → update client + adresse
+                            bd.ClientById(ancienIdClient.Value, out DataTable dataClient);
+                            int idAdresse = Convert.ToInt32(dataClient.Rows[0]["idAdresse"]);
+                            bd.UpdateClient(ancienIdClient.Value, nom, prenom, telephone);
+                            bd.UpdateAdresse(idAdresse, double.Parse(codePostal), rue, numero, ville);
+                            idClient = ancienIdClient.Value;
+                        }
+                        else
+                        {
+                            // Passage emporter → livraison → créer client + adresse
+                            int idAdresse = bd.AjouterAdresse(double.Parse(codePostal), rue, numero, ville);
+                            idClient = bd.AjouterClient(nom, prenom, telephone, idAdresse);
+                        }
+                    }
+                    else
+                    {
+                        if (nom == "")
+                        {
+                            MessageBox.Show("Veuillez remplir le champ nom");
+                            return;
+                        }
+                        // Emporter → idClient = null (on ne supprime pas l'ancien client)
+                        idClient = null;
                     }
 
-                    int idAdresse = bd.AjouterAdresse(double.Parse(codePostal), rue, numero, ville);
-                    int idClient = bd.AjouterClient(nom, prenom, telephone, idAdresse);
-                    int idCommande = bd.NewCommande(nom, prenom, livraison, date, prixTotal, commentaire, idRest, 1, idClient);
-                    Traitement.CreationLigne(idCommande);
+                    bd.UpdateCommande(idCom, nom, prenom, livraison, date, prixTotal, commentaire, 1, idClient);
 
-                }
-                else if (rdLivraison.IsChecked == false)
-                {
-                    if (nom == "")
+                    // Récupérer les anciennes lignes
+                    bd.AllLigneByCommande(idCom, out DataTable dataLignes, out int nbrLignes);
+                    List<int> anciensIdLignes = new List<int>();
+                    for (int i = 0; i < nbrLignes; i++)
                     {
-                        MessageBox.Show("Veuillez remplir le champ nom");
-                        return;
+                        anciensIdLignes.Add(Convert.ToInt32(dataLignes.Rows[i]["id"]));
                     }
 
-                    int idCommande = bd.NewCommande(nom, prenom, livraison, date, prixTotal, commentaire, idRest, 1, null);
-                    Traitement.CreationLigne(idCommande);
-                }
+                    // Update les lignes existantes, ajouter les nouvelles
+                    for (int i = 0; i < PagePrincipale.Panier.Count; i++)
+                    {
+                        if (i < anciensIdLignes.Count)
+                        {
+                            // Ligne existante → update + recréer ingrédients
+                            Produit p = PagePrincipale.Panier[i];
+                            bd.UpdateLigne(anciensIdLignes[i], p.Prix, p.EstLarge, p.TypePate, p.Note, p.Id);
+                            bd.SupprimerIngredientsByLigne(anciensIdLignes[i]);
+                            Traitement.ModificationLigneIngredient(anciensIdLignes[i], p);
+                        }
+                        else
+                        {
+                            // Nouvelle ligne → insert
+                            Produit p = PagePrincipale.Panier[i];
+                            int idLigne = bd.NewLigne(p.Prix, p.EstLarge, p.TypePate, p.Note, p.Id, idCom);
+                            Traitement.ModificationLigneIngredient(idLigne, p);
+                        }
+                    }
 
-                MessageBox.Show("Commade sauvegarder avec succès !");
-                PagePrincipale.Panier.Clear();
-                PagePrincipale.Main.Content = new Home();
+                    // Supprimer les lignes en trop
+                    for (int i = PagePrincipale.Panier.Count; i < anciensIdLignes.Count; i++)
+                    {
+                        bd.SupprimerLigne(anciensIdLignes[i]);
+                    }
+
+                    MessageBox.Show("Commande modifiée avec succès !");
+                    PagePrincipale.IdCommande = -1;
+                    PagePrincipale.Panier.Clear();
+                    PagePrincipale.Main.Content = new Home();
+                }
+                else
+                {
+                    // ---- MODE CRÉATION ----
+                    if (rdLivraison.IsChecked == true)
+                    {
+                        if (nom == "" || telephone == "" || rue == "" || numero == "" || codePostal == "" || ville == "")
+                        {
+                            MessageBox.Show("Veuillez remplir tous les champs obligatoires (Nom, Téléphone, Rue, Numéro, Localité, Ville).");
+                            return;
+                        }
+
+                        int idAdresse = bd.AjouterAdresse(double.Parse(codePostal), rue, numero, ville);
+                        int idClient = bd.AjouterClient(nom, prenom, telephone, idAdresse);
+                        int idCommande = bd.NewCommande(nom, prenom, livraison, date, prixTotal, commentaire, idRest, 1, idClient);
+                        Traitement.CreationLigne(idCommande);
+                    }
+                    else if (rdLivraison.IsChecked == false)
+                    {
+                        if (nom == "")
+                        {
+                            MessageBox.Show("Veuillez remplir le champ nom");
+                            return;
+                        }
+
+                        int idCommande = bd.NewCommande(nom, prenom, livraison, date, prixTotal, commentaire, idRest, 1, null);
+                        Traitement.CreationLigne(idCommande);
+                    }
+
+                    MessageBox.Show("Commade sauvegarder avec succès !");
+                    PagePrincipale.Panier.Clear();
+                    PagePrincipale.Main.Content = new Home();
+                }
             }
             else
             {
                 MessageBox.Show("Le panier est vide !");
             }
-
         }
     }
 }

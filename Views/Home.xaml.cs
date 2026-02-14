@@ -666,7 +666,7 @@ namespace CrispyLo.Views
             calculatrice.Click += new RoutedEventHandler(Click_Calculette);
             calculatrice.FontWeight = FontWeights.Bold;
 
-            note.Content = "🧾";
+            note.Content = "🗒️";
             note.Background = Brushes.Transparent;
             note.Height = 50;
             note.Width = 50;
@@ -732,6 +732,11 @@ namespace CrispyLo.Views
             grdMain.Children.Add(commander);
 
             //action du haut droite
+            WrapPanel wrap = new WrapPanel();
+            wrap.HorizontalAlignment = HorizontalAlignment.Right;
+            Grid.SetColumn(wrap, 2);
+            Grid.SetRow(wrap, 0);
+
             Button allCommande = new Button();
             allCommande.Content = "🗃️";
             allCommande.FontSize = 20;
@@ -740,9 +745,42 @@ namespace CrispyLo.Views
             allCommande.Background = Brushes.DodgerBlue;
             allCommande.Foreground = Brushes.White;
             allCommande.Click += new RoutedEventHandler(Click_AllCommande);
-            Grid.SetColumn(allCommande, 2);
-            Grid.SetRow(allCommande, 0);
-            grdMain.Children.Add(allCommande);
+            wrap.Children.Add(allCommande);
+
+            Button allClient = new Button();
+            allClient.Content = "👤";
+            allClient.FontSize = 20;
+            allClient.Height = 40;
+            allClient.Width = 40;
+            allClient.Background = Brushes.DodgerBlue;
+            allClient.Foreground = Brushes.White;
+            allClient.Margin = new Thickness(10, 0, 0, 0);
+            allClient.Click += new RoutedEventHandler(Click_allClient);
+            wrap.Children.Add(allClient);
+
+            Button retourCommande = new Button();
+            retourCommande.Visibility = Visibility.Hidden;
+            retourCommande.Content = "🔙";
+            retourCommande.FontWeight = FontWeights.Bold;
+            retourCommande.FontSize = 20;
+            retourCommande.Foreground = Brushes.White;
+            retourCommande.Background = Brushes.Red;
+            retourCommande.Width = 35;
+            retourCommande.Height = 35;
+            retourCommande.Margin = new Thickness(45,10,10,10);
+            retourCommande.HorizontalAlignment = HorizontalAlignment.Right;
+            retourCommande.VerticalAlignment = VerticalAlignment.Top;
+            retourCommande.Click += new RoutedEventHandler(Click_AllCommande);
+            wrap.Children.Add(retourCommande);
+
+            grdMain.Children.Add(wrap);
+
+            if (PagePrincipale.IdCommande != -1)
+            {
+                retourCommande.Visibility = Visibility.Visible;
+                allCommande.Visibility = Visibility.Collapsed;
+                allClient.Visibility = Visibility.Collapsed;
+            }
             //-------------------------------------------------------------------------------------------------------
 
             //---------------------------------------------Création catalogue--------------------------------------------
@@ -761,9 +799,9 @@ namespace CrispyLo.Views
             catalogueWrap.Add("INGREDIENT", ingrédient);
             catalogueWrap.Add("CHOIXINGREDIENT", choixIngrédient);
 
-            foreach (var wrap in catalogueWrap.Values)
+            foreach (var wrapCat in catalogueWrap.Values)
             {
-                grdMain.Children.Add(wrap);
+                grdMain.Children.Add(wrapCat);
             }
 
             if (PagePrincipale.Panier.Count > 0)
@@ -1139,7 +1177,7 @@ namespace CrispyLo.Views
                     Grid.SetColumn(textIng, 0);
                     grilleIng.Children.Add(textIng);
 
-                    grilleIng.Width = panier.ActualWidth - 2;
+                    grilleIng.Width = 316;
                     text.Children.Add(grilleIng);
                     text.Height = 20;
                     text.HorizontalAlignment = HorizontalAlignment.Stretch;
@@ -1414,6 +1452,11 @@ namespace CrispyLo.Views
         public void Click_AllCommande(object sender, RoutedEventArgs e)
         {
             PagePrincipale.Main.Content = new AllCommande();
+        }
+
+        public void Click_allClient(object sender, RoutedEventArgs e)
+        {
+            PagePrincipale.Main.Content = new AllClient();
         }
     }
 }

@@ -292,6 +292,27 @@ namespace CrispyLo.Modules
             }
         }
 
+        public bool ClientEstLieACommande(int idClient)
+        {
+            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
+
+            try
+            {
+                maConnexion.Open();
+                string query = "SELECT COUNT(*) FROM commande WHERE idClient = @idClient";
+                MySqlCommand cmd = new MySqlCommand(query, maConnexion);
+                cmd.Parameters.AddWithValue("@idClient", idClient);
+                int count = Convert.ToInt32(cmd.ExecuteScalar());
+                maConnexion.Close();
+                return count > 0;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+                throw;
+            }
+        }
+
         public void SupprimerClient(int idClient)
         {
             MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
@@ -459,17 +480,18 @@ namespace CrispyLo.Modules
             }
         }
 
-        public void AllCommandeByDateAndType(DateTime date, bool estLivraison, out DataTable dataT, out int nbrRow)
+        public void AllCommandeByDateAndType(DateTime date, bool estLivraison, int idRest, out DataTable dataT, out int nbrRow)
         {
             MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
             dataT = new DataTable();
 
             try
             {
-                string query = "SELECT * FROM commande WHERE DATE(dateHeure) = @date AND estLivraison = @estLivraison";
+                string query = "SELECT * FROM commande WHERE DATE(dateHeure) = @date AND estLivraison = @estLivraison AND idRestaurant = @idRest";
                 MySqlCommand cmd = new MySqlCommand(query, maConnexion);
                 cmd.Parameters.AddWithValue("@date", date.ToString("yyyy-MM-dd"));
                 cmd.Parameters.AddWithValue("@estLivraison", estLivraison);
+                cmd.Parameters.AddWithValue("@idRest", idRest);
                 MySqlDataAdapter Data = new MySqlDataAdapter(cmd);
                 Data.Fill(dataT);
                 nbrRow = dataT.Rows.Count;
@@ -538,6 +560,210 @@ namespace CrispyLo.Modules
                 MySqlDataAdapter Data = new MySqlDataAdapter(cmd);
                 Data.Fill(dataT);
                 nbrRow = dataT.Rows.Count;
+                maConnexion.Close();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+                throw;
+            }
+        }
+
+        public void CommandeById(int id, out DataTable dataT)
+        {
+            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
+            dataT = new DataTable();
+
+            try
+            {
+                string query = "SELECT * FROM commande WHERE id = @id";
+                MySqlCommand cmd = new MySqlCommand(query, maConnexion);
+                cmd.Parameters.AddWithValue("@id", id);
+                MySqlDataAdapter Data = new MySqlDataAdapter(cmd);
+                Data.Fill(dataT);
+                maConnexion.Close();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+                throw;
+            }
+        }
+        public void AllClientsByIdRestaurant(int id, out DataTable dataT, out int nbrRow)
+        {
+            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
+            dataT = new DataTable();
+
+            try
+            {
+                string query = @"SELECT c.id, c.nom, c.prenom, c.numero,
+                    a.nomRue, a.numeroRue, a.codePostal, a.localite
+                    FROM client c LEFT JOIN adresse a ON c.idAdresse = a.id
+                    WHERE c.idRestaurant = @id";
+                MySqlCommand cmd = new MySqlCommand(query, maConnexion);
+                cmd.Parameters.AddWithValue("@id", id);
+                MySqlDataAdapter Data = new MySqlDataAdapter(cmd);
+                Data.Fill(dataT);
+                nbrRow = dataT.Rows.Count;
+                maConnexion.Close();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+                throw;
+            }
+        }
+
+        // ---- UPDATE Commande ----
+        public void UpdateCommande(int idCommande, string nom, string prenom, bool livraison, DateTime date, double prixTotal, string commentaire, int idStatut, int? idClient)
+        {
+            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
+
+            try
+            {
+                maConnexion.Open();
+                string query = @"UPDATE commande SET nom = @nom, prenom = @prenom, estLivraison = @livraison,
+                    dateHeure = @date, prixTotal = @prixTotal, commetaire = @commentaire,
+                    idStatut = @idStatut, idClient = @idClient WHERE id = @id";
+                MySqlCommand cmd = new MySqlCommand(query, maConnexion);
+                cmd.Parameters.AddWithValue("@nom", nom);
+                cmd.Parameters.AddWithValue("@prenom", prenom);
+                cmd.Parameters.AddWithValue("@livraison", livraison);
+                cmd.Parameters.AddWithValue("@date", date);
+                cmd.Parameters.AddWithValue("@prixTotal", prixTotal);
+                cmd.Parameters.AddWithValue("@commentaire", commentaire);
+                cmd.Parameters.AddWithValue("@idStatut", idStatut);
+                if (idClient.HasValue)
+                    cmd.Parameters.AddWithValue("@idClient", idClient.Value);
+                else
+                    cmd.Parameters.AddWithValue("@idClient", DBNull.Value);
+                cmd.Parameters.AddWithValue("@id", idCommande);
+                cmd.ExecuteNonQuery();
+                maConnexion.Close();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+                throw;
+            }
+        }
+
+        // ---- UPDATE LigneCommande ----
+        public void UpdateLigne(int idLigne, double prixProduit, bool tailleLarge, string typePate, string note, int idProduit)
+        {
+            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
+
+            try
+            {
+                maConnexion.Open();
+                string query = @"UPDATE ligneCommande SET prixProduit = @prix, tailleLarge = @taille,
+                    typePate = @typePate, note = @note, idProduit = @idProduit WHERE id = @id";
+                MySqlCommand cmd = new MySqlCommand(query, maConnexion);
+                cmd.Parameters.AddWithValue("@prix", prixProduit);
+                cmd.Parameters.AddWithValue("@taille", tailleLarge);
+                cmd.Parameters.AddWithValue("@typePate", typePate);
+                cmd.Parameters.AddWithValue("@note", note);
+                cmd.Parameters.AddWithValue("@idProduit", idProduit);
+                cmd.Parameters.AddWithValue("@id", idLigne);
+                cmd.ExecuteNonQuery();
+                maConnexion.Close();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+                throw;
+            }
+        }
+
+        // ---- DELETE Ingredients d'une ligne ----
+        public void SupprimerIngredientsByLigne(int idLigne)
+        {
+            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
+
+            try
+            {
+                maConnexion.Open();
+                string query = "DELETE FROM ligneingredient WHERE idLigne = @idLigne";
+                MySqlCommand cmd = new MySqlCommand(query, maConnexion);
+                cmd.Parameters.AddWithValue("@idLigne", idLigne);
+                cmd.ExecuteNonQuery();
+                maConnexion.Close();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+                throw;
+            }
+        }
+
+        // ---- DELETE une ligne + ses ingrédients ----
+        public void SupprimerLigne(int idLigne)
+        {
+            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
+
+            try
+            {
+                maConnexion.Open();
+
+                string queryIng = "DELETE FROM ligneingredient WHERE idLigne = @idLigne";
+                MySqlCommand cmdIng = new MySqlCommand(queryIng, maConnexion);
+                cmdIng.Parameters.AddWithValue("@idLigne", idLigne);
+                cmdIng.ExecuteNonQuery();
+
+                string queryLigne = "DELETE FROM ligneCommande WHERE id = @idLigne2";
+                MySqlCommand cmdLigne = new MySqlCommand(queryLigne, maConnexion);
+                cmdLigne.Parameters.AddWithValue("@idLigne2", idLigne);
+                cmdLigne.ExecuteNonQuery();
+
+                maConnexion.Close();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+                throw;
+            }
+        }
+
+        // ---- UPDATE Client ----
+        public void UpdateClient(int idClient, string nom, string prenom, string numero)
+        {
+            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
+
+            try
+            {
+                maConnexion.Open();
+                string query = "UPDATE client SET nom = @nom, prenom = @prenom, numero = @numero WHERE id = @id";
+                MySqlCommand cmd = new MySqlCommand(query, maConnexion);
+                cmd.Parameters.AddWithValue("@nom", nom);
+                cmd.Parameters.AddWithValue("@prenom", prenom);
+                cmd.Parameters.AddWithValue("@numero", numero);
+                cmd.Parameters.AddWithValue("@id", idClient);
+                cmd.ExecuteNonQuery();
+                maConnexion.Close();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+                throw;
+            }
+        }
+
+        // ---- UPDATE Adresse ----
+        public void UpdateAdresse(int idAdresse, double codePostal, string nomRue, string numeroRue, string localite)
+        {
+            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
+
+            try
+            {
+                maConnexion.Open();
+                string query = "UPDATE adresse SET codePostal = @codePostal, nomRue = @nomRue, numeroRue = @numeroRue, localite = @localite WHERE id = @id";
+                MySqlCommand cmd = new MySqlCommand(query, maConnexion);
+                cmd.Parameters.AddWithValue("@codePostal", codePostal);
+                cmd.Parameters.AddWithValue("@nomRue", nomRue);
+                cmd.Parameters.AddWithValue("@numeroRue", numeroRue);
+                cmd.Parameters.AddWithValue("@localite", localite);
+                cmd.Parameters.AddWithValue("@id", idAdresse);
+                cmd.ExecuteNonQuery();
                 maConnexion.Close();
             }
             catch (Exception ex)
