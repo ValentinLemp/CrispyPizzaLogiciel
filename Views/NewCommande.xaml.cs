@@ -834,7 +834,7 @@ namespace CrispyLo.Views
                         {
                             // Passage emporter → livraison → créer client + adresse
                             int idAdresse = bd.AjouterAdresse(double.Parse(codePostal), rue, numero, ville);
-                            idClient = bd.AjouterClient(nom, prenom, telephone, idAdresse);
+                            idClient = bd.AjouterClient(nom, prenom, telephone, idAdresse, PagePrincipale.Restaurent);
                         }
                     }
                     else
@@ -901,7 +901,7 @@ namespace CrispyLo.Views
                         }
 
                         int idAdresse = bd.AjouterAdresse(double.Parse(codePostal), rue, numero, ville);
-                        int idClient = bd.AjouterClient(nom, prenom, telephone, idAdresse);
+                        int idClient = bd.AjouterClient(nom, prenom, telephone, idAdresse, PagePrincipale.Restaurent);
                         int idCommande = bd.NewCommande(nom, prenom, livraison, date, prixTotal, commentaire, idRest, 1, idClient);
                         Traitement.CreationLigne(idCommande);
                     }

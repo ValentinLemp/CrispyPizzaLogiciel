@@ -144,6 +144,7 @@ namespace CrispyLo.Views
             tableauCommandes.Columns.Add(new DataGridTextColumn { Header = "N°", Binding = new Binding("Id"), Width = 50 });
             tableauCommandes.Columns.Add(new DataGridTextColumn { Header = "Date", Binding = new Binding("Date"), Width = 100 });
             tableauCommandes.Columns.Add(new DataGridTextColumn { Header = "Heure", Binding = new Binding("Heure"), Width = 70 });
+            tableauCommandes.Columns.Add(new DataGridTextColumn { Header = "Prise Commande", Binding = new Binding("PriseCommande"), Width = 130 });
             tableauCommandes.Columns.Add(new DataGridTextColumn { Header = "Client", Binding = new Binding("Client"), Width = 120 });
             tableauCommandes.Columns.Add(new DataGridTextColumn { Header = "Adresse", Binding = new Binding("Adresse"), Width = new DataGridLength(1, DataGridLengthUnitType.Star) });
             tableauCommandes.Columns.Add(new DataGridTextColumn { Header = "Montant", Binding = new Binding("Montant"), Width = 80 });
@@ -180,14 +181,31 @@ namespace CrispyLo.Views
             Grid.SetColumn(panel, 1);
             Grid.SetRow(panel, 1);
 
+            WrapPanel wrap0 = new WrapPanel();
+            wrap0.Background = Brushes.Transparent;
+
+            Button supprimer = new Button();
+            supprimer.Content = "supprimer";
+            supprimer.Height = 40;
+            supprimer.Width = 100;
+            supprimer.FontWeight = FontWeights.Bold;
+            supprimer.Margin = new Thickness(20,0,0,10);
+            supprimer.Background = Brushes.Red;
+            supprimer.Foreground = Brushes.White;
+            supprimer.HorizontalAlignment = HorizontalAlignment.Left;
+            supprimer.Click += new RoutedEventHandler(Click_Supprimer);
+            wrap0.Children.Add(supprimer);
+
             prix.Height = 60;
             prix.Width = 140;
             prix.Background = Brushes.Transparent;
             prix.FontSize = 40;
             prix.TextAlignment = TextAlignment.Right;
-            prix.Margin = new Thickness(0, 0, 15, 10);
+            prix.Margin = new Thickness(40, 0, 15, 10);
             prix.HorizontalAlignment = HorizontalAlignment.Right;
-            panel.Children.Add(prix);
+            wrap0.Children.Add(prix);
+
+            panel.Children.Add(wrap0);
 
             WrapPanel wrap = new WrapPanel();
             wrap.Background = Brushes.Transparent;
@@ -241,6 +259,9 @@ namespace CrispyLo.Views
             List<object> commandes = new List<object>();
             for (int i = 0; i < nbrRow; i++)
             {
+                int idStatut = Convert.ToInt32(dataT.Rows[i]["idStatut"]);
+                if (idStatut == 3) continue;
+
                 DateTime dateHeure = Convert.ToDateTime(dataT.Rows[i]["dateHeure"]);
 
                 string adresse = "";
@@ -262,6 +283,15 @@ namespace CrispyLo.Views
                     }
                 }
 
+                string statut = "";
+                {
+                    sql.StatutById(idStatut, out DataTable dataStatut);
+                    if (dataStatut.Rows.Count > 0)
+                    {
+                        statut = dataStatut.Rows[0]["libelle"].ToString();
+                    }
+                }
+
                 commandes.Add(new
                 {
                     Id = dataT.Rows[i]["id"],
@@ -269,7 +299,8 @@ namespace CrispyLo.Views
                     Heure = dateHeure.ToString("HH:mm"),
                     Client = dataT.Rows[i]["nom"].ToString() + " " + dataT.Rows[i]["prenom"].ToString(),
                     Adresse = adresse,
-                    Montant = dataT.Rows[i]["prixTotal"].ToString() + " €"
+                    Montant = dataT.Rows[i]["prixTotal"].ToString() + " €",
+                    PriseCommande = statut
                 });
             }
 
@@ -470,6 +501,25 @@ namespace CrispyLo.Views
             {
                 PagePrincipale.Main.Content = new Home();
             }
+        }
+
+        public void Click_Supprimer(object sender, RoutedEventArgs e)
+        {
+            if (tableauCommandes.SelectedItem == null) return;
+
+            dynamic commande = tableauCommandes.SelectedItem;
+            int idCommande = Convert.ToInt32(commande.Id);
+
+            MessageBoxResult result = MessageBox.Show("Voulez-vous vraiment supprimer cette commande ?", "Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+            if (result != MessageBoxResult.Yes) return;
+
+            sql.SupprimerCommande(idCommande);
+
+            PagePrincipale.Panier.Clear();
+            PagePrincipale.IdCommande = -1;
+            panier.Children.Clear();
+            prix.Text = "";
+            ChargerCommandes();
         }
 
         public void Click_Imprimer(object sender, RoutedEventArgs e)

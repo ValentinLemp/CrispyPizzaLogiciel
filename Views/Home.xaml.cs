@@ -737,6 +737,22 @@ namespace CrispyLo.Views
             Grid.SetColumn(wrap, 2);
             Grid.SetRow(wrap, 0);
 
+            Button btnAdmin = new Button();
+            btnAdmin.Content = "Admin";
+            btnAdmin.FontWeight = FontWeights.Bold;
+            btnAdmin.FontSize = 15;
+            btnAdmin.Foreground = Brushes.White;
+            btnAdmin.Background = Brushes.Red;
+            btnAdmin.Width = 70;
+            btnAdmin.Height = 35;
+            btnAdmin.Click += new RoutedEventHandler(Click_Admin);
+            if (PagePrincipale.EstAdmin)
+            {
+                btnAdmin.Background = Brushes.Green;
+            }
+
+            wrap.Children.Add(btnAdmin);
+
             Button allCommande = new Button();
             allCommande.Content = "🗃️";
             allCommande.FontSize = 20;
@@ -744,6 +760,7 @@ namespace CrispyLo.Views
             allCommande.Width = 40;
             allCommande.Background = Brushes.DodgerBlue;
             allCommande.Foreground = Brushes.White;
+            allCommande.Margin = new Thickness(20, 0, 0, 0);
             allCommande.Click += new RoutedEventHandler(Click_AllCommande);
             wrap.Children.Add(allCommande);
 
@@ -780,6 +797,7 @@ namespace CrispyLo.Views
                 retourCommande.Visibility = Visibility.Visible;
                 allCommande.Visibility = Visibility.Collapsed;
                 allClient.Visibility = Visibility.Collapsed;
+                btnAdmin.Visibility = Visibility.Collapsed;
             }
             //-------------------------------------------------------------------------------------------------------
 
@@ -1457,6 +1475,19 @@ namespace CrispyLo.Views
         public void Click_allClient(object sender, RoutedEventArgs e)
         {
             PagePrincipale.Main.Content = new AllClient();
+        }
+
+        public void Click_Admin(object sender, RoutedEventArgs e)
+        {
+            if (PagePrincipale.EstAdmin)
+            {
+                PagePrincipale.Main.Content = new HomeAdmin();
+            }
+            else
+            {
+                PagePrincipale.MainInfo.Content = new ChoixAdmin();
+                PagePrincipale.MainInfo.Visibility = Visibility.Visible;
+            }
         }
     }
 }

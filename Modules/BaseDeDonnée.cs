@@ -39,6 +39,27 @@ namespace CrispyLo.Modules
             }
         }
 
+        public void StatutById(int id, out DataTable dataT)
+        {
+            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
+            dataT = new DataTable();
+
+            try
+            {
+                string query = "SELECT * FROM statut WHERE id = @id";
+                MySqlCommand cmd = new MySqlCommand(query, maConnexion);
+                cmd.Parameters.AddWithValue("@id", id);
+                MySqlDataAdapter Data = new MySqlDataAdapter(cmd);
+                Data.Fill(dataT);
+                maConnexion.Close();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+                throw;
+            }
+        }
+
         public void RestaurentById(int id, out DataTable dataT)
         {
             MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
@@ -370,19 +391,20 @@ namespace CrispyLo.Modules
             }
         }
 
-        public int AjouterClient(string nom, string prenom, string numero, int idAdresse)
+        public int AjouterClient(string nom, string prenom, string numero, int idAdresse, int idRest)
         {
             MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
 
             try
             {
                 maConnexion.Open();
-                string query = "INSERT INTO client(nom, prenom, numero, idAdresse) VALUES(@nom, @prenom, @numero, @idAdresse)";
+                string query = "INSERT INTO client(nom, prenom, numero, idAdresse, idRestaurant) VALUES(@nom, @prenom, @numero, @idAdresse, @idRest)";
                 MySqlCommand cmd = new MySqlCommand(query, maConnexion);
                 cmd.Parameters.AddWithValue("@nom", nom);
                 cmd.Parameters.AddWithValue("@prenom", prenom);
                 cmd.Parameters.AddWithValue("@numero", numero);
                 cmd.Parameters.AddWithValue("@idAdresse", idAdresse);
+                cmd.Parameters.AddWithValue("@idRest", idRest);
                 cmd.ExecuteNonQuery();
                 int id = (int)cmd.LastInsertedId;
                 maConnexion.Close();
@@ -739,6 +761,44 @@ namespace CrispyLo.Modules
                 cmd.Parameters.AddWithValue("@numero", numero);
                 cmd.Parameters.AddWithValue("@id", idClient);
                 cmd.ExecuteNonQuery();
+                maConnexion.Close();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+                throw;
+            }
+        }
+
+        // ---- DELETE Commande (+ lignes + ingrédients, sans toucher client/adresse) ----
+        public void SupprimerCommande(int idCommande)
+        {
+            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
+
+            try
+            {
+                maConnexion.Open();
+
+                // Supprimer les ingrédients de toutes les lignes de cette commande
+                string queryIng = @"DELETE li FROM ligneingredient li
+                    INNER JOIN ligneCommande lc ON li.idLigne = lc.id
+                    WHERE lc.idCommande = @idCommande";
+                MySqlCommand cmdIng = new MySqlCommand(queryIng, maConnexion);
+                cmdIng.Parameters.AddWithValue("@idCommande", idCommande);
+                cmdIng.ExecuteNonQuery();
+
+                // Supprimer les lignes de commande
+                string queryLignes = "DELETE FROM ligneCommande WHERE idCommande = @idCommande2";
+                MySqlCommand cmdLignes = new MySqlCommand(queryLignes, maConnexion);
+                cmdLignes.Parameters.AddWithValue("@idCommande2", idCommande);
+                cmdLignes.ExecuteNonQuery();
+
+                // Supprimer la commande
+                string queryCom = "DELETE FROM commande WHERE id = @idCommande3";
+                MySqlCommand cmdCom = new MySqlCommand(queryCom, maConnexion);
+                cmdCom.Parameters.AddWithValue("@idCommande3", idCommande);
+                cmdCom.ExecuteNonQuery();
+
                 maConnexion.Close();
             }
             catch (Exception ex)
