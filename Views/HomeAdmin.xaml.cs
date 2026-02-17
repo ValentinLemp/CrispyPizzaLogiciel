@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CrispyLo.Views.Info;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -54,15 +55,25 @@ namespace CrispyLo.Views
             home.Click += new RoutedEventHandler(Click_Home);
             wrap.Children.Add(home);
 
-            Button mtpUti = new Button();
-            mtpUti.Content = "    Modifier\nmot de passe";
-            mtpUti.FontWeight = FontWeights.Bold;
-            mtpUti.FontSize = 20;
-            mtpUti.Width = 200;
-            mtpUti.Height = 200;
-            mtpUti.Background = Brushes.CadetBlue;
-            mtpUti.Click += new RoutedEventHandler(Click_mtpUti);
-            wrap.Children.Add(mtpUti);
+            Button mdpUti = new Button();
+            mdpUti.Content = "    Modifier\nmot de passe";
+            mdpUti.FontWeight = FontWeights.Bold;
+            mdpUti.FontSize = 20;
+            mdpUti.Width = 200;
+            mdpUti.Height = 200;
+            mdpUti.Background = Brushes.CadetBlue;
+            mdpUti.Click += new RoutedEventHandler(Click_mdpUti);
+            wrap.Children.Add(mdpUti);
+
+            Button suggestion = new Button();
+            suggestion.Content = "Liste Client";
+            suggestion.FontWeight = FontWeights.Bold;
+            suggestion.FontSize = 20;
+            suggestion.Width = 200;
+            suggestion.Height = 200;
+            suggestion.Background = Brushes.CadetBlue;
+            suggestion.Click += new RoutedEventHandler(Click_Suggestion);
+            wrap.Children.Add(suggestion);
 
             Button cloture = new Button();
             cloture.Content = "Cloture";
@@ -137,19 +148,20 @@ namespace CrispyLo.Views
             PagePrincipale.Main.Content = new Home();
         }
 
-        public void Click_mtpUti(object sender, RoutedEventArgs e)
+        public void Click_mdpUti(object sender, RoutedEventArgs e)
         {
-            //
+            PagePrincipale.MainInfo.Content = new modifierMDP();
+            PagePrincipale.MainInfo.Visibility = Visibility.Visible;
         }
 
         public void Click_Cloture(object sender, RoutedEventArgs e)
         {
-            //
+            //PagePrincipale.Main.Content = new AllClient();
         }
 
         public void Click_HistClot(object sender, RoutedEventArgs e)
         {
-            //
+            //PagePrincipale.Main.Content = new AllClient();
         }
 
         public void Click_AllCommande(object sender, RoutedEventArgs e)
@@ -159,6 +171,11 @@ namespace CrispyLo.Views
         public void Click_AllClient(object sender, RoutedEventArgs e)
         {
             PagePrincipale.Main.Content = new AllClient();
+        }
+
+        public void Click_Suggestion(object sender, RoutedEventArgs e)
+        {
+            //PagePrincipale.Main.Content = new AllClient();
         }
     }
 }

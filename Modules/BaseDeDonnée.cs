@@ -39,6 +39,27 @@ namespace CrispyLo.Modules
             }
         }
 
+        public void ModificationMDPById(object id, string nouveauMdp)
+        {
+            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
+
+            try
+            {
+                maConnexion.Open();
+                string query = "UPDATE utilisateur SET motdepasse = @mdp WHERE id = @id";
+                MySqlCommand cmd = new MySqlCommand(query, maConnexion);
+                cmd.Parameters.AddWithValue("@mdp", nouveauMdp);
+                cmd.Parameters.AddWithValue("@id", id);
+                cmd.ExecuteNonQuery();
+                maConnexion.Close();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+                throw;
+            }
+        }
+
         public void StatutById(int id, out DataTable dataT)
         {
             MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());

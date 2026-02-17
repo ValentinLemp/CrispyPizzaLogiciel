@@ -34,7 +34,6 @@ namespace CrispyLo
         {
             IdCommande = -1;
             EstAdmin = false;
-            //Main.Content = new Home();
             Main.Content = new Login();
         }
     }

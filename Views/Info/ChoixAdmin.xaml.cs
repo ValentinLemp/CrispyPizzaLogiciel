@@ -82,7 +82,6 @@ namespace CrispyLo.Views.Info
             }
             text.Text = "";
         }
-
         public void Click_Leave(object sender, RoutedEventArgs e)
         {
             PagePrincipale.MainInfo.Visibility = Visibility.Collapsed;
