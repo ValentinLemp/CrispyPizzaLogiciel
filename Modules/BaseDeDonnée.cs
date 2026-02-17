@@ -853,5 +853,146 @@ namespace CrispyLo.Modules
                 throw;
             }
         }
+        // ---- CLOTURE : Total prixTotal par statut pour aujourd'hui ----
+        public double TotalCommandeByDateAndStatut(DateTime date, int idStatut, int idRest)
+        {
+            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
+
+            try
+            {
+                maConnexion.Open();
+                string query = @"SELECT IFNULL(SUM(prixTotal), 0) FROM commande
+                    WHERE DATE(dateHeure) = @date AND idStatut != 3 AND idStatut = @idStatut AND idRestaurant = @idRest";
+                MySqlCommand cmd = new MySqlCommand(query, maConnexion);
+                cmd.Parameters.AddWithValue("@date", date.ToString("yyyy-MM-dd"));
+                cmd.Parameters.AddWithValue("@idStatut", idStatut);
+                cmd.Parameters.AddWithValue("@idRest", idRest);
+                double total = Convert.ToDouble(cmd.ExecuteScalar());
+                maConnexion.Close();
+                return total;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+                throw;
+            }
+        }
+
+        // ---- CLOTURE : Comptage produits vendus aujourd'hui ----
+        public void CompteProduitsByDate(DateTime date, int idRest, out DataTable dataT)
+        {
+            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
+            dataT = new DataTable();
+
+            try
+            {
+                string query = @"SELECT p.idTypeProduit, lc.tailleLarge, COUNT(*) AS nombre
+                    FROM ligneCommande lc
+                    INNER JOIN commande c ON lc.idCommande = c.id
+                    INNER JOIN produit p ON lc.idProduit = p.id
+                    WHERE DATE(c.dateHeure) = @date AND c.idStatut != 3 AND c.idRestaurant = @idRest
+                    GROUP BY p.idTypeProduit, lc.tailleLarge";
+                MySqlCommand cmd = new MySqlCommand(query, maConnexion);
+                cmd.Parameters.AddWithValue("@date", date.ToString("yyyy-MM-dd"));
+                cmd.Parameters.AddWithValue("@idRest", idRest);
+                MySqlDataAdapter Data = new MySqlDataAdapter(cmd);
+                Data.Fill(dataT);
+                maConnexion.Close();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+                throw;
+            }
+        }
+        // ---- CLOTURE : Passer toutes les commandes du jour en idStatut = 3 ----
+        public void CloturerCommandes(DateTime date, int idRest)
+        {
+            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
+
+            try
+            {
+                maConnexion.Open();
+                string query = @"UPDATE commande SET idStatut = 3
+                    WHERE DATE(dateHeure) = @date AND idStatut != 3 AND idRestaurant = @idRest";
+                MySqlCommand cmd = new MySqlCommand(query, maConnexion);
+                cmd.Parameters.AddWithValue("@date", date.ToString("yyyy-MM-dd"));
+                cmd.Parameters.AddWithValue("@idRest", idRest);
+                cmd.ExecuteNonQuery();
+                maConnexion.Close();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+                throw;
+            }
+        }
+        // ---- CLOTURE : Insérer une clôture ----
+        public void InsererCloture(DateTime date, double argentRestaurant, double argentInternet,
+            double argentCarte, double argentLiquide, double argentDifference,
+            int nbMaxiPizza, int nbPizza, int nbPate, int nbPain, int nbSalade, int nbSnacking,
+            int nbBoisson, int nbDessert, int nbDipy, int idRestaurant)
+        {
+            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
+
+            try
+            {
+                maConnexion.Open();
+                string query = @"INSERT INTO cloture(date, argentRestaurant, argentInternet,
+                    argentCarte, argentLiquide, argentDifference,
+                    nbMaxiPizza, nbPizza, nbPâte, nbPain, nbSalade, nbSnacking,
+                    nbBoisson, nbDessert, nbDipy, idRestaurant)
+                    VALUES(@date, @argentRest, @argentNet,
+                    @argentCarte, @argentLiquide, @argentDiff,
+                    @nbMaxiPizza, @nbPizza, @nbPate, @nbPain, @nbSalade, @nbSnacking,
+                    @nbBoisson, @nbDessert, @nbDipy, @idRest)";
+                MySqlCommand cmd = new MySqlCommand(query, maConnexion);
+                cmd.Parameters.AddWithValue("@date", date.ToString("yyyy-MM-dd"));
+                cmd.Parameters.AddWithValue("@argentRest", argentRestaurant);
+                cmd.Parameters.AddWithValue("@argentNet", argentInternet);
+                cmd.Parameters.AddWithValue("@argentCarte", argentCarte);
+                cmd.Parameters.AddWithValue("@argentLiquide", argentLiquide);
+                cmd.Parameters.AddWithValue("@argentDiff", argentDifference);
+                cmd.Parameters.AddWithValue("@nbMaxiPizza", nbMaxiPizza);
+                cmd.Parameters.AddWithValue("@nbPizza", nbPizza);
+                cmd.Parameters.AddWithValue("@nbPate", nbPate);
+                cmd.Parameters.AddWithValue("@nbPain", nbPain);
+                cmd.Parameters.AddWithValue("@nbSalade", nbSalade);
+                cmd.Parameters.AddWithValue("@nbSnacking", nbSnacking);
+                cmd.Parameters.AddWithValue("@nbBoisson", nbBoisson);
+                cmd.Parameters.AddWithValue("@nbDessert", nbDessert);
+                cmd.Parameters.AddWithValue("@nbDipy", nbDipy);
+                cmd.Parameters.AddWithValue("@idRest", idRestaurant);
+                cmd.ExecuteNonQuery();
+                maConnexion.Close();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+                throw;
+            }
+        }
+        // ---- HISTORIQUE : Toutes les clôtures par restaurant ----
+        public void AllClotureByRestaurant(int idRest, out DataTable dataT, out int nbrRow)
+        {
+            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
+            dataT = new DataTable();
+
+            try
+            {
+                string query = "SELECT * FROM cloture WHERE idRestaurant = @idRest ORDER BY date DESC";
+                MySqlCommand cmd = new MySqlCommand(query, maConnexion);
+                cmd.Parameters.AddWithValue("@idRest", idRest);
+                MySqlDataAdapter Data = new MySqlDataAdapter(cmd);
+                Data.Fill(dataT);
+                nbrRow = dataT.Rows.Count;
+                maConnexion.Close();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+                throw;
+            }
+        }
     }
 }

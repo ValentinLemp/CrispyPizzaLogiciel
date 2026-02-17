@@ -156,12 +156,12 @@ namespace CrispyLo.Views
 
         public void Click_Cloture(object sender, RoutedEventArgs e)
         {
-            //PagePrincipale.Main.Content = new AllClient();
+            PagePrincipale.Main.Content = new Cloture();
         }
 
         public void Click_HistClot(object sender, RoutedEventArgs e)
         {
-            //PagePrincipale.Main.Content = new AllClient();
+            PagePrincipale.Main.Content = new HistoriqueCloture();
         }
 
         public void Click_AllCommande(object sender, RoutedEventArgs e)
