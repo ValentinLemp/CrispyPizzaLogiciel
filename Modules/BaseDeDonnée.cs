@@ -994,5 +994,105 @@ namespace CrispyLo.Modules
                 throw;
             }
         }
+        // ---- SUGGESTION : Toutes les suggestions ----
+        public void AllSuggestions(out DataTable dataT, out int nbrRow)
+        {
+            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
+            dataT = new DataTable();
+
+            try
+            {
+                string query = "SELECT * FROM produit WHERE estSuggestion = 1";
+                MySqlDataAdapter Data = new MySqlDataAdapter(query, maConnexion);
+                Data.Fill(dataT);
+                nbrRow = dataT.Rows.Count;
+                maConnexion.Close();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+                throw;
+            }
+        }
+
+        // ---- SUGGESTION : Ajouter ----
+        public void AjouterSuggestion(string libelle, string description, double prix, double? prixLarge, int idTypeProduit)
+        {
+            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
+
+            try
+            {
+                maConnexion.Open();
+                string query = @"INSERT INTO produit(libelle, description, quantite, prix, prixLarge, centilitre, urlImage, idTypePizza, idTypeProduit, estSuggestion)
+                    VALUES(@libelle, @description, NULL, @prix, @prixLarge, NULL, '/images/suggestions/suggestion', NULL, @idTypeProduit, 1)";
+                MySqlCommand cmd = new MySqlCommand(query, maConnexion);
+                cmd.Parameters.AddWithValue("@libelle", libelle);
+                cmd.Parameters.AddWithValue("@description", description);
+                cmd.Parameters.AddWithValue("@prix", prix);
+                if (prixLarge.HasValue)
+                    cmd.Parameters.AddWithValue("@prixLarge", prixLarge.Value);
+                else
+                    cmd.Parameters.AddWithValue("@prixLarge", DBNull.Value);
+                cmd.Parameters.AddWithValue("@idTypeProduit", idTypeProduit);
+                cmd.ExecuteNonQuery();
+                maConnexion.Close();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+                throw;
+            }
+        }
+
+        // ---- SUGGESTION : Modifier ----
+        public void ModifierSuggestion(int id, string libelle, string description, double prix, double? prixLarge, int idTypeProduit)
+        {
+            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
+
+            try
+            {
+                maConnexion.Open();
+                string query = @"UPDATE produit SET libelle = @libelle, description = @description, prix = @prix,
+                    prixLarge = @prixLarge, idTypeProduit = @idTypeProduit WHERE id = @id";
+                MySqlCommand cmd = new MySqlCommand(query, maConnexion);
+                cmd.Parameters.AddWithValue("@libelle", libelle);
+                cmd.Parameters.AddWithValue("@description", description);
+                cmd.Parameters.AddWithValue("@prix", prix);
+                if (prixLarge.HasValue)
+                    cmd.Parameters.AddWithValue("@prixLarge", prixLarge.Value);
+                else
+                    cmd.Parameters.AddWithValue("@prixLarge", DBNull.Value);
+                cmd.Parameters.AddWithValue("@idTypeProduit", idTypeProduit);
+                cmd.Parameters.AddWithValue("@id", id);
+                cmd.ExecuteNonQuery();
+                maConnexion.Close();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+                throw;
+            }
+        }
+
+        // ---- SUGGESTION : Supprimer ----
+        public void SupprimerSuggestion(int id)
+        {
+            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
+
+            try
+            {
+                maConnexion.Open();
+                string query = "DELETE FROM produit WHERE id = @id AND estSuggestion = 1";
+                MySqlCommand cmd = new MySqlCommand(query, maConnexion);
+                cmd.Parameters.AddWithValue("@id", id);
+                cmd.ExecuteNonQuery();
+                maConnexion.Close();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+                throw;
+            }
+        }
     }
 }

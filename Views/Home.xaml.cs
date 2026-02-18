@@ -107,7 +107,7 @@ namespace CrispyLo.Views
                 btnCatalogue.HorizontalAlignment = HorizontalAlignment.Left;
                 btnCatalogue.FontWeight = FontWeights.Bold;
                 btnCatalogue.FontSize = 20;
-                btnCatalogue.Background = Brushes.GreenYellow;
+                btnCatalogue.Background = Brushes.Chartreuse;
                 btnCatalogue.Foreground = Brushes.White;
                 btnCatalogue.Margin = new Thickness(5, 0, 0, 0);
                 btnCatalogue.Click += new RoutedEventHandler(Click_catalogue);
@@ -125,7 +125,7 @@ namespace CrispyLo.Views
             btnSCatalogue.HorizontalAlignment = HorizontalAlignment.Left;
             btnSCatalogue.FontWeight = FontWeights.Bold;
             btnSCatalogue.FontSize = 20;
-            btnSCatalogue.Background = Brushes.GreenYellow;
+            btnSCatalogue.Background = Brushes.Chartreuse;
             btnSCatalogue.Foreground = Brushes.White;
             btnSCatalogue.Click += new RoutedEventHandler(Click_catalogue);
             btnSCatalogue.Margin = new Thickness(5, 0, 0, 0);
@@ -139,7 +139,7 @@ namespace CrispyLo.Views
             btnIngrédient.HorizontalAlignment = HorizontalAlignment.Left;
             btnIngrédient.FontWeight = FontWeights.Bold;
             btnIngrédient.FontSize = 20;
-            btnIngrédient.Background = Brushes.GreenYellow;
+            btnIngrédient.Background = Brushes.Chartreuse;
             btnIngrédient.Foreground = Brushes.White;
             btnIngrédient.Click += new RoutedEventHandler(Click_catalogue);
             btnIngrédient.Margin = new Thickness(5, 0, 0, 0);

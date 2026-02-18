@@ -44,6 +44,10 @@ namespace CrispyLo.Views
         TextBlock valDessert = new TextBlock();
         TextBlock valDipy = new TextBlock();
 
+        TextBlock totalCalculette = new TextBlock();
+        double[] valeurs = { 0.05, 0.10, 0.20, 0.50, 1, 2, 5, 10, 20, 50, 100 };
+        TextBlock[] quantites;
+
         public Cloture()
         {
             InitializeComponent();
@@ -56,6 +60,7 @@ namespace CrispyLo.Views
 
             grdMain.RowDefinitions.Add(new RowDefinition { Height = new GridLength(60) });
             grdMain.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+            grdMain.RowDefinitions.Add(new RowDefinition { Height = new GridLength(220) });
 
             grdMain.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
             grdMain.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
@@ -63,6 +68,7 @@ namespace CrispyLo.Views
             TopBar();
             PanelArgent();
             PanelProduits();
+            Calculette();
             ChargerDonnees();
         }
 
@@ -286,6 +292,158 @@ namespace CrispyLo.Views
             ligne.Children.Add(valeur);
 
             return ligne;
+        }
+
+        public void Calculette()
+        {
+            StackPanel panelCalc = new StackPanel();
+            panelCalc.Background = Brushes.DarkSlateGray;
+            panelCalc.Margin = new Thickness(5, 5, 5, 5);
+            Grid.SetRow(panelCalc, 2);
+            Grid.SetColumnSpan(panelCalc, 2);
+
+            string[] labels = { "0.05", "0.10", "0.20", "0.50", "1€", "2€", "5€", "10€", "20€", "50€", "100€" };
+            quantites = new TextBlock[valeurs.Length];
+
+            // Ligne des labels
+            WrapPanel ligneLabels = new WrapPanel();
+            ligneLabels.HorizontalAlignment = HorizontalAlignment.Center;
+            ligneLabels.Margin = new Thickness(0, 8, 0, 0);
+            for (int i = 0; i < labels.Length; i++)
+            {
+                TextBlock lbl = new TextBlock();
+                lbl.Text = labels[i];
+                lbl.FontSize = 13;
+                lbl.FontWeight = FontWeights.Bold;
+                lbl.Foreground = Brushes.White;
+                lbl.Width = 55;
+                lbl.TextAlignment = TextAlignment.Center;
+                lbl.Margin = new Thickness(2, 0, 2, 0);
+                ligneLabels.Children.Add(lbl);
+            }
+            panelCalc.Children.Add(ligneLabels);
+
+            // Ligne des boutons +
+            WrapPanel lignePlus = new WrapPanel();
+            lignePlus.HorizontalAlignment = HorizontalAlignment.Center;
+            for (int i = 0; i < valeurs.Length; i++)
+            {
+                Button btnPlus = new Button();
+                btnPlus.Content = "+";
+                btnPlus.FontWeight = FontWeights.Bold;
+                btnPlus.FontSize = 14;
+                btnPlus.Width = 55;
+                btnPlus.Height = 28;
+                btnPlus.Margin = new Thickness(2);
+                btnPlus.Background = Brushes.LimeGreen;
+                btnPlus.Tag = i;
+                btnPlus.Click += Click_CalcPlus;
+                lignePlus.Children.Add(btnPlus);
+            }
+            panelCalc.Children.Add(lignePlus);
+
+            // Ligne des quantités
+            WrapPanel ligneQte = new WrapPanel();
+            ligneQte.HorizontalAlignment = HorizontalAlignment.Center;
+            for (int i = 0; i < valeurs.Length; i++)
+            {
+                quantites[i] = new TextBlock();
+                quantites[i].Text = "0";
+                quantites[i].FontSize = 16;
+                quantites[i].FontWeight = FontWeights.Bold;
+                quantites[i].Foreground = Brushes.Yellow;
+                quantites[i].Width = 55;
+                quantites[i].TextAlignment = TextAlignment.Center;
+                quantites[i].Margin = new Thickness(2, 2, 2, 2);
+                ligneQte.Children.Add(quantites[i]);
+            }
+            panelCalc.Children.Add(ligneQte);
+
+            // Ligne des boutons -
+            WrapPanel ligneMoins = new WrapPanel();
+            ligneMoins.HorizontalAlignment = HorizontalAlignment.Center;
+            for (int i = 0; i < valeurs.Length; i++)
+            {
+                Button btnMoins = new Button();
+                btnMoins.Content = "-";
+                btnMoins.FontWeight = FontWeights.Bold;
+                btnMoins.FontSize = 14;
+                btnMoins.Width = 55;
+                btnMoins.Height = 28;
+                btnMoins.Margin = new Thickness(2);
+                btnMoins.Background = Brushes.Salmon;
+                btnMoins.Tag = i;
+                btnMoins.Click += Click_CalcMoins;
+                ligneMoins.Children.Add(btnMoins);
+            }
+            panelCalc.Children.Add(ligneMoins);
+
+            // Ligne total + bouton reset
+            WrapPanel ligneBas = new WrapPanel();
+            ligneBas.HorizontalAlignment = HorizontalAlignment.Center;
+            ligneBas.Margin = new Thickness(0, 5, 0, 5);
+
+            TextBlock lblTotal = new TextBlock();
+            lblTotal.Text = "Total :";
+            lblTotal.FontSize = 18;
+            lblTotal.FontWeight = FontWeights.Bold;
+            lblTotal.Foreground = Brushes.White;
+            lblTotal.VerticalAlignment = VerticalAlignment.Center;
+            lblTotal.Margin = new Thickness(0, 0, 10, 0);
+            ligneBas.Children.Add(lblTotal);
+
+            totalCalculette.Text = "0.00 €";
+            totalCalculette.FontSize = 20;
+            totalCalculette.FontWeight = FontWeights.Bold;
+            totalCalculette.Foreground = Brushes.Yellow;
+            totalCalculette.VerticalAlignment = VerticalAlignment.Center;
+            totalCalculette.Margin = new Thickness(0, 0, 30, 0);
+            ligneBas.Children.Add(totalCalculette);
+
+            Button btnReset = new Button();
+            btnReset.Content = "Remettre à 0";
+            btnReset.FontWeight = FontWeights.Bold;
+            btnReset.FontSize = 13;
+            btnReset.Width = 110;
+            btnReset.Height = 30;
+            btnReset.Background = Brushes.Orange;
+            btnReset.Click += Click_CalcReset;
+            ligneBas.Children.Add(btnReset);
+
+            panelCalc.Children.Add(ligneBas);
+            grdMain.Children.Add(panelCalc);
+        }
+
+        private void Click_CalcPlus(object sender, RoutedEventArgs e)
+        {
+            int index = (int)((Button)sender).Tag;
+            int qte = int.Parse(quantites[index].Text) + 1;
+            quantites[index].Text = qte.ToString();
+            MajTotalCalculette();
+        }
+
+        private void Click_CalcMoins(object sender, RoutedEventArgs e)
+        {
+            int index = (int)((Button)sender).Tag;
+            int qte = int.Parse(quantites[index].Text);
+            if (qte > 0) qte--;
+            quantites[index].Text = qte.ToString();
+            MajTotalCalculette();
+        }
+
+        private void Click_CalcReset(object sender, RoutedEventArgs e)
+        {
+            for (int i = 0; i < quantites.Length; i++)
+                quantites[i].Text = "0";
+            MajTotalCalculette();
+        }
+
+        private void MajTotalCalculette()
+        {
+            double total = 0;
+            for (int i = 0; i < valeurs.Length; i++)
+                total += valeurs[i] * int.Parse(quantites[i].Text);
+            totalCalculette.Text = total.ToString("0.00") + " €";
         }
 
         public void ChargerDonnees()
