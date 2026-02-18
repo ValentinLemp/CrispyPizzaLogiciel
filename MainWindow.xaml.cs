@@ -12,6 +12,7 @@ using System.Windows.Shapes;
 //permet de voir cette page 
 using CrispyLo.Views;
 using CrispyLo.Classes;
+using CrispyLo.Views.ComInternet;
 
 namespace CrispyLo
 {
@@ -35,6 +36,7 @@ namespace CrispyLo
             IdCommande = -1;
             EstAdmin = false;
             Main.Content = new Login();
+            RechercheCommande.Content = new RechercheCommande();
         }
     }
 }

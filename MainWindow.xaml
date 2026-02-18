@@ -12,5 +12,6 @@
     <Grid x:Name="grdMain">
         <Frame x:Name="Main" NavigationUIVisibility="Hidden" Background="#2D2D30"></Frame>
         <Frame x:Name="MainInfo" NavigationUIVisibility="Hidden" Visibility="Collapsed"></Frame>
+        <Frame x:Name="RechercheCommande" NavigationUIVisibility="Hidden" Visibility="Collapsed"></Frame>
     </Grid>
 </Window>

@@ -445,8 +445,8 @@ namespace CrispyLo.Modules
             try
             {
                 maConnexion.Open();
-                string query = @"INSERT INTO commande(nom, prenom, estLivraison, dateHeure, prixTotal, commetaire, idRestaurant, idStatut, idClient) 
-                        VALUES(@nom, @prenom, @livraison, @date, @prixTotal, @commentaire, @idRest, @idStatut, @idClient)";
+                string query = @"INSERT INTO commande(nom, prenom, estLivraison, dateHeure, prixTotal, commetaire, idRestaurant, idStatut, idClient, estVu)
+                        VALUES(@nom, @prenom, @livraison, @date, @prixTotal, @commentaire, @idRest, @idStatut, @idClient, 1)";
 
                 MySqlCommand cmd = new MySqlCommand(query, maConnexion);
 
@@ -1085,6 +1085,50 @@ namespace CrispyLo.Modules
                 string query = "DELETE FROM produit WHERE id = @id AND estSuggestion = 1";
                 MySqlCommand cmd = new MySqlCommand(query, maConnexion);
                 cmd.Parameters.AddWithValue("@id", id);
+                cmd.ExecuteNonQuery();
+                maConnexion.Close();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+                throw;
+            }
+        }
+
+        // ---- INTERNET : Récupérer les commandes non vues ----
+        public void CommandesNonVues(int idRest, out DataTable dataT, out int nbrRow)
+        {
+            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
+            dataT = new DataTable();
+
+            try
+            {
+                string query = "SELECT * FROM commande WHERE estVu = 0 AND idStatut = 2 AND idRestaurant = @idRest";
+                MySqlCommand cmd = new MySqlCommand(query, maConnexion);
+                cmd.Parameters.AddWithValue("@idRest", idRest);
+                MySqlDataAdapter Data = new MySqlDataAdapter(cmd);
+                Data.Fill(dataT);
+                nbrRow = dataT.Rows.Count;
+                maConnexion.Close();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+                throw;
+            }
+        }
+
+        // ---- INTERNET : Marquer une commande comme vue ----
+        public void MarquerCommandeVue(int idCommande)
+        {
+            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
+
+            try
+            {
+                maConnexion.Open();
+                string query = "UPDATE commande SET estVu = 1 WHERE id = @id";
+                MySqlCommand cmd = new MySqlCommand(query, maConnexion);
+                cmd.Parameters.AddWithValue("@id", idCommande);
                 cmd.ExecuteNonQuery();
                 maConnexion.Close();
             }
