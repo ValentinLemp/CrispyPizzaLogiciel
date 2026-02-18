@@ -127,12 +127,212 @@ namespace CrispyLo.Modules
                 dessiner(e.Graphics);
                 e.HasMorePages = false;
             };
+            doc.PrinterSettings.PrinterName = "Microsoft Print to PDF";
             doc.Print();
         }
 
         private void ImpressionTicketGeneral()
         {
-            // ici code impression ticket général
+            Imprimer(g =>
+            {
+                float y = 10;
+                float pageWidth = 295; // largeur utile (315 - marges)
+                float xGauche = 5;
+                float xDroite = pageWidth - 5;
+
+                // ---- Polices ----
+                Font fTitre = new Font("Arial", 11, FontStyle.Bold);
+                Font fNormal = new Font("Arial", 8, FontStyle.Regular);
+                Font fBold = new Font("Arial", 8, FontStyle.Bold);
+                Font fGrandBold = new Font("Arial", 13, FontStyle.Bold);
+                Font fMoyenBold = new Font("Arial", 10, FontStyle.Bold);
+
+                StringFormat sfCenter = new StringFormat { Alignment = StringAlignment.Center };
+                StringFormat sfRight = new StringFormat { Alignment = StringAlignment.Far };
+                StringFormat sfLeft = new StringFormat { Alignment = StringAlignment.Near };
+
+                RectangleF rect = new RectangleF(xGauche, y, pageWidth, 20);
+
+                // ---- En-tête restaurant ----
+                int idRestaurant = Convert.ToInt32(commande["idRestaurant"]);
+                string nomRestau, adresseR, villeR, tel;
+                string tva = "N° TVA : BE1028813177";
+
+                if (idRestaurant == 2)
+                {
+                    nomRestau = "Crispy Pizza Ramillies";
+                    adresseR = "Avenue des Déportés 45A";
+                    villeR = "1367 Ramillies";
+                    tel = "Tel : 081/340.628";
+                }
+                else
+                {
+                    nomRestau = "Crispy Pizza Meux";
+                    adresseR = "Rue Binia 62";
+                    villeR = "5081 Meux";
+                    tel = "Tel : 081/340.628";
+                }
+
+                g.DrawString(nomRestau, fTitre, Brushes.Black, new RectangleF(xGauche, y, pageWidth, 20), sfCenter); y += 18;
+                g.DrawString(adresseR, fNormal, Brushes.Black, new RectangleF(xGauche, y, pageWidth, 16), sfCenter); y += 14;
+                g.DrawString(villeR, fNormal, Brushes.Black, new RectangleF(xGauche, y, pageWidth, 16), sfCenter); y += 14;
+                g.DrawString(tel, fNormal, Brushes.Black, new RectangleF(xGauche, y, pageWidth, 16), sfCenter); y += 14;
+                g.DrawString(tva, fNormal, Brushes.Black, new RectangleF(xGauche, y, pageWidth, 16), sfCenter); y += 18;
+
+                // ---- Type commande ----
+                bool estLivraison = Convert.ToBoolean(commande["estLivraison"]);
+                string titreCmd = estLivraison ? "COMMANDE LIVRAISON" : "COMMANDE SUR PLACE";
+                g.DrawString(titreCmd, fGrandBold, Brushes.Black, new RectangleF(xGauche, y, pageWidth, 24), sfCenter); y += 26;
+
+                // ---- Type statut ----
+                int idStatut = Convert.ToInt32(commande["idStatut"]);
+                string typeStatut = (idStatut == 2) ? "Internet" : "Restaurant";
+                g.DrawString(typeStatut, fBold, Brushes.Black, xGauche, y); y += 14;
+
+                // ---- Date impression ----
+                g.DrawString("Prise de commande :", fNormal, Brushes.Black, xGauche, y);
+                g.DrawString($"{DateTime.Now:dd/MM/yyyy  HH:mm:ss}", fNormal, Brushes.Black, new RectangleF(xGauche, y, pageWidth, 14), sfRight); y += 14;
+
+                // ---- Heure commande ----
+                DateTime dateCommande = Convert.ToDateTime(commande["dateHeure"]);
+                g.DrawString($"{dateCommande:HH:mm}", fGrandBold, Brushes.Black, new RectangleF(xGauche, y, pageWidth, 24), sfCenter); y += 26;
+
+                // ---- Infos client ----
+                string nomCmd = commande["nom"].ToString();
+                string prenomCmd = commande["prenom"].ToString();
+                g.DrawString(nomCmd, fBold, Brushes.Black, xGauche, y); y += 14;
+                if (!string.IsNullOrEmpty(prenomCmd))
+                { g.DrawString(prenomCmd, fNormal, Brushes.Black, xGauche, y); y += 14; }
+
+                if (client != null)
+                {
+                    string telClient = client["numero"]?.ToString() ?? "";
+                    if (!string.IsNullOrEmpty(telClient))
+                    { g.DrawString(telClient, fNormal, Brushes.Black, xGauche, y); y += 14; }
+
+                    if (estLivraison && adresse != null)
+                    {
+                        string rue = $"{adresse["nomRue"]} {adresse["numeroRue"]}";
+                        string codeVille = $"{adresse["codePostal"]} {adresse["localite"]}";
+                        g.DrawString(rue, fNormal, Brushes.Black, xGauche, y); y += 14;
+                        g.DrawString(codeVille, fNormal, Brushes.Black, xGauche, y); y += 14;
+                    }
+                }
+                y += 4;
+
+                // ---- Séparateur ----
+                g.DrawLine(Pens.Black, xGauche, y, xDroite, y); y += 6;
+
+                // ---- En-tête colonnes ----
+                g.DrawString("ARTICLE", fBold, Brushes.Black, xGauche, y);
+                g.DrawString("TOT", fBold, Brushes.Black, new RectangleF(xGauche, y, pageWidth, 14), sfRight);
+                y += 14;
+                g.DrawLine(Pens.Black, xGauche, y, xDroite, y); y += 6;
+
+                // ---- Lignes de commande ----
+                for (int i = 0; i < lignes.Rows.Count; i++)
+                {
+                    DataRow ligne = lignes.Rows[i];
+                    DataRow produit = produits[i];
+                    DataTable ings = ingredients[i];
+
+                    string libelle = produit["libelle"].ToString().ToUpper();
+                    int idTypeProduit = Convert.ToInt32(produit["idTypeProduit"]);
+                    bool tailleLarge = Convert.ToBoolean(ligne["tailleLarge"]);
+                    decimal prixLigne = Convert.ToDecimal(ligne["prixProduit"]);
+
+                    // Formater le nom
+                    string nomProduit;
+                    if (idTypeProduit == 1) // pizza
+                        nomProduit = tailleLarge ? $"MAXI PIZZA {libelle}" : $"PIZZA {libelle}";
+                    else if (idTypeProduit == 2) // pâte
+                    {
+                        string typePate = ligne["typePate"]?.ToString().ToUpper() ?? "";
+                        nomProduit = $"{typePate} {libelle}";
+                    }
+                    else if (produit["quantite"] != DBNull.Value)
+                        nomProduit = $"{libelle} {produit["quantite"]}PC";
+                    else
+                        nomProduit = libelle;
+
+                    // Ligne principale
+                    g.DrawString(nomProduit, fNormal, Brushes.Black, xGauche, y);
+                    g.DrawString(prixLigne.ToString("F2").Replace(".", ","), fNormal, Brushes.Black,
+                                 new RectangleF(xGauche, y, pageWidth, 14), sfRight);
+                    y += 14;
+
+                    // Ingrédients supprimés / ajoutés
+                    foreach (DataRow ing in ings.Rows)
+                    {
+                        bool estSupp = Convert.ToBoolean(ing["ingredientEnPlus"]);
+                        string prefix = estSupp ? "SUPP" : "SS";
+                        string nomIng = ing["ingredient"].ToString();
+                        string ligneIng = $"   {prefix} {nomIng}";
+                        g.DrawString(ligneIng, fNormal, Brushes.Black, xGauche, y); y += 12;
+                    }
+
+                    // Note
+                    string note = ligne["note"]?.ToString() ?? "";
+                    if (!string.IsNullOrEmpty(note))
+                    {
+                        string texteNote = $"   {note}";
+                        SizeF tailleNote = g.MeasureString(texteNote, fNormal, (int)pageWidth);
+                        g.DrawString(texteNote, fNormal, Brushes.Black, new RectangleF(xGauche, y, pageWidth, tailleNote.Height));
+                        y += tailleNote.Height;
+                    }
+                }
+                y += 4;
+
+                // ---- Séparateur ----
+                g.DrawLine(Pens.Black, xGauche, y, xDroite, y); y += 6;
+
+                // ---- Total ----
+                decimal totalCommande = Convert.ToDecimal(commande["prixTotal"]);
+
+                g.DrawString("TOTAL :", fBold, Brushes.Black, xGauche, y);
+                g.DrawString($"{totalCommande:F2} €".Replace(".", ","), fBold, Brushes.Black,
+                             new RectangleF(xGauche, y, pageWidth, 14), sfRight);
+                y += 18;
+
+                // ---- TVA ----
+                g.DrawString("", fNormal, Brushes.Black, xGauche + 60, y);
+                g.DrawString("HT", fNormal, Brushes.Black, xGauche + 130, y);
+                g.DrawString("TVA", fNormal, Brushes.Black, xGauche + 180, y);
+                g.DrawString("TTC", fNormal, Brushes.Black, new RectangleF(xGauche, y, pageWidth, 14), sfRight);
+                y += 14;
+
+                decimal taux = 0.06m;
+                decimal ht = Math.Round(totalCommande / (1 + taux), 2);
+                decimal tvaVal = Math.Round(totalCommande - ht, 2);
+
+                g.DrawString("6%(A)", fNormal, Brushes.Black, xGauche, y);
+                g.DrawString(ht.ToString("F2").Replace(".", ","), fNormal, Brushes.Black, xGauche + 130, y);
+                g.DrawString(tvaVal.ToString("F2").Replace(".", ","), fNormal, Brushes.Black, xGauche + 180, y);
+                g.DrawString(totalCommande.ToString("F2").Replace(".", ","), fNormal, Brushes.Black,
+                             new RectangleF(xGauche, y, pageWidth, 14), sfRight);
+                y += 14;
+
+                g.DrawLine(Pens.Black, xGauche + 120, y, xDroite, y); y += 6;
+
+                g.DrawString(ht.ToString("F2").Replace(".", ","), fNormal, Brushes.Black, xGauche + 130, y);
+                g.DrawString(tvaVal.ToString("F2").Replace(".", ","), fNormal, Brushes.Black, xGauche + 180, y);
+                g.DrawString(totalCommande.ToString("F2").Replace(".", ","), fNormal, Brushes.Black,
+                             new RectangleF(xGauche, y, pageWidth, 14), sfRight);
+                y += 18;
+
+                // ---- Pied de page ----
+                g.DrawString("< MERCI DE VOTRE VISITE >", fBold, Brushes.Black,
+                             new RectangleF(xGauche, y, pageWidth, 16), sfCenter); y += 18;
+
+                // ---- Signature (hash) - à intégrer avec le module fiscal (FDM) ----
+                // string sign = commande["signature"]?.ToString() ?? "";
+                // if (!string.IsNullOrEmpty(sign))
+                // {
+                //     Font fTiny = new Font("Arial", 6);
+                //     g.DrawString($"Sign : {sign}", fTiny, Brushes.Black,
+                //                  new RectangleF(xGauche, y, pageWidth, 12), sfCenter);
+                // }
+            });
         }
 
         private void ImpressionCuisine1()

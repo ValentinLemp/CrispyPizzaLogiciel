@@ -185,6 +185,9 @@ namespace CrispyLo.Views
             wrap0.Background = Brushes.Transparent;
 
             Button supprimer = new Button();
+            supprimer.Visibility = Visibility.Hidden;
+            if (PagePrincipale.EstAdmin)
+            { supprimer.Visibility = Visibility.Visible; }
             supprimer.Content = "supprimer";
             supprimer.Height = 40;
             supprimer.Width = 100;

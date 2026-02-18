@@ -27,6 +27,7 @@ namespace CrispyLo.Views
     {
         MainWindow PagePrincipale = (MainWindow)App.Current.MainWindow;
         ControlTemplate radioStyle = VisuelCSS.CreateButtonStyleTemplate();
+        ImpressionTicket impression = new ImpressionTicket();
         BaseDeDonnée bd = new BaseDeDonnée();
 
         public NewCommande()
@@ -883,7 +884,7 @@ namespace CrispyLo.Views
                     {
                         bd.SupprimerLigne(anciensIdLignes[i]);
                     }
-
+                    impression.GeneralImpression(PagePrincipale.IdCommande);
                     MessageBox.Show("Commande modifiée avec succès !");
                     PagePrincipale.IdCommande = -1;
                     PagePrincipale.Panier.Clear();
@@ -892,6 +893,7 @@ namespace CrispyLo.Views
                 else
                 {
                     // ---- MODE CRÉATION ----
+                    int newIdCommande = -1;
                     if (rdLivraison.IsChecked == true)
                     {
                         if (nom == "" || telephone == "" || rue == "" || numero == "" || codePostal == "" || ville == "")
@@ -902,8 +904,8 @@ namespace CrispyLo.Views
 
                         int idAdresse = bd.AjouterAdresse(double.Parse(codePostal), rue, numero, ville);
                         int idClient = bd.AjouterClient(nom, prenom, telephone, idAdresse, PagePrincipale.Restaurent);
-                        int idCommande = bd.NewCommande(nom, prenom, livraison, date, prixTotal, commentaire, idRest, 1, idClient);
-                        Traitement.CreationLigne(idCommande);
+                        newIdCommande = bd.NewCommande(nom, prenom, livraison, date, prixTotal, commentaire, idRest, 1, idClient);
+                        Traitement.CreationLigne(newIdCommande);
                     }
                     else if (rdLivraison.IsChecked == false)
                     {
@@ -913,14 +915,15 @@ namespace CrispyLo.Views
                             return;
                         }
 
-                        int idCommande = bd.NewCommande(nom, prenom, livraison, date, prixTotal, commentaire, idRest, 1, null);
-                        Traitement.CreationLigne(idCommande);
+                        newIdCommande = bd.NewCommande(nom, prenom, livraison, date, prixTotal, commentaire, idRest, 1, null);
+                        Traitement.CreationLigne(newIdCommande);
                     }
-
+                    impression.GeneralImpression(newIdCommande);
                     MessageBox.Show("Commade sauvegarder avec succès !");
                     PagePrincipale.Panier.Clear();
                     PagePrincipale.Main.Content = new Home();
                 }
+
             }
             else
             {
