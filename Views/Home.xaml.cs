@@ -26,6 +26,8 @@ namespace CrispyLo.Views
     /// <summary>
     /// Logique d'interaction pour Home.xaml
     /// </summary>
+    /// 
+    //🔊 🔇
     public partial class Home : Page
     {
         //---------------------
@@ -162,6 +164,64 @@ namespace CrispyLo.Views
             Grid.SetColumn(btnDéconnexion, 0);
             Grid.SetRow(btnDéconnexion, 0);
             grdMain.Children.Add(btnDéconnexion);
+
+            // ---- Boutons son ----
+            StackPanel panelSon = new StackPanel();
+            panelSon.Orientation = Orientation.Horizontal;
+            panelSon.VerticalAlignment = VerticalAlignment.Top;
+            panelSon.HorizontalAlignment = HorizontalAlignment.Left;
+            panelSon.Margin = new Thickness(35, 5, 0, 0);
+            Grid.SetColumn(panelSon, 0);
+            Grid.SetRow(panelSon, 0);
+
+            Button btnVolUp = new Button();
+            btnVolUp.Content = "+";
+            btnVolUp.Width = 25;
+            btnVolUp.Height = 25;
+            btnVolUp.FontWeight = FontWeights.Bold;
+            btnVolUp.Click += (s, ev) =>
+            {
+                if (PagePrincipale.SonNotification.Volume < 1.0)
+                    PagePrincipale.SonNotification.Volume = Math.Min(1.0, PagePrincipale.SonNotification.Volume + 0.2);
+                PagePrincipale.SonNotification.Stop();
+                PagePrincipale.SonNotification.Position = TimeSpan.Zero;
+                PagePrincipale.SonNotification.Play();
+            };
+
+            Button btnMute = new Button();
+            btnMute.Content = "🔊";
+            btnMute.Width = 25;
+            btnMute.Height = 25;
+            btnMute.Click += (s, ev) =>
+            {
+                PagePrincipale.SonNotification.IsMuted = !PagePrincipale.SonNotification.IsMuted;
+                btnMute.Content = PagePrincipale.SonNotification.IsMuted ? "🔇" : "🔊";
+                if (!PagePrincipale.SonNotification.IsMuted)
+                {
+                    PagePrincipale.SonNotification.Stop();
+                    PagePrincipale.SonNotification.Position = TimeSpan.Zero;
+                    PagePrincipale.SonNotification.Play();
+                }
+            };
+
+            Button btnVolDown = new Button();
+            btnVolDown.Content = "-";
+            btnVolDown.Width = 25;
+            btnVolDown.Height = 25;
+            btnVolDown.FontWeight = FontWeights.Bold;
+            btnVolDown.Click += (s, ev) =>
+            {
+                if (PagePrincipale.SonNotification.Volume > 0.0)
+                    PagePrincipale.SonNotification.Volume = Math.Max(0.0, PagePrincipale.SonNotification.Volume - 0.2);
+                PagePrincipale.SonNotification.Stop();
+                PagePrincipale.SonNotification.Position = TimeSpan.Zero;
+                PagePrincipale.SonNotification.Play();
+            };
+
+            panelSon.Children.Add(btnVolUp);
+            panelSon.Children.Add(btnMute);
+            panelSon.Children.Add(btnVolDown);
+            grdMain.Children.Add(panelSon);
 
             //-------------------------------------------------------------------------------------------------------
             //------------------------------------------Création Vue Milieu------------------------------------------ 

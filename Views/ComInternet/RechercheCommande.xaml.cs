@@ -25,12 +25,14 @@ namespace CrispyLo.Views.ComInternet
     {
         MainWindow PagePrincipale = (MainWindow)App.Current.MainWindow;
         BaseDeDonnée sql = new BaseDeDonnée();
+        ImpressionTicket impression = new ImpressionTicket();
+
         Grid barreNotif;
         TextBlock txtNotif;
         DispatcherTimer timerClignotement;
         DispatcherTimer timerRecherche;
         bool estRouge = true;
-        DataTable commandesNonVues;
+        List<int> idsEnAttente = new List<int>();
         int indexCommande = 0;
 
         public RechercheCommande()
@@ -86,28 +88,69 @@ namespace CrispyLo.Views.ComInternet
                 estRouge = !estRouge;
             };
 
-            // ---- Timer recherche nouvelles commandes (5 sec) ----
+            // ---- Timer recherche nouvelles commandes (2 sec) ----
             timerRecherche = new DispatcherTimer();
-            timerRecherche.Interval = TimeSpan.FromSeconds(5);
+            timerRecherche.Interval = TimeSpan.FromSeconds(2);
             timerRecherche.Tick += (s, e) => VerifierNouvellesCommandes();
             timerRecherche.Start();
         }
 
         private void VerifierNouvellesCommandes()
         {
-            if (barreNotif.Visibility == Visibility.Visible) return;
-
             try
             {
                 int nbrRow;
+                DataTable commandesNonVues;
                 sql.CommandesNonVues(PagePrincipale.Restaurent, out commandesNonVues, out nbrRow);
-                if (nbrRow > 0)
+
+                // Ajouter les nouveaux IDs pas encore dans la liste
+                for (int i = 0; i < nbrRow; i++)
                 {
-                    indexCommande = 0;
+                    int id = Convert.ToInt32(commandesNonVues.Rows[i]["id"]);
+                    if (!idsEnAttente.Contains(id))
+                    {
+                        idsEnAttente.Add(id);
+                        PagePrincipale.SonNotification.Position = TimeSpan.Zero;
+                        PagePrincipale.SonNotification.Play();
+                    }
+                }
+
+                // Enlever les IDs déjà confirmés par un autre appareil (estVu = 1 en base)
+                for (int i = idsEnAttente.Count - 1; i >= 0; i--)
+                {
+                    bool encoreNonVu = false;
+                    for (int j = 0; j < nbrRow; j++)
+                    {
+                        if (Convert.ToInt32(commandesNonVues.Rows[j]["id"]) == idsEnAttente[i])
+                        {
+                            encoreNonVu = true;
+                            break;
+                        }
+                    }
+                    if (!encoreNonVu)
+                        idsEnAttente.RemoveAt(i);
+                }
+
+                // Mettre à jour l'affichage
+                if (idsEnAttente.Count > 0)
+                {
+                    if (indexCommande >= idsEnAttente.Count)
+                        indexCommande = 0;
                     MajTexteNotif();
-                    barreNotif.Visibility = Visibility.Visible;
-                    PagePrincipale.RechercheCommande.Visibility = Visibility.Visible;
-                    timerClignotement.Start();
+                    if (barreNotif.Visibility != Visibility.Visible)
+                    {
+                        barreNotif.Visibility = Visibility.Visible;
+                        PagePrincipale.RechercheCommande.Visibility = Visibility.Visible;
+                        timerClignotement.Start();
+                    }
+                }
+                else
+                {
+                    // Plus rien en attente
+                    timerClignotement.Stop();
+                    barreNotif.Visibility = Visibility.Collapsed;
+                    PagePrincipale.RechercheCommande.Visibility = Visibility.Collapsed;
+                    indexCommande = 0;
                 }
             }
             catch { }
@@ -115,26 +158,29 @@ namespace CrispyLo.Views.ComInternet
 
         private void MajTexteNotif()
         {
-            int total = commandesNonVues.Rows.Count;
+            int total = idsEnAttente.Count;
             txtNotif.Text = "NOUVELLE COMMANDE INTERNET (" + (indexCommande + 1) + "/" + total + ")";
         }
 
         private void Click_Confirmer(object sender, RoutedEventArgs e)
         {
-            if (commandesNonVues == null || commandesNonVues.Rows.Count == 0) return;
+            if (idsEnAttente.Count == 0) return;
+
+            int idCommande = idsEnAttente[indexCommande];
 
             try
             {
-                int idCommande = Convert.ToInt32(commandesNonVues.Rows[indexCommande]["id"]);
-                // ici code imprimer avec commandesNonVues.Rows[indexCommande]
+                impression.GeneralImpression(idCommande);
                 sql.MarquerCommandeVue(idCommande);
             }
             catch { }
 
-            indexCommande++;
+            idsEnAttente.RemoveAt(indexCommande);
 
-            if (indexCommande < commandesNonVues.Rows.Count)
+            if (idsEnAttente.Count > 0)
             {
+                if (indexCommande >= idsEnAttente.Count)
+                    indexCommande = 0;
                 MajTexteNotif();
             }
             else

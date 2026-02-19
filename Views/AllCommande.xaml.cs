@@ -27,6 +27,7 @@ namespace CrispyLo.Views
         MainWindow PagePrincipale = (MainWindow)App.Current.MainWindow;
         ControlTemplate radioStyle = VisuelCSS.CreateButtonStyleTemplate();
         BaseDeDonnée sql = new BaseDeDonnée();
+        ImpressionTicket impression = new ImpressionTicket();
 
         DataGrid tableauCommandes = new DataGrid();
         StackPanel panier = new StackPanel();
@@ -529,7 +530,7 @@ namespace CrispyLo.Views
         {
             if (PagePrincipale.IdCommande != -1)
             {
-                //imprimer
+                    impression.GeneralImpression(PagePrincipale.IdCommande);
             }
         }
     }

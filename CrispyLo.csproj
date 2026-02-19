@@ -19,6 +19,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="sound\myinstants.mp3">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="createBD.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>createBD.txt</LastGenOutput>

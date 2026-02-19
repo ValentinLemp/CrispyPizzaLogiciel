@@ -220,6 +220,18 @@ namespace CrispyLo.Modules
                 }
                 y += 4;
 
+                y += 6;
+
+                // ---- Commentaire ----
+                string commentaireCmd = commande["commetaire"]?.ToString() ?? "";
+                if (!string.IsNullOrEmpty(commentaireCmd))
+                {
+                    g.DrawString("Commentaire :", fBold, Brushes.Black, xGauche, y); y += 14;
+                    SizeF tailleComm = g.MeasureString(commentaireCmd, fNormal, (int)pageWidth);
+                    g.DrawString(commentaireCmd, fNormal, Brushes.Black, new RectangleF(xGauche, y, pageWidth, tailleComm.Height));
+                    y += tailleComm.Height + 4;
+                }
+
                 // ---- Séparateur ----
                 g.DrawLine(Pens.Black, xGauche, y, xDroite, y); y += 6;
 
@@ -337,20 +349,348 @@ namespace CrispyLo.Modules
 
         private void ImpressionCuisine1()
         {
-            // ici code impression cuisine 1 (pizza, pâte, pain)
-            // utiliser indexCuisine1 pour accéder aux lignes, ingrédients et produits
+            Imprimer(g =>
+            {
+                float y = 10;
+                float pageWidth = 295;
+                float xGauche = 5;
+                float xDroite = pageWidth - 5;
+
+                Font fNormal = new Font("Arial", 8, FontStyle.Regular);
+                Font fBold = new Font("Arial", 8, FontStyle.Bold);
+                Font fGrandBold = new Font("Arial", 14, FontStyle.Bold);
+                Font fNumero = new Font("Arial", 36, FontStyle.Bold);
+                Font fTitre = new Font("Arial", 13, FontStyle.Bold);
+                Font fEmporte = new Font("Arial", 11, FontStyle.Bold);
+                Font fProduit = new Font("Arial", 9, FontStyle.Bold);
+
+                StringFormat sfCenter = new StringFormat { Alignment = StringAlignment.Center };
+                StringFormat sfRight = new StringFormat { Alignment = StringAlignment.Far };
+
+                // ---- Date + Heure sur la même ligne ----
+                g.DrawString(DateTime.Now.ToString("dd/MM/yyyy"), fNormal, Brushes.Black, xGauche, y);
+                g.DrawString(DateTime.Now.ToString("HH:mm:ss"), fNormal, Brushes.Black,
+                                new RectangleF(xGauche, y, pageWidth, 14), sfRight);
+                y += 20;
+
+                // ---- Titre Restaurant / Internet ----
+                int idStatut = Convert.ToInt32(commande["idStatut"]);
+                string titreCuisine = (idStatut == 2) ? "INTERNET" : "RESTAURANT";
+                RectangleF rectTitre = new RectangleF(xGauche, y, pageWidth, 22);
+                g.FillRectangle(Brushes.Black, rectTitre);
+                g.DrawString(titreCuisine, fTitre, Brushes.White, rectTitre, sfCenter);
+                y += 28;
+
+                // ---- Commande N ----
+                // g.DrawString($"Commande N :{numCommande}", fGrandBold, Brushes.Black, xGauche, y); y += 18;
+
+                // ---- Nom + Prénom client ----
+                string nomCmd = commande["nom"].ToString();
+                string prenomCmd = commande["prenom"].ToString();
+                g.DrawString(nomCmd, fBold, Brushes.Black, xGauche, y); y += 14;
+                if (!string.IsNullOrEmpty(prenomCmd))
+                { g.DrawString(prenomCmd, fNormal, Brushes.Black, xGauche, y); y += 14; }
+                y += 4;
+
+                // ---- Date/heure commande ----
+                DateTime dateCommande = Convert.ToDateTime(commande["dateHeure"]);
+                g.DrawString($"{dateCommande:dd/MM/yyyy}   {dateCommande:HH:mm}",
+                                fGrandBold, Brushes.Black, xGauche, y);
+                y += 20;
+
+                // ---- Commentaire ----
+                string commentaireCmd = commande["commetaire"]?.ToString() ?? "";
+                if (!string.IsNullOrEmpty(commentaireCmd))
+                {
+                    g.DrawString("Commentaire :", fBold, Brushes.Black, xGauche, y); y += 14;
+                    SizeF tailleComm = g.MeasureString(commentaireCmd, fNormal, (int)pageWidth);
+                    g.DrawString(commentaireCmd, fNormal, Brushes.Black, new RectangleF(xGauche, y, pageWidth, tailleComm.Height));
+                    y += tailleComm.Height + 4;
+                }
+
+                // ---- Séparateur ----
+                g.DrawLine(Pens.Black, xGauche, y, xDroite, y); y += 6;
+
+                // ---- En-tête colonnes ----
+                g.DrawString("ARTICLE", fBold, Brushes.Black, xGauche, y);
+                y += 14;
+                g.DrawLine(Pens.Black, xGauche, y, xDroite, y); y += 8;
+
+                // ---- Lignes articles (cuisine1 seulement) ----
+                foreach (int i in indexCuisine1)
+                {
+                    DataRow ligne = lignes.Rows[i];
+                    DataRow produit = produits[i];
+                    DataTable ings = ingredients[i];
+
+                    string libelle = produit["libelle"].ToString().ToUpper();
+                    int idTypeProduit = Convert.ToInt32(produit["idTypeProduit"]);
+                    bool tailleLarge = Convert.ToBoolean(ligne["tailleLarge"]);
+
+                    // Formater le nom
+                    string nomProduit;
+                    if (idTypeProduit == 1)
+                        nomProduit = tailleLarge ? $"MAXI PIZZA {libelle}" : $"PIZZA {libelle}";
+                    else if (idTypeProduit == 2)
+                    {
+                        string typePate = ligne["typePate"]?.ToString().ToUpper() ?? "";
+                        nomProduit = $"{typePate} {libelle}";
+                    }
+                    else
+                        nomProduit = libelle;
+
+                    g.DrawString(nomProduit, fProduit, Brushes.Black, xGauche, y);
+                    y += 16;
+
+                    // Ingrédients modifiés
+                    foreach (DataRow ing in ings.Rows)
+                    {
+                        bool estSupp = Convert.ToBoolean(ing["ingredientEnPlus"]);
+                        string prefix = estSupp ? "SUPP" : "SS";
+                        string nomIng = ing["ingredient"].ToString();
+                        g.DrawString($"   {prefix} {nomIng}", fProduit, Brushes.Black, xGauche, y);
+                        y += 14;
+                    }
+
+                    // Note
+                    string note = ligne["note"]?.ToString() ?? "";
+                    if (!string.IsNullOrEmpty(note))
+                    {
+                        string texteNote = $"   --> {note}";
+                        SizeF tailleNote = g.MeasureString(texteNote, fProduit, (int)pageWidth);
+                        g.DrawString(texteNote, fProduit, Brushes.Black, new RectangleF(xGauche, y, pageWidth, tailleNote.Height));
+                        y += tailleNote.Height;
+                    }
+                }
+
+                y += 4;
+
+                // ---- Séparateur ----
+                g.DrawLine(Pens.Black, xGauche, y, xDroite, y); y += 6;
+
+                // ---- Type commande encadré ----
+                bool estLivraison = Convert.ToBoolean(commande["estLivraison"]);
+                string typeCmd = estLivraison ? "LIVRAISON" : "EMPORTER";
+                RectangleF rectType = new RectangleF(xGauche + 60, y, pageWidth - 120, 22);
+                g.DrawRectangle(Pens.Black, rectType.X, rectType.Y, rectType.Width, rectType.Height);
+                g.DrawString(typeCmd, fEmporte, Brushes.Black, rectType, sfCenter);
+                y += 28;
+            });
         }
 
         private void ImpressionCuisine2()
         {
-            // ici code impression cuisine 2 (salade, snacking, dipy, moelleux au chocolat)
-            // utiliser indexCuisine2 pour accéder aux lignes, ingrédients et produits
+            Imprimer(g =>
+            {
+                float y = 10;
+                float pageWidth = 295;
+                float xGauche = 5;
+                float xDroite = pageWidth - 5;
+
+                Font fNormal = new Font("Arial", 8, FontStyle.Regular);
+                Font fBold = new Font("Arial", 8, FontStyle.Bold);
+                Font fGrandBold = new Font("Arial", 14, FontStyle.Bold);
+                Font fNumero = new Font("Arial", 36, FontStyle.Bold);
+                Font fTitre = new Font("Arial", 13, FontStyle.Bold);
+                Font fEmporte = new Font("Arial", 11, FontStyle.Bold);
+                Font fProduit = new Font("Arial", 9, FontStyle.Bold);
+
+                StringFormat sfCenter = new StringFormat { Alignment = StringAlignment.Center };
+                StringFormat sfRight = new StringFormat { Alignment = StringAlignment.Far };
+
+                // ---- Date + Heure sur la même ligne ----
+                g.DrawString(DateTime.Now.ToString("dd/MM/yyyy"), fNormal, Brushes.Black, xGauche, y);
+                g.DrawString(DateTime.Now.ToString("HH:mm:ss"), fNormal, Brushes.Black,
+                                new RectangleF(xGauche, y, pageWidth, 14), sfRight);
+                y += 20;
+
+                // ---- Titre Restaurant / Internet ----
+                int idStatut = Convert.ToInt32(commande["idStatut"]);
+                string titreCuisine = (idStatut == 2) ? "INTERNET" : "RESTAURANT";
+                RectangleF rectTitre = new RectangleF(xGauche, y, pageWidth, 22);
+                g.FillRectangle(Brushes.Black, rectTitre);
+                g.DrawString(titreCuisine, fTitre, Brushes.White, rectTitre, sfCenter);
+                y += 28;
+
+                // ---- Commande N ----
+                // g.DrawString($"Commande N :{numCommande}", fGrandBold, Brushes.Black, xGauche, y); y += 18;
+
+                // ---- Nom + Prénom client ----
+                string nomCmd = commande["nom"].ToString();
+                string prenomCmd = commande["prenom"].ToString();
+                g.DrawString(nomCmd, fBold, Brushes.Black, xGauche, y); y += 14;
+                if (!string.IsNullOrEmpty(prenomCmd))
+                { g.DrawString(prenomCmd, fNormal, Brushes.Black, xGauche, y); y += 14; }
+                y += 4;
+
+                // ---- Date/heure commande ----
+                DateTime dateCommande = Convert.ToDateTime(commande["dateHeure"]);
+                g.DrawString($"{dateCommande:dd/MM/yyyy}   {dateCommande:HH:mm}",
+                                fGrandBold, Brushes.Black, xGauche, y);
+                y += 20;
+
+                // ---- Commentaire ----
+                string commentaireCmd = commande["commetaire"]?.ToString() ?? "";
+                if (!string.IsNullOrEmpty(commentaireCmd))
+                {
+                    g.DrawString("Commentaire :", fBold, Brushes.Black, xGauche, y); y += 14;
+                    SizeF tailleComm = g.MeasureString(commentaireCmd, fNormal, (int)pageWidth);
+                    g.DrawString(commentaireCmd, fNormal, Brushes.Black, new RectangleF(xGauche, y, pageWidth, tailleComm.Height));
+                    y += tailleComm.Height + 4;
+                }
+
+                // ---- Séparateur ----
+                g.DrawLine(Pens.Black, xGauche, y, xDroite, y); y += 6;
+
+                // ---- En-tête colonnes ----
+                g.DrawString("ARTICLE", fBold, Brushes.Black, xGauche, y);
+                y += 14;
+                g.DrawLine(Pens.Black, xGauche, y, xDroite, y); y += 8;
+
+                // ---- Lignes articles (cuisine2 seulement) ----
+                foreach (int i in indexCuisine2)
+                {
+                    DataRow ligne = lignes.Rows[i];
+                    DataRow produit = produits[i];
+                    DataTable ings = ingredients[i];
+
+                    string libelle = produit["libelle"].ToString().ToUpper();
+                    string nomProduit;
+                    if (produit["quantite"] != DBNull.Value)
+                        nomProduit = $"{libelle} {produit["quantite"]}PC";
+                    else
+                        nomProduit = libelle;
+
+                    g.DrawString(nomProduit, fProduit, Brushes.Black, xGauche, y);
+                    y += 16;
+
+                    // Ingrédients modifiés
+                    foreach (DataRow ing in ings.Rows)
+                    {
+                        bool estSupp = Convert.ToBoolean(ing["ingredientEnPlus"]);
+                        string prefix = estSupp ? "SUPP" : "SS";
+                        string nomIng = ing["ingredient"].ToString();
+                        g.DrawString($"   {prefix} {nomIng}", fProduit, Brushes.Black, xGauche, y);
+                        y += 14;
+                    }
+
+                    // Note
+                    string note = ligne["note"]?.ToString() ?? "";
+                    if (!string.IsNullOrEmpty(note))
+                    {
+                        string texteNote = $"   --> {note}";
+                        SizeF tailleNote = g.MeasureString(texteNote, fProduit, (int)pageWidth);
+                        g.DrawString(texteNote, fProduit, Brushes.Black, new RectangleF(xGauche, y, pageWidth, tailleNote.Height));
+                        y += tailleNote.Height;
+                    }
+                }
+
+                y += 4;
+
+                // ---- Séparateur ----
+                g.DrawLine(Pens.Black, xGauche, y, xDroite, y); y += 6;
+
+                // ---- Type commande encadré ----
+                bool estLivraison = Convert.ToBoolean(commande["estLivraison"]);
+                string typeCmd = estLivraison ? "LIVRAISON" : "EMPORTER";
+                RectangleF rectType = new RectangleF(xGauche + 60, y, pageWidth - 120, 22);
+                g.DrawRectangle(Pens.Black, rectType.X, rectType.Y, rectType.Width, rectType.Height);
+                g.DrawString(typeCmd, fEmporte, Brushes.Black, rectType, sfCenter);
+                y += 28;
+            });
         }
 
         private void ImpressionAutre()
         {
-            // ici code impression autre (dessert, boisson)
-            // utiliser indexAutre pour accéder aux lignes, ingrédients et produits
+            Imprimer(g =>
+            {
+                float y = 10;
+                float pageWidth = 295;
+                float xGauche = 5;
+                float xDroite = pageWidth - 5;
+
+                Font fNormal = new Font("Arial", 8, FontStyle.Regular);
+                Font fBold = new Font("Arial", 8, FontStyle.Bold);
+                Font fGrandBold = new Font("Arial", 14, FontStyle.Bold);
+                Font fNumero = new Font("Arial", 36, FontStyle.Bold);
+                Font fTitre = new Font("Arial", 13, FontStyle.Bold);
+                Font fEmporte = new Font("Arial", 11, FontStyle.Bold);
+                Font fProduit = new Font("Arial", 9, FontStyle.Bold);
+
+                StringFormat sfCenter = new StringFormat { Alignment = StringAlignment.Center };
+                StringFormat sfRight = new StringFormat { Alignment = StringAlignment.Far };
+
+                // ---- Date + Heure sur la même ligne ----
+                g.DrawString(DateTime.Now.ToString("dd/MM/yyyy"), fNormal, Brushes.Black, xGauche, y);
+                g.DrawString(DateTime.Now.ToString("HH:mm:ss"), fNormal, Brushes.Black,
+                                new RectangleF(xGauche, y, pageWidth, 14), sfRight);
+                y += 20;
+
+                // ---- Titre Restaurant / Internet ----
+                int idStatut = Convert.ToInt32(commande["idStatut"]);
+                string titreCuisine = (idStatut == 2) ? "INTERNET" : "RESTAURANT";
+                RectangleF rectTitre = new RectangleF(xGauche, y, pageWidth, 22);
+                g.FillRectangle(Brushes.Black, rectTitre);
+                g.DrawString(titreCuisine, fTitre, Brushes.White, rectTitre, sfCenter);
+                y += 28;
+
+                // ---- Commande N ----
+                // g.DrawString($"Commande N :{numCommande}", fGrandBold, Brushes.Black, xGauche, y); y += 18;
+
+                // ---- Nom + Prénom client ----
+                string nomCmd = commande["nom"].ToString();
+                string prenomCmd = commande["prenom"].ToString();
+                g.DrawString(nomCmd, fBold, Brushes.Black, xGauche, y); y += 14;
+                if (!string.IsNullOrEmpty(prenomCmd))
+                { g.DrawString(prenomCmd, fNormal, Brushes.Black, xGauche, y); y += 14; }
+                y += 4;
+
+                // ---- Date/heure commande ----
+                DateTime dateCommande = Convert.ToDateTime(commande["dateHeure"]);
+                g.DrawString($"{dateCommande:dd/MM/yyyy}   {dateCommande:HH:mm}",
+                                fGrandBold, Brushes.Black, xGauche, y);
+                y += 20;
+
+                // ---- Commentaire ----
+                string commentaireCmd = commande["commetaire"]?.ToString() ?? "";
+                if (!string.IsNullOrEmpty(commentaireCmd))
+                {
+                    g.DrawString("Commentaire :", fBold, Brushes.Black, xGauche, y); y += 14;
+                    SizeF tailleComm = g.MeasureString(commentaireCmd, fNormal, (int)pageWidth);
+                    g.DrawString(commentaireCmd, fNormal, Brushes.Black, new RectangleF(xGauche, y, pageWidth, tailleComm.Height));
+                    y += tailleComm.Height + 4;
+                }
+
+                // ---- Séparateur ----
+                g.DrawLine(Pens.Black, xGauche, y, xDroite, y); y += 6;
+
+                // ---- En-tête colonnes ----
+                g.DrawString("ARTICLE", fBold, Brushes.Black, xGauche, y);
+                y += 14;
+                g.DrawLine(Pens.Black, xGauche, y, xDroite, y); y += 8;
+
+                // ---- Lignes articles (autre seulement) ----
+                foreach (int i in indexAutre)
+                {
+                    DataRow produit = produits[i];
+                    string nomProduit = produit["libelle"].ToString().ToUpper();
+                    g.DrawString(nomProduit, fProduit, Brushes.Black, xGauche, y);
+                    y += 16;
+                }
+
+                y += 4;
+
+                // ---- Séparateur ----
+                g.DrawLine(Pens.Black, xGauche, y, xDroite, y); y += 6;
+
+                // ---- Type commande encadré ----
+                bool estLivraison = Convert.ToBoolean(commande["estLivraison"]);
+                string typeCmd = estLivraison ? "LIVRAISON" : "EMPORTER";
+                RectangleF rectType = new RectangleF(xGauche + 60, y, pageWidth - 120, 22);
+                g.DrawRectangle(Pens.Black, rectType.X, rectType.Y, rectType.Width, rectType.Height);
+                g.DrawString(typeCmd, fEmporte, Brushes.Black, rectType, sfCenter);
+                y += 28;
+            });
         }
     }
 }
