@@ -175,21 +175,22 @@ namespace CrispyLo.Views
         {
             DataTable dataT;
             int nbrRow;
-            sql.AllClientsByIdRestaurant(PagePrincipale.Restaurent, out dataT, out nbrRow);
+            sql.AllClient(out dataT, out nbrRow);
 
             var listeClients = new List<object>();
             for (int i = 0; i < nbrRow; i++)
             {
+                sql.AdresseByClient((int)dataT.Rows[i]["idAdresse"], out DataTable dataA);
                 listeClients.Add(new
                 {
                     Id = dataT.Rows[i]["id"].ToString(),
                     Nom = dataT.Rows[i]["nom"].ToString(),
                     Prenom = dataT.Rows[i]["prenom"].ToString(),
                     Telephone = dataT.Rows[i]["numero"].ToString(),
-                    Rue = dataT.Rows[i]["nomRue"].ToString(),
-                    NumeroRue = dataT.Rows[i]["numeroRue"].ToString(),
-                    CodePostal = dataT.Rows[i]["codePostal"].ToString(),
-                    Localite = dataT.Rows[i]["localite"].ToString()
+                    Rue = dataA.Rows[0]["nomRue"].ToString(),
+                    NumeroRue = dataA.Rows[0]["numeroRue"].ToString(),
+                    CodePostal = dataA.Rows[0]["codePostal"].ToString(),
+                    Localite = dataA.Rows[0]["localite"].ToString()
                 });
             }
             tableauClients.ItemsSource = listeClients;

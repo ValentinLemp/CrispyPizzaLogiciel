@@ -14,9 +14,15 @@ namespace CrispyLo.Modules
 {
     internal class BaseDeDonnée
     {
+        MainWindow PagePrincipale = (MainWindow)App.Current.MainWindow;
+
         public string DefinirCheminBD()
         {
-            return "Server=localhost;Database=crispypizzadb;port=3306;User Id=root;password=root";
+            return PagePrincipale.ChemminDB;
+        }
+        public string DefinirCheminCommun()
+        {
+            return "Server=localhost;Database=crispy_pizza_commun;port=3306;User Id=root;password=root";
         }
         //---------------- Vérifier le mot de passe ----------------
         public void VerificationMDP(out DataTable dataT, out int nbrRow)
@@ -81,7 +87,7 @@ namespace CrispyLo.Modules
             }
         }
 
-        public void RestaurentById(int id, out DataTable dataT)
+        /*public void RestaurentById(int id, out DataTable dataT)
         {
             MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
             dataT = new DataTable();
@@ -100,11 +106,11 @@ namespace CrispyLo.Modules
                 Debug.WriteLine(ex);
                 throw;
             }
-        }
+        }*/
 
         public void AllProduitByTypeProduit(int id, out DataTable dataT, out int nbrRow)
         {
-            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
+            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminCommun());
             dataT = new DataTable();
 
             try
@@ -125,7 +131,7 @@ namespace CrispyLo.Modules
         }
         public void AllProduitByEstSuggestion(out DataTable dataT, out int nbrRow)
         {
-            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
+            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminCommun());
             dataT = new DataTable();
 
             try
@@ -145,7 +151,7 @@ namespace CrispyLo.Modules
 
         public void AllTypeProduit(out DataTable dataT, out int nbrRow)
         {
-            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
+            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminCommun());
             dataT = new DataTable();
 
             try
@@ -165,7 +171,7 @@ namespace CrispyLo.Modules
 
         public void AllPizzaByTypeProduit(int id, out DataTable dataT, out int nbrRow)
         {
-            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
+            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminCommun());
             dataT = new DataTable();
 
             try
@@ -187,7 +193,7 @@ namespace CrispyLo.Modules
 
         public void ProduitById(int id, out DataTable dataT)
         {
-            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
+            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminCommun());
             dataT = new DataTable();
 
             try
@@ -208,7 +214,7 @@ namespace CrispyLo.Modules
 
         public void ProduitByLibelle(string libelle, out DataTable dataT)
         {
-            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
+            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminCommun());
             dataT = new DataTable();
 
             try
@@ -229,7 +235,7 @@ namespace CrispyLo.Modules
 
         public void AllIngredientByCategorieIng(int id, string libelle, out DataTable dataT, out int nbrRow)
         {
-            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
+            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminCommun());
             dataT = new DataTable();
 
             try
@@ -251,7 +257,7 @@ namespace CrispyLo.Modules
 
         public void IngredientById(int id, out DataTable dataT)
         {
-            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
+            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminCommun());
             dataT = new DataTable();
 
             try
@@ -272,7 +278,7 @@ namespace CrispyLo.Modules
 
         public void IngredientByLibelle(string libelle, out DataTable dataT)
         {
-            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
+            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminCommun());
             dataT = new DataTable();
 
             try
@@ -412,20 +418,19 @@ namespace CrispyLo.Modules
             }
         }
 
-        public int AjouterClient(string nom, string prenom, string numero, int idAdresse, int idRest)
+        public int AjouterClient(string nom, string prenom, string numero, int idAdresse)
         {
             MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
 
             try
             {
                 maConnexion.Open();
-                string query = "INSERT INTO client(nom, prenom, numero, idAdresse, idRestaurant) VALUES(@nom, @prenom, @numero, @idAdresse, @idRest)";
+                string query = "INSERT INTO client(nom, prenom, numero, idAdresse) VALUES(@nom, @prenom, @numero, @idAdresse)";
                 MySqlCommand cmd = new MySqlCommand(query, maConnexion);
                 cmd.Parameters.AddWithValue("@nom", nom);
                 cmd.Parameters.AddWithValue("@prenom", prenom);
                 cmd.Parameters.AddWithValue("@numero", numero);
                 cmd.Parameters.AddWithValue("@idAdresse", idAdresse);
-                cmd.Parameters.AddWithValue("@idRest", idRest);
                 cmd.ExecuteNonQuery();
                 int id = (int)cmd.LastInsertedId;
                 maConnexion.Close();
@@ -438,15 +443,15 @@ namespace CrispyLo.Modules
             }
         }
 
-        public int NewCommande(string nom, string prenom, Boolean livraison, DateTime date, double prixTotal, string commentaire, int idRest, int idStatut, int? idClient)
+        public int NewCommande(string nom, string prenom, Boolean livraison, DateTime date, double prixTotal, string commentaire, int idStatut, int? idClient)
         {
             MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
 
             try
             {
                 maConnexion.Open();
-                string query = @"INSERT INTO commande(nom, prenom, estLivraison, dateHeure, prixTotal, commetaire, idRestaurant, idStatut, idClient, estVu)
-                        VALUES(@nom, @prenom, @livraison, @date, @prixTotal, @commentaire, @idRest, @idStatut, @idClient, 1)";
+                string query = @"INSERT INTO commande(nom, prenom, estLivraison, dateHeure, prixTotal, commetaire, idStatut, idClient, estVu, estCloture)
+                        VALUES(@nom, @prenom, @livraison, @date, @prixTotal, @commentaire, @idStatut, @idClient, 1, 0)";
 
                 MySqlCommand cmd = new MySqlCommand(query, maConnexion);
 
@@ -456,7 +461,6 @@ namespace CrispyLo.Modules
                 cmd.Parameters.AddWithValue("@date", date);
                 cmd.Parameters.AddWithValue("@prixTotal", prixTotal);
                 cmd.Parameters.AddWithValue("@commentaire", commentaire);
-                cmd.Parameters.AddWithValue("@idRest", idRest);
                 cmd.Parameters.AddWithValue("@idStatut", idStatut);
                 if (idClient.HasValue)
                     cmd.Parameters.AddWithValue("@idClient", idClient.Value);
@@ -523,18 +527,17 @@ namespace CrispyLo.Modules
             }
         }
 
-        public void AllCommandeByDateAndType(DateTime date, bool estLivraison, int idRest, out DataTable dataT, out int nbrRow)
+        public void AllCommandeByDateAndType(DateTime date, bool estLivraison, out DataTable dataT, out int nbrRow)
         {
             MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
             dataT = new DataTable();
 
             try
             {
-                string query = "SELECT * FROM commande WHERE DATE(dateHeure) = @date AND estLivraison = @estLivraison AND idRestaurant = @idRest";
+                string query = "SELECT * FROM commande WHERE DATE(dateHeure) = @date AND estLivraison = @estLivraison";
                 MySqlCommand cmd = new MySqlCommand(query, maConnexion);
                 cmd.Parameters.AddWithValue("@date", date.ToString("yyyy-MM-dd"));
                 cmd.Parameters.AddWithValue("@estLivraison", estLivraison);
-                cmd.Parameters.AddWithValue("@idRest", idRest);
                 MySqlDataAdapter Data = new MySqlDataAdapter(cmd);
                 Data.Fill(dataT);
                 nbrRow = dataT.Rows.Count;
@@ -632,19 +635,16 @@ namespace CrispyLo.Modules
                 throw;
             }
         }
-        public void AllClientsByIdRestaurant(int id, out DataTable dataT, out int nbrRow)
+        public void AllClient(out DataTable dataT, out int nbrRow)
         {
             MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
             dataT = new DataTable();
 
             try
             {
-                string query = @"SELECT c.id, c.nom, c.prenom, c.numero,
-                    a.nomRue, a.numeroRue, a.codePostal, a.localite
-                    FROM client c LEFT JOIN adresse a ON c.idAdresse = a.id
-                    WHERE c.idRestaurant = @id";
+                string query = "SELECT * FROM client";
+
                 MySqlCommand cmd = new MySqlCommand(query, maConnexion);
-                cmd.Parameters.AddWithValue("@id", id);
                 MySqlDataAdapter Data = new MySqlDataAdapter(cmd);
                 Data.Fill(dataT);
                 nbrRow = dataT.Rows.Count;
@@ -854,7 +854,7 @@ namespace CrispyLo.Modules
             }
         }
         // ---- CLOTURE : Total prixTotal par statut pour aujourd'hui ----
-        public double TotalCommandeByDateAndStatut(DateTime date, int idStatut, int idRest)
+        public double TotalCommandeByDateAndStatut(DateTime date, int idStatut)
         {
             MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
 
@@ -862,11 +862,10 @@ namespace CrispyLo.Modules
             {
                 maConnexion.Open();
                 string query = @"SELECT IFNULL(SUM(prixTotal), 0) FROM commande
-                    WHERE DATE(dateHeure) = @date AND idStatut != 3 AND idStatut = @idStatut AND idRestaurant = @idRest";
+                    WHERE DATE(dateHeure) = @date AND estCloture = 0 AND idStatut = @idStatut";
                 MySqlCommand cmd = new MySqlCommand(query, maConnexion);
                 cmd.Parameters.AddWithValue("@date", date.ToString("yyyy-MM-dd"));
                 cmd.Parameters.AddWithValue("@idStatut", idStatut);
-                cmd.Parameters.AddWithValue("@idRest", idRest);
                 double total = Convert.ToDouble(cmd.ExecuteScalar());
                 maConnexion.Close();
                 return total;
@@ -879,7 +878,7 @@ namespace CrispyLo.Modules
         }
 
         // ---- CLOTURE : Comptage produits vendus aujourd'hui ----
-        public void CompteProduitsByDate(DateTime date, int idRest, out DataTable dataT)
+        public void CompteProduitsByDate(DateTime date, out DataTable dataT)
         {
             MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
             dataT = new DataTable();
@@ -889,12 +888,11 @@ namespace CrispyLo.Modules
                 string query = @"SELECT p.idTypeProduit, lc.tailleLarge, COUNT(*) AS nombre
                     FROM ligneCommande lc
                     INNER JOIN commande c ON lc.idCommande = c.id
-                    INNER JOIN produit p ON lc.idProduit = p.id
-                    WHERE DATE(c.dateHeure) = @date AND c.idStatut != 3 AND c.idRestaurant = @idRest
+                    INNER JOIN crispy_pizza_commun.produit p ON lc.idProduit = p.id
+                    WHERE DATE(c.dateHeure) = @date AND c.estCloture = 0
                     GROUP BY p.idTypeProduit, lc.tailleLarge";
                 MySqlCommand cmd = new MySqlCommand(query, maConnexion);
                 cmd.Parameters.AddWithValue("@date", date.ToString("yyyy-MM-dd"));
-                cmd.Parameters.AddWithValue("@idRest", idRest);
                 MySqlDataAdapter Data = new MySqlDataAdapter(cmd);
                 Data.Fill(dataT);
                 maConnexion.Close();
@@ -905,21 +903,39 @@ namespace CrispyLo.Modules
                 throw;
             }
         }
-        // ---- CLOTURE : Passer toutes les commandes du jour en idStatut = 3 ----
-        public void CloturerCommandes(DateTime date, int idRest)
+        // ---- CLOTURE : Passer toutes les commandes du jour en estCloture = 1 ----
+        public void CloturerCommandes(DateTime date)
         {
             MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
 
             try
             {
                 maConnexion.Open();
-                string query = @"UPDATE commande SET idStatut = 3
-                    WHERE DATE(dateHeure) = @date AND idStatut != 3 AND idRestaurant = @idRest";
+                string query = @"UPDATE commande SET estCloture = 1
+                    WHERE DATE(dateHeure) = @date AND estCloture = 0";
                 MySqlCommand cmd = new MySqlCommand(query, maConnexion);
                 cmd.Parameters.AddWithValue("@date", date.ToString("yyyy-MM-dd"));
-                cmd.Parameters.AddWithValue("@idRest", idRest);
                 cmd.ExecuteNonQuery();
                 maConnexion.Close();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+                throw;
+            }
+        }
+        // ---- CLOTURE : Nombre de clôtures par restaurant ----
+        public int NombreClotureByRestaurant()
+        {
+            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
+            try
+            {
+                maConnexion.Open();
+                string query = "SELECT COUNT(*) FROM cloture";
+                MySqlCommand cmd = new MySqlCommand(query, maConnexion);
+                int count = Convert.ToInt32(cmd.ExecuteScalar());
+                maConnexion.Close();
+                return count;
             }
             catch (Exception ex)
             {
@@ -931,22 +947,24 @@ namespace CrispyLo.Modules
         public void InsererCloture(DateTime date, double argentRestaurant, double argentInternet,
             double argentCarte, double argentLiquide, double argentDifference,
             int nbMaxiPizza, int nbPizza, int nbPate, int nbPain, int nbSalade, int nbSnacking,
-            int nbBoisson, int nbDessert, int nbDipy, int idRestaurant)
+            int nbBoisson, int nbDessert, int nbDipy)
         {
             MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
 
             try
             {
                 maConnexion.Open();
-                string query = @"INSERT INTO cloture(date, argentRestaurant, argentInternet,
+                int numeroCloture = NombreClotureByRestaurant() + 1;
+                string query = @"INSERT INTO cloture(numeroCloture, date, argentRestaurant, argentInternet,
                     argentCarte, argentLiquide, argentDifference,
                     nbMaxiPizza, nbPizza, nbPâte, nbPain, nbSalade, nbSnacking,
-                    nbBoisson, nbDessert, nbDipy, idRestaurant)
-                    VALUES(@date, @argentRest, @argentNet,
+                    nbBoisson, nbDessert, nbDipy)
+                    VALUES(@numCloture, @date, @argentRest, @argentNet,
                     @argentCarte, @argentLiquide, @argentDiff,
                     @nbMaxiPizza, @nbPizza, @nbPate, @nbPain, @nbSalade, @nbSnacking,
-                    @nbBoisson, @nbDessert, @nbDipy, @idRest)";
+                    @nbBoisson, @nbDessert, @nbDipy)";
                 MySqlCommand cmd = new MySqlCommand(query, maConnexion);
+                cmd.Parameters.AddWithValue("@numCloture", numeroCloture);
                 cmd.Parameters.AddWithValue("@date", date.ToString("yyyy-MM-dd"));
                 cmd.Parameters.AddWithValue("@argentRest", argentRestaurant);
                 cmd.Parameters.AddWithValue("@argentNet", argentInternet);
@@ -962,7 +980,6 @@ namespace CrispyLo.Modules
                 cmd.Parameters.AddWithValue("@nbBoisson", nbBoisson);
                 cmd.Parameters.AddWithValue("@nbDessert", nbDessert);
                 cmd.Parameters.AddWithValue("@nbDipy", nbDipy);
-                cmd.Parameters.AddWithValue("@idRest", idRestaurant);
                 cmd.ExecuteNonQuery();
                 maConnexion.Close();
             }
@@ -973,16 +990,15 @@ namespace CrispyLo.Modules
             }
         }
         // ---- HISTORIQUE : Toutes les clôtures par restaurant ----
-        public void AllClotureByRestaurant(int idRest, out DataTable dataT, out int nbrRow)
+        public void AllClotureByRestaurant(out DataTable dataT, out int nbrRow)
         {
             MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
             dataT = new DataTable();
 
             try
             {
-                string query = "SELECT * FROM cloture WHERE idRestaurant = @idRest ORDER BY date DESC";
+                string query = "SELECT numeroCloture, date, argentRestaurant, argentInternet, argentCarte, argentLiquide, argentDifference, nbMaxiPizza, nbPizza, nbPâte, nbPain, nbSalade, nbSnacking, nbBoisson, nbDessert, nbDipy FROM cloture ORDER BY date DESC";
                 MySqlCommand cmd = new MySqlCommand(query, maConnexion);
-                cmd.Parameters.AddWithValue("@idRest", idRest);
                 MySqlDataAdapter Data = new MySqlDataAdapter(cmd);
                 Data.Fill(dataT);
                 nbrRow = dataT.Rows.Count;
@@ -997,7 +1013,7 @@ namespace CrispyLo.Modules
         // ---- SUGGESTION : Toutes les suggestions ----
         public void AllSuggestions(out DataTable dataT, out int nbrRow)
         {
-            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
+            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminCommun());
             dataT = new DataTable();
 
             try
@@ -1018,7 +1034,7 @@ namespace CrispyLo.Modules
         // ---- SUGGESTION : Ajouter ----
         public void AjouterSuggestion(string libelle, string description, double prix, double? prixLarge, int idTypeProduit)
         {
-            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
+            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminCommun());
 
             try
             {
@@ -1047,7 +1063,7 @@ namespace CrispyLo.Modules
         // ---- SUGGESTION : Modifier ----
         public void ModifierSuggestion(int id, string libelle, string description, double prix, double? prixLarge, int idTypeProduit)
         {
-            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
+            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminCommun());
 
             try
             {
@@ -1077,7 +1093,7 @@ namespace CrispyLo.Modules
         // ---- SUGGESTION : Supprimer ----
         public void SupprimerSuggestion(int id)
         {
-            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
+            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminCommun());
 
             try
             {
@@ -1096,16 +1112,15 @@ namespace CrispyLo.Modules
         }
 
         // ---- INTERNET : Récupérer les commandes non vues ----
-        public void CommandesNonVues(int idRest, out DataTable dataT, out int nbrRow)
+        public void CommandesNonVues(out DataTable dataT, out int nbrRow)
         {
             MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
             dataT = new DataTable();
 
             try
             {
-                string query = "SELECT * FROM commande WHERE estVu = 0 AND idStatut = 2 AND idRestaurant = @idRest";
+                string query = "SELECT * FROM commande WHERE estVu = 0 AND idStatut = 2";
                 MySqlCommand cmd = new MySqlCommand(query, maConnexion);
-                cmd.Parameters.AddWithValue("@idRest", idRest);
                 MySqlDataAdapter Data = new MySqlDataAdapter(cmd);
                 Data.Fill(dataT);
                 nbrRow = dataT.Rows.Count;

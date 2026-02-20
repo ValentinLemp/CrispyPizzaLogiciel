@@ -258,13 +258,12 @@ namespace CrispyLo.Views
             bool estLivraison = rdLivraison.IsChecked == true;
             DateTime date = datePicker.SelectedDate.Value;
 
-            sql.AllCommandeByDateAndType(date, estLivraison, PagePrincipale.Restaurent, out DataTable dataT, out int nbrRow);
+            sql.AllCommandeByDateAndType(date, estLivraison, out DataTable dataT, out int nbrRow);
 
             List<object> commandes = new List<object>();
             for (int i = 0; i < nbrRow; i++)
             {
                 int idStatut = Convert.ToInt32(dataT.Rows[i]["idStatut"]);
-                if (idStatut == 3) continue;
 
                 DateTime dateHeure = Convert.ToDateTime(dataT.Rows[i]["dateHeure"]);
 

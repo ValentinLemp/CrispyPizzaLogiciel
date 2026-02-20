@@ -898,6 +898,7 @@ namespace CrispyLo.Views
             double prix;
             string pate = "";
             string libelle;
+            Boolean estLarge = false;
 
             if (btn.Tag is int)
             {
@@ -922,6 +923,7 @@ namespace CrispyLo.Views
                 {
                     prix = (double)data.Rows[0]["prixLarge"];
                     nom = "maxi ";
+                    estLarge = true;
                 }
             }
             if ((int)data.Rows[0]["idTypeProduit"] == 2)
@@ -959,7 +961,7 @@ namespace CrispyLo.Views
                 Id = (int)data.Rows[0]["id"],
                 Libelle = nom,
                 Prix = prix,
-                EstLarge = (bool)radioTailleLarge.IsChecked,
+                EstLarge = estLarge,
                 TypePate = pate,
                 IdTypeProduit = (int)data.Rows[0]["idTypeProduit"],
                 Ingredients = new List<Ingredient>(),

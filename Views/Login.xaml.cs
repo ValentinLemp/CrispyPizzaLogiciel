@@ -29,6 +29,7 @@ namespace CrispyLo.Views
         //---------------------
 
         StackPanel panel = new StackPanel();
+        ComboBox selectorResto = new ComboBox();
         TextBox text = new TextBox();
         Button valider = new Button();
 
@@ -43,6 +44,15 @@ namespace CrispyLo.Views
             Thickness mythickness = new Thickness();
 
             mythickness.Bottom = 20;
+
+            selectorResto.Items.Add(new ComboBoxItem { Content = "Meux", Tag = 1 });
+            selectorResto.Items.Add(new ComboBoxItem { Content = "Ramillies", Tag = 2 });
+            selectorResto.SelectedIndex = -1;
+            selectorResto.FontSize = 25;
+            selectorResto.FontWeight = FontWeights.Bold;
+            selectorResto.Width = 300;
+            selectorResto.Height = 60;
+            selectorResto.Margin = mythickness;
 
             text.FontSize = 40;
             text.FontWeight = FontWeights.Bold;
@@ -64,6 +74,7 @@ namespace CrispyLo.Views
 
             panel.VerticalAlignment = VerticalAlignment.Center;
             panel.HorizontalAlignment = HorizontalAlignment.Center;
+            panel.Children.Add(selectorResto);
             panel.Children.Add(text);
             panel.Children.Add(valider);
 
@@ -72,16 +83,41 @@ namespace CrispyLo.Views
 
         public void Validation_Click(object sender, RoutedEventArgs e)
         {
-            sql.VerificationMDP(out DataTable data, out int nbrRow);
-            for (int i = 0; i < data.Rows.Count; i++)
+            if (selectorResto.SelectedItem == null)
             {
-                if (data.Rows[i]["motdepasse"].ToString() == text.Text && (bool)data.Rows[i]["modeAdmin"] == false)
+                text.Text = "";
+                return;
+            }
+
+            PagePrincipale.Restaurant = (int)((ComboBoxItem)selectorResto.SelectedItem).Tag;
+
+            if (PagePrincipale.Restaurant == 1)
+            {
+                PagePrincipale.ChemminDB = "Server=localhost;Database=crispy_pizza_meux;port=3306;User Id=root;password=root";
+                sql.VerificationMDP(out DataTable data, out int nbrRow);
+                for (int i = 0; i < data.Rows.Count; i++)
                 {
-                    PagePrincipale.Main.Content = new Home();
-                    PagePrincipale.Restaurent = (int)data.Rows[i]["id"];
+                    if (data.Rows[i]["motdepasse"].ToString() == text.Text && (bool)data.Rows[i]["modeAdmin"] == false)
+                    {
+                        PagePrincipale.Main.Content = new Home();
+                    }
+                }
+            }
+            else if(PagePrincipale.Restaurant == 2)
+            {
+                PagePrincipale.ChemminDB = "Server=localhost;Database=crispy_pizza_ramillies;port=3306;User Id=root;password=root";
+                sql.VerificationMDP(out DataTable data, out int nbrRow);
+                for (int i = 0; i < data.Rows.Count; i++)
+                {
+                    if (data.Rows[i]["motdepasse"].ToString() == text.Text && (bool)data.Rows[i]["modeAdmin"] == false)
+                    {
+                        PagePrincipale.Main.Content = new Home();
+                    }
                 }
             }
             text.Text = "";
+
+            
         }
     }
 }

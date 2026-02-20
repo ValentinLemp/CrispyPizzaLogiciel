@@ -449,11 +449,10 @@ namespace CrispyLo.Views
         public void ChargerDonnees()
         {
             DateTime aujourdhui = DateTime.Now;
-            int idRest = PagePrincipale.Restaurent;
 
             // ---- Totaux argent par statut ----
-            double totalRest = sql.TotalCommandeByDateAndStatut(aujourdhui, 1, idRest);
-            double totalNet = sql.TotalCommandeByDateAndStatut(aujourdhui, 2, idRest);
+            double totalRest = sql.TotalCommandeByDateAndStatut(aujourdhui, 1);
+            double totalNet = sql.TotalCommandeByDateAndStatut(aujourdhui, 2);
 
             valTotalRestaurant.Text = totalRest.ToString("0.00") + " €";
             valTotalInternet.Text = totalNet.ToString("0.00") + " €";
@@ -462,7 +461,7 @@ namespace CrispyLo.Views
             txtInternet.Text = totalNet.ToString("0.00");
 
             // ---- Comptage produits vendus ----
-            sql.CompteProduitsByDate(aujourdhui, idRest, out DataTable dataP);
+            sql.CompteProduitsByDate(aujourdhui, out DataTable dataP);
 
             int nbMaxiPizza = 0, nbPizza = 0, nbPate = 0, nbPain = 0;
             int nbSalade = 0, nbSnacking = 0, nbBoisson = 0, nbDessert = 0, nbDipy = 0;
@@ -551,7 +550,6 @@ namespace CrispyLo.Views
             if (result != MessageBoxResult.Yes) return;
 
             DateTime aujourdhui = DateTime.Now;
-            int idRest = PagePrincipale.Restaurent;
 
             double argentRest = 0, argentNet = 0;
             double.TryParse(valTotalRestaurant.Text.Replace(" €", "").Replace(",", "."), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out argentRest);
@@ -570,9 +568,9 @@ namespace CrispyLo.Views
                 int.Parse(valPate.Text), int.Parse(valPain.Text),
                 int.Parse(valSalade.Text), int.Parse(valSnacking.Text),
                 int.Parse(valBoisson.Text), int.Parse(valDessert.Text),
-                int.Parse(valDipy.Text), idRest);
+                int.Parse(valDipy.Text));
 
-            sql.CloturerCommandes(aujourdhui, idRest);
+            sql.CloturerCommandes(aujourdhui);
             MessageBox.Show("Clôture effectuée avec succès !");
             PagePrincipale.Main.Content = new HomeAdmin();
         }

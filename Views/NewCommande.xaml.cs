@@ -793,7 +793,7 @@ namespace CrispyLo.Views
                 }
                 bool livraison = (bool)rdLivraison.IsChecked;
                 double prixTotal = Traitement.prixTotal();
-                int idRest = PagePrincipale.Restaurent;
+                //int idRest = PagePrincipale.Restaurent;
 
                 string nom = Nom.Text.Trim();
                 string prenom = Prenom.Text.Trim() == "" ? "" : Prenom.Text.Trim();
@@ -835,7 +835,7 @@ namespace CrispyLo.Views
                         {
                             // Passage emporter → livraison → créer client + adresse
                             int idAdresse = bd.AjouterAdresse(double.Parse(codePostal), rue, numero, ville);
-                            idClient = bd.AjouterClient(nom, prenom, telephone, idAdresse, PagePrincipale.Restaurent);
+                            idClient = bd.AjouterClient(nom, prenom, telephone, idAdresse);
                         }
                     }
                     else
@@ -903,8 +903,8 @@ namespace CrispyLo.Views
                         }
 
                         int idAdresse = bd.AjouterAdresse(double.Parse(codePostal), rue, numero, ville);
-                        int idClient = bd.AjouterClient(nom, prenom, telephone, idAdresse, PagePrincipale.Restaurent);
-                        newIdCommande = bd.NewCommande(nom, prenom, livraison, date, prixTotal, commentaire, idRest, 1, idClient);
+                        int idClient = bd.AjouterClient(nom, prenom, telephone, idAdresse);
+                        newIdCommande = bd.NewCommande(nom, prenom, livraison, date, prixTotal, commentaire, 1, idClient);
                         Traitement.CreationLigne(newIdCommande);
                     }
                     else if (rdLivraison.IsChecked == false)
@@ -915,7 +915,7 @@ namespace CrispyLo.Views
                             return;
                         }
 
-                        newIdCommande = bd.NewCommande(nom, prenom, livraison, date, prixTotal, commentaire, idRest, 1, null);
+                        newIdCommande = bd.NewCommande(nom, prenom, livraison, date, prixTotal, commentaire, 1, null);
                         Traitement.CreationLigne(newIdCommande);
                     }
                     impression.GeneralImpression(newIdCommande);

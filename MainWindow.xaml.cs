@@ -22,11 +22,12 @@ namespace CrispyLo
     /// </summary>
     public partial class MainWindow : Window
     {
-        public int Restaurent { get; set; }
+        public int Restaurant { get; set; }
         public List<Produit> Panier { get; set; } = new List<Produit>();
         public int IdCommande { get; set; }
         public bool EstAdmin { get; set; }
         public MediaPlayer SonNotification { get; set; } = new MediaPlayer();
+        public String ChemminDB { get; set; }
         public MainWindow()
         {
             InitializeComponent();

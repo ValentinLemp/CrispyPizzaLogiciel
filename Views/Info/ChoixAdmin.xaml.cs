@@ -73,7 +73,7 @@ namespace CrispyLo.Views.Info
             sql.VerificationMDP(out DataTable data, out int nbrRow);
             for (int i = 0; i < data.Rows.Count; i++)
             {
-                if (data.Rows[i]["motdepasse"].ToString() == text.Text && (bool)data.Rows[i]["modeAdmin"] == true && (int)data.Rows[i]["idRestaurant"] == PagePrincipale.Restaurent)
+                if (data.Rows[i]["motdepasse"].ToString() == text.Text && (bool)data.Rows[i]["modeAdmin"] == true)
                 {
                     PagePrincipale.MainInfo.Visibility = Visibility.Collapsed;
                     PagePrincipale.Main.Content = new HomeAdmin();

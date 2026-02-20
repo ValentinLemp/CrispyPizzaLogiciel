@@ -42,13 +42,13 @@ namespace CrispyLo.Modules
         {
             MainWindow PagePrincipale = (MainWindow)App.Current.MainWindow;
             string lat = "0", lon = "0";
-            if (PagePrincipale.Restaurent == 1)
+            if (PagePrincipale.Restaurant == 1)
             {
                 // Centre : Rue du Chainia 62, 5081 Meux
                 lat = "50.5515";
                 lon = "4.8016";
             }
-            else if(PagePrincipale.Restaurent == 2)
+            else if(PagePrincipale.Restaurant == 2)
             {
                 // Centre : Avenue des déportés 45A, 1367 Ramillies
                 lat = "50.6457";

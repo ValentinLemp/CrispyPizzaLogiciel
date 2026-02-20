@@ -129,6 +129,7 @@ namespace CrispyLo.Views
             headerStyle.Setters.Add(new Setter(DataGridColumnHeader.PaddingProperty, new Thickness(5)));
             tableauClotures.ColumnHeaderStyle = headerStyle;
 
+            tableauClotures.Columns.Add(new DataGridTextColumn { Header = "N°", Binding = new Binding("Numero"), Width = 50 });
             tableauClotures.Columns.Add(new DataGridTextColumn { Header = "Date", Binding = new Binding("Date"), Width = 100 });
             tableauClotures.Columns.Add(new DataGridTextColumn { Header = "Restaurant", Binding = new Binding("ArgentRest"), Width = 90 });
             tableauClotures.Columns.Add(new DataGridTextColumn { Header = "Internet", Binding = new Binding("ArgentNet"), Width = 85 });
@@ -243,7 +244,7 @@ namespace CrispyLo.Views
 
         public void ChargerClotures()
         {
-            sql.AllClotureByRestaurant(PagePrincipale.Restaurent, out DataTable dataT, out int nbrRow);
+            sql.AllClotureByRestaurant(out DataTable dataT, out int nbrRow);
 
             listeClotures.Clear();
             List<object> lignes = new List<object>();
@@ -259,8 +260,11 @@ namespace CrispyLo.Views
                 double argentLiquide = Convert.ToDouble(dataT.Rows[i]["argentLiquide"]);
                 double diff = Convert.ToDouble(dataT.Rows[i]["argentDifference"]);
 
+                int numero = Convert.ToInt32(dataT.Rows[i]["numeroCloture"]);
+
                 lignes.Add(new
                 {
+                    Numero = numero,
                     Date = date.ToString("dd/MM/yyyy"),
                     ArgentRest = argentRest.ToString("0.00") + " €",
                     ArgentNet = argentNet.ToString("0.00") + " €",

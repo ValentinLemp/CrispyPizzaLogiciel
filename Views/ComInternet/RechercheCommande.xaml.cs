@@ -101,7 +101,7 @@ namespace CrispyLo.Views.ComInternet
             {
                 int nbrRow;
                 DataTable commandesNonVues;
-                sql.CommandesNonVues(PagePrincipale.Restaurent, out commandesNonVues, out nbrRow);
+                sql.CommandesNonVues(out commandesNonVues, out nbrRow);
 
                 // Ajouter les nouveaux IDs pas encore dans la liste
                 for (int i = 0; i < nbrRow; i++)

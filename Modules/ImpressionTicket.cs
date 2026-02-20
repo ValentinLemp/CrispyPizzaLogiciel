@@ -11,6 +11,8 @@ namespace CrispyLo.Modules
 {
     internal class ImpressionTicket
     {
+        MainWindow PagePrincipale = (MainWindow)App.Current.MainWindow;
+
         BaseDeDonnée sql = new BaseDeDonnée();
         DataRow commande;
         DataTable lignes;
@@ -67,8 +69,12 @@ namespace CrispyLo.Modules
                 if (idTypeProduit == 1 || idTypeProduit == 2 || idTypeProduit == 4) // pizza, pâte, pain
                 {
                     indexCuisine1.Add(i);
+                    if (idTypeProduit == 2)
+                    {
+                        indexCuisine2.Add(i);
+                    }
                 }
-                else if (idTypeProduit == 3 || idTypeProduit == 5 || idTypeProduit == 8) // salade, snacking, dipy
+                else if (idTypeProduit == 3 || idTypeProduit == 5 || idTypeProduit == 8) // pate, salade, snacking, dipy
                 {
                     indexCuisine2.Add(i);
                 }
@@ -138,6 +144,7 @@ namespace CrispyLo.Modules
                 float y = 10;
                 float pageWidth = 295; // largeur utile (315 - marges)
                 float xGauche = 5;
+                float xArticle = xGauche + 35;
                 float xDroite = pageWidth - 5;
 
                 // ---- Polices ----
@@ -154,11 +161,10 @@ namespace CrispyLo.Modules
                 RectangleF rect = new RectangleF(xGauche, y, pageWidth, 20);
 
                 // ---- En-tête restaurant ----
-                int idRestaurant = Convert.ToInt32(commande["idRestaurant"]);
                 string nomRestau, adresseR, villeR, tel;
                 string tva = "N° TVA : BE1028813177";
 
-                if (idRestaurant == 2)
+                if (PagePrincipale.Restaurant == 2)
                 {
                     nomRestau = "Crispy Pizza Ramillies";
                     adresseR = "Avenue des Déportés 45A";
@@ -236,7 +242,8 @@ namespace CrispyLo.Modules
                 g.DrawLine(Pens.Black, xGauche, y, xDroite, y); y += 6;
 
                 // ---- En-tête colonnes ----
-                g.DrawString("ARTICLE", fBold, Brushes.Black, xGauche, y);
+                g.DrawString("Qte", fBold, Brushes.Black, xGauche, y);
+                g.DrawString("ARTICLE", fBold, Brushes.Black, xArticle, y);
                 g.DrawString("TOT", fBold, Brushes.Black, new RectangleF(xGauche, y, pageWidth, 14), sfRight);
                 y += 14;
                 g.DrawLine(Pens.Black, xGauche, y, xDroite, y); y += 6;
@@ -259,8 +266,8 @@ namespace CrispyLo.Modules
                         nomProduit = tailleLarge ? $"MAXI PIZZA {libelle}" : $"PIZZA {libelle}";
                     else if (idTypeProduit == 2) // pâte
                     {
-                        string typePate = ligne["typePate"]?.ToString().ToUpper() ?? "";
-                        nomProduit = $"{typePate} {libelle}";
+                        string typePate = (ligne["typePate"].ToString() != "" ? ligne["typePate"].ToString().ToUpper() + " " : "");
+                        nomProduit = $"{typePate}{libelle}";
                     }
                     else if (produit["quantite"] != DBNull.Value)
                         nomProduit = $"{libelle} {produit["quantite"]}PC";
@@ -268,7 +275,8 @@ namespace CrispyLo.Modules
                         nomProduit = libelle;
 
                     // Ligne principale
-                    g.DrawString(nomProduit, fNormal, Brushes.Black, xGauche, y);
+                    g.DrawString("1", fNormal, Brushes.Black, xGauche, y);
+                    g.DrawString(nomProduit, fNormal, Brushes.Black, xArticle, y);
                     g.DrawString(prixLigne.ToString("F2").Replace(".", ","), fNormal, Brushes.Black,
                                  new RectangleF(xGauche, y, pageWidth, 14), sfRight);
                     y += 14;
@@ -280,7 +288,7 @@ namespace CrispyLo.Modules
                         string prefix = estSupp ? "SUPP" : "SS";
                         string nomIng = ing["ingredient"].ToString();
                         string ligneIng = $"   {prefix} {nomIng}";
-                        g.DrawString(ligneIng, fNormal, Brushes.Black, xGauche, y); y += 12;
+                        g.DrawString(ligneIng, fNormal, Brushes.Black, xArticle, y); y += 12;
                     }
 
                     // Note
@@ -289,7 +297,7 @@ namespace CrispyLo.Modules
                     {
                         string texteNote = $"   {note}";
                         SizeF tailleNote = g.MeasureString(texteNote, fNormal, (int)pageWidth);
-                        g.DrawString(texteNote, fNormal, Brushes.Black, new RectangleF(xGauche, y, pageWidth, tailleNote.Height));
+                        g.DrawString(texteNote, fNormal, Brushes.Black, new RectangleF(xArticle, y, pageWidth, tailleNote.Height));
                         y += tailleNote.Height;
                     }
                 }
@@ -354,6 +362,7 @@ namespace CrispyLo.Modules
                 float y = 10;
                 float pageWidth = 295;
                 float xGauche = 5;
+                float xArticle = xGauche + 35;
                 float xDroite = pageWidth - 5;
 
                 Font fNormal = new Font("Arial", 8, FontStyle.Regular);
@@ -362,7 +371,6 @@ namespace CrispyLo.Modules
                 Font fNumero = new Font("Arial", 36, FontStyle.Bold);
                 Font fTitre = new Font("Arial", 13, FontStyle.Bold);
                 Font fEmporte = new Font("Arial", 11, FontStyle.Bold);
-                Font fProduit = new Font("Arial", 9, FontStyle.Bold);
 
                 StringFormat sfCenter = new StringFormat { Alignment = StringAlignment.Center };
                 StringFormat sfRight = new StringFormat { Alignment = StringAlignment.Far };
@@ -408,11 +416,13 @@ namespace CrispyLo.Modules
                     y += tailleComm.Height + 4;
                 }
 
+                y += 6;
                 // ---- Séparateur ----
                 g.DrawLine(Pens.Black, xGauche, y, xDroite, y); y += 6;
 
                 // ---- En-tête colonnes ----
-                g.DrawString("ARTICLE", fBold, Brushes.Black, xGauche, y);
+                g.DrawString("Qte", fBold, Brushes.Black, xGauche, y);
+                g.DrawString("ARTICLE", fBold, Brushes.Black, xArticle, y);
                 y += 14;
                 g.DrawLine(Pens.Black, xGauche, y, xDroite, y); y += 8;
 
@@ -433,13 +443,14 @@ namespace CrispyLo.Modules
                         nomProduit = tailleLarge ? $"MAXI PIZZA {libelle}" : $"PIZZA {libelle}";
                     else if (idTypeProduit == 2)
                     {
-                        string typePate = ligne["typePate"]?.ToString().ToUpper() ?? "";
-                        nomProduit = $"{typePate} {libelle}";
+                        string typePate = (ligne["typePate"].ToString() != "" ? ligne["typePate"].ToString().ToUpper() + " " : "");
+                        nomProduit = $"{typePate}{libelle}";
                     }
                     else
                         nomProduit = libelle;
 
-                    g.DrawString(nomProduit, fProduit, Brushes.Black, xGauche, y);
+                    g.DrawString("1", fNormal, Brushes.Black, xGauche, y);
+                    g.DrawString(nomProduit, fNormal, Brushes.Black, xArticle, y);
                     y += 16;
 
                     // Ingrédients modifiés
@@ -448,7 +459,7 @@ namespace CrispyLo.Modules
                         bool estSupp = Convert.ToBoolean(ing["ingredientEnPlus"]);
                         string prefix = estSupp ? "SUPP" : "SS";
                         string nomIng = ing["ingredient"].ToString();
-                        g.DrawString($"   {prefix} {nomIng}", fProduit, Brushes.Black, xGauche, y);
+                        g.DrawString($"   {prefix} {nomIng}", fNormal, Brushes.Black, xArticle, y);
                         y += 14;
                     }
 
@@ -456,9 +467,9 @@ namespace CrispyLo.Modules
                     string note = ligne["note"]?.ToString() ?? "";
                     if (!string.IsNullOrEmpty(note))
                     {
-                        string texteNote = $"   --> {note}";
-                        SizeF tailleNote = g.MeasureString(texteNote, fProduit, (int)pageWidth);
-                        g.DrawString(texteNote, fProduit, Brushes.Black, new RectangleF(xGauche, y, pageWidth, tailleNote.Height));
+                        string texteNote = $"   {note}";
+                        SizeF tailleNote = g.MeasureString(texteNote, fNormal, (int)pageWidth);
+                        g.DrawString(texteNote, fNormal, Brushes.Black, new RectangleF(xArticle, y, pageWidth, tailleNote.Height));
                         y += tailleNote.Height;
                     }
                 }
@@ -468,6 +479,7 @@ namespace CrispyLo.Modules
                 // ---- Séparateur ----
                 g.DrawLine(Pens.Black, xGauche, y, xDroite, y); y += 6;
 
+                y += 6;
                 // ---- Type commande encadré ----
                 bool estLivraison = Convert.ToBoolean(commande["estLivraison"]);
                 string typeCmd = estLivraison ? "LIVRAISON" : "EMPORTER";
@@ -485,6 +497,7 @@ namespace CrispyLo.Modules
                 float y = 10;
                 float pageWidth = 295;
                 float xGauche = 5;
+                float xArticle = xGauche + 35;
                 float xDroite = pageWidth - 5;
 
                 Font fNormal = new Font("Arial", 8, FontStyle.Regular);
@@ -493,7 +506,6 @@ namespace CrispyLo.Modules
                 Font fNumero = new Font("Arial", 36, FontStyle.Bold);
                 Font fTitre = new Font("Arial", 13, FontStyle.Bold);
                 Font fEmporte = new Font("Arial", 11, FontStyle.Bold);
-                Font fProduit = new Font("Arial", 9, FontStyle.Bold);
 
                 StringFormat sfCenter = new StringFormat { Alignment = StringAlignment.Center };
                 StringFormat sfRight = new StringFormat { Alignment = StringAlignment.Far };
@@ -539,11 +551,13 @@ namespace CrispyLo.Modules
                     y += tailleComm.Height + 4;
                 }
 
+                y += 6;
                 // ---- Séparateur ----
                 g.DrawLine(Pens.Black, xGauche, y, xDroite, y); y += 6;
 
                 // ---- En-tête colonnes ----
-                g.DrawString("ARTICLE", fBold, Brushes.Black, xGauche, y);
+                g.DrawString("Qte", fBold, Brushes.Black, xGauche, y);
+                g.DrawString("ARTICLE", fBold, Brushes.Black, xArticle, y);
                 y += 14;
                 g.DrawLine(Pens.Black, xGauche, y, xDroite, y); y += 8;
 
@@ -555,13 +569,21 @@ namespace CrispyLo.Modules
                     DataTable ings = ingredients[i];
 
                     string libelle = produit["libelle"].ToString().ToUpper();
+                    int idTypeProduit = Convert.ToInt32(produit["idTypeProduit"]);
                     string nomProduit;
+
                     if (produit["quantite"] != DBNull.Value)
                         nomProduit = $"{libelle} {produit["quantite"]}PC";
+                    else if (idTypeProduit == 2)
+                    {
+                        string typePate = (ligne["typePate"].ToString() != "" ? ligne["typePate"].ToString().ToUpper() + " " : "");
+                        nomProduit = $"{typePate}{libelle}";
+                    }
                     else
                         nomProduit = libelle;
 
-                    g.DrawString(nomProduit, fProduit, Brushes.Black, xGauche, y);
+                    g.DrawString("1", fNormal, Brushes.Black, xGauche, y);
+                    g.DrawString(nomProduit, fNormal, Brushes.Black, xArticle, y);
                     y += 16;
 
                     // Ingrédients modifiés
@@ -570,7 +592,7 @@ namespace CrispyLo.Modules
                         bool estSupp = Convert.ToBoolean(ing["ingredientEnPlus"]);
                         string prefix = estSupp ? "SUPP" : "SS";
                         string nomIng = ing["ingredient"].ToString();
-                        g.DrawString($"   {prefix} {nomIng}", fProduit, Brushes.Black, xGauche, y);
+                        g.DrawString($"   {prefix} {nomIng}", fNormal, Brushes.Black, xArticle, y);
                         y += 14;
                     }
 
@@ -578,9 +600,9 @@ namespace CrispyLo.Modules
                     string note = ligne["note"]?.ToString() ?? "";
                     if (!string.IsNullOrEmpty(note))
                     {
-                        string texteNote = $"   --> {note}";
-                        SizeF tailleNote = g.MeasureString(texteNote, fProduit, (int)pageWidth);
-                        g.DrawString(texteNote, fProduit, Brushes.Black, new RectangleF(xGauche, y, pageWidth, tailleNote.Height));
+                        string texteNote = $"   {note}";
+                        SizeF tailleNote = g.MeasureString(texteNote, fNormal, (int)pageWidth);
+                        g.DrawString(texteNote, fNormal, Brushes.Black, new RectangleF(xArticle, y, pageWidth, tailleNote.Height));
                         y += tailleNote.Height;
                     }
                 }
@@ -590,6 +612,7 @@ namespace CrispyLo.Modules
                 // ---- Séparateur ----
                 g.DrawLine(Pens.Black, xGauche, y, xDroite, y); y += 6;
 
+                y += 6;
                 // ---- Type commande encadré ----
                 bool estLivraison = Convert.ToBoolean(commande["estLivraison"]);
                 string typeCmd = estLivraison ? "LIVRAISON" : "EMPORTER";
@@ -607,6 +630,7 @@ namespace CrispyLo.Modules
                 float y = 10;
                 float pageWidth = 295;
                 float xGauche = 5;
+                float xArticle = xGauche + 35;
                 float xDroite = pageWidth - 5;
 
                 Font fNormal = new Font("Arial", 8, FontStyle.Regular);
@@ -615,7 +639,6 @@ namespace CrispyLo.Modules
                 Font fNumero = new Font("Arial", 36, FontStyle.Bold);
                 Font fTitre = new Font("Arial", 13, FontStyle.Bold);
                 Font fEmporte = new Font("Arial", 11, FontStyle.Bold);
-                Font fProduit = new Font("Arial", 9, FontStyle.Bold);
 
                 StringFormat sfCenter = new StringFormat { Alignment = StringAlignment.Center };
                 StringFormat sfRight = new StringFormat { Alignment = StringAlignment.Far };
@@ -660,22 +683,36 @@ namespace CrispyLo.Modules
                     g.DrawString(commentaireCmd, fNormal, Brushes.Black, new RectangleF(xGauche, y, pageWidth, tailleComm.Height));
                     y += tailleComm.Height + 4;
                 }
+                y += 6;
 
                 // ---- Séparateur ----
                 g.DrawLine(Pens.Black, xGauche, y, xDroite, y); y += 6;
 
                 // ---- En-tête colonnes ----
-                g.DrawString("ARTICLE", fBold, Brushes.Black, xGauche, y);
+                g.DrawString("Qte", fBold, Brushes.Black, xGauche, y);
+                g.DrawString("ARTICLE", fBold, Brushes.Black, xArticle, y);
                 y += 14;
                 g.DrawLine(Pens.Black, xGauche, y, xDroite, y); y += 8;
 
                 // ---- Lignes articles (autre seulement) ----
                 foreach (int i in indexAutre)
                 {
+                    DataRow ligne = lignes.Rows[i];
                     DataRow produit = produits[i];
                     string nomProduit = produit["libelle"].ToString().ToUpper();
-                    g.DrawString(nomProduit, fProduit, Brushes.Black, xGauche, y);
+                    g.DrawString("1", fNormal, Brushes.Black, xGauche, y);
+                    g.DrawString(nomProduit, fNormal, Brushes.Black, xArticle, y);
                     y += 16;
+
+                    // Note
+                    string note = ligne["note"]?.ToString() ?? "";
+                    if (!string.IsNullOrEmpty(note))
+                    {
+                        string texteNote = $"   {note}";
+                        SizeF tailleNote = g.MeasureString(texteNote, fNormal, (int)pageWidth);
+                        g.DrawString(texteNote, fNormal, Brushes.Black, new RectangleF(xArticle, y, pageWidth, tailleNote.Height));
+                        y += tailleNote.Height;
+                    }
                 }
 
                 y += 4;
@@ -683,6 +720,7 @@ namespace CrispyLo.Modules
                 // ---- Séparateur ----
                 g.DrawLine(Pens.Black, xGauche, y, xDroite, y); y += 6;
 
+                y += 6;
                 // ---- Type commande encadré ----
                 bool estLivraison = Convert.ToBoolean(commande["estLivraison"]);
                 string typeCmd = estLivraison ? "LIVRAISON" : "EMPORTER";
@@ -691,6 +729,11 @@ namespace CrispyLo.Modules
                 g.DrawString(typeCmd, fEmporte, Brushes.Black, rectType, sfCenter);
                 y += 28;
             });
+        }
+
+        public void ImpressionCloture()
+        {
+            
         }
     }
 }

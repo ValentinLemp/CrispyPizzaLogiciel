@@ -218,7 +218,7 @@ namespace CrispyLo.Views.Info
             int i;
             for (i = 0;i < nbrRow; i++)
             {
-                if (data.Rows[i]["motdepasse"].ToString() == mdpActuel.Text && (bool)data.Rows[i]["modeAdmin"] == estAdmin && (int)data.Rows[i]["idRestaurant"] == PagePrincipale.Restaurent)
+                if (data.Rows[i]["motdepasse"].ToString() == mdpActuel.Text && (bool)data.Rows[i]["modeAdmin"] == estAdmin)
                 {
                     break;
                 }
@@ -235,6 +235,8 @@ namespace CrispyLo.Views.Info
                 estAdmin = false;
                 panel.Visibility = Visibility.Collapsed;
                 wrapBtn.Visibility = Visibility.Visible;
+                mdpActuel.Text = "";
+                mdpNouv.Text = "";
 
             }
             
