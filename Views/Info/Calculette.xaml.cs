@@ -22,14 +22,14 @@ namespace CrispyLo.Views.Info
     public partial class Calculette : Page
     {
         MainWindow PagePrincipale = (MainWindow)App.Current.MainWindow;
-        double montantTotal;
-        public Calculette(double index)
+        decimal montantTotal;
+        public Calculette(decimal index)
         {
             InitializeComponent();
             PrepareInitialize(index);
         }
 
-        public void PrepareInitialize(double index)
+        public void PrepareInitialize(decimal index)
         {
             this.Height = 450;
             this.Width = 365;

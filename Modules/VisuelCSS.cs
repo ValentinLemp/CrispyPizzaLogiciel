@@ -83,7 +83,7 @@ namespace CrispyLo.Modules
             return template;
         }
 
-        public static Grid RemplisageBouton(Boolean pizza, Boolean estLarge,string libelle, double prix)
+        public static Grid RemplisageBouton(Boolean pizza, Boolean estLarge,string libelle, decimal prix)
         {
             Grid contenue = new Grid();
             contenue.HorizontalAlignment = HorizontalAlignment.Stretch;

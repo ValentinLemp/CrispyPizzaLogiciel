@@ -17,6 +17,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CrispyLo.Views
 {
@@ -792,7 +793,7 @@ namespace CrispyLo.Views
                     return;
                 }
                 bool livraison = (bool)rdLivraison.IsChecked;
-                double prixTotal = Traitement.prixTotal();
+                decimal prixTotal = Traitement.prixTotal();
                 //int idRest = PagePrincipale.Restaurent;
 
                 string nom = Nom.Text.Trim();
@@ -828,13 +829,13 @@ namespace CrispyLo.Views
                             bd.ClientById(ancienIdClient.Value, out DataTable dataClient);
                             int idAdresse = Convert.ToInt32(dataClient.Rows[0]["idAdresse"]);
                             bd.UpdateClient(ancienIdClient.Value, nom, prenom, telephone);
-                            bd.UpdateAdresse(idAdresse, double.Parse(codePostal), rue, numero, ville);
+                            bd.UpdateAdresse(idAdresse, int.Parse(codePostal), rue, numero, ville);
                             idClient = ancienIdClient.Value;
                         }
                         else
                         {
                             // Passage emporter → livraison → créer client + adresse
-                            int idAdresse = bd.AjouterAdresse(double.Parse(codePostal), rue, numero, ville);
+                            int idAdresse = bd.AjouterAdresse(int.Parse(codePostal), rue, numero, ville);
                             idClient = bd.AjouterClient(nom, prenom, telephone, idAdresse);
                         }
                     }
@@ -884,6 +885,23 @@ namespace CrispyLo.Views
                     {
                         bd.SupprimerLigne(anciensIdLignes[i]);
                     }
+
+                    bd.TicketByCommande(idCom, out DataTable dataT);
+                    bd.UpdateTicketidCom((int)dataT.Rows[0]["id"]);
+                    string signaturePrec = bd.DernierSignature();
+                    string signature = Traitement.GenererSignature(idCom, date, prixTotal, signaturePrec);
+
+                    bd.newTicket("annulation", DateTime.Now, -Convert.ToDecimal(dataT.Rows[0]["total_ht"]), -Convert.ToDecimal(dataT.Rows[0]["total_tva"]), -Convert.ToDecimal(dataT.Rows[0]["total_ttc"]), signature, signaturePrec, Convert.ToInt32(dataT.Rows[0]["id"]), -1);
+
+                    decimal totalCommande = Convert.ToDecimal(prixTotal);
+                    decimal taux = 0.06m;
+                    decimal ht = Math.Round(totalCommande / (1 + taux), 2);
+                    decimal tvaVal = Math.Round(totalCommande - ht, 2);
+
+                    signaturePrec = bd.DernierSignature();
+                    signature = Traitement.GenererSignature(idCom, date, totalCommande, signaturePrec);
+                    bd.newTicket("vente",DateTime.Now, ht, tvaVal, totalCommande, signature, signaturePrec, -1, idCom);
+
                     impression.GeneralImpression(PagePrincipale.IdCommande);
                     MessageBox.Show("Commande modifiée avec succès !");
                     PagePrincipale.IdCommande = -1;
@@ -902,7 +920,7 @@ namespace CrispyLo.Views
                             return;
                         }
 
-                        int idAdresse = bd.AjouterAdresse(double.Parse(codePostal), rue, numero, ville);
+                        int idAdresse = bd.AjouterAdresse(int.Parse(codePostal), rue, numero, ville);
                         int idClient = bd.AjouterClient(nom, prenom, telephone, idAdresse);
                         newIdCommande = bd.NewCommande(nom, prenom, livraison, date, prixTotal, commentaire, 1, idClient);
                         Traitement.CreationLigne(newIdCommande);
@@ -918,6 +936,16 @@ namespace CrispyLo.Views
                         newIdCommande = bd.NewCommande(nom, prenom, livraison, date, prixTotal, commentaire, 1, null);
                         Traitement.CreationLigne(newIdCommande);
                     }
+
+                    decimal totalCommande = Convert.ToDecimal(prixTotal);
+                    decimal taux = 0.06m;
+                    decimal ht = Math.Round(totalCommande / (1 + taux), 2);
+                    decimal tvaVal = Math.Round(totalCommande - ht, 2);
+
+                    string signaturePrec = bd.DernierSignature();
+                    string signature = Traitement.GenererSignature(newIdCommande, date, totalCommande, signaturePrec);
+                    bd.newTicket("vente" , date, ht, tvaVal, totalCommande, signature, signaturePrec, -1, newIdCommande);
+
                     impression.GeneralImpression(newIdCommande);
                     MessageBox.Show("Commade sauvegarder avec succès !");
                     PagePrincipale.Panier.Clear();

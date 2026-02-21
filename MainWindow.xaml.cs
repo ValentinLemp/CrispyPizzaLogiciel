@@ -14,6 +14,7 @@ using System.Windows.Shapes;
 using CrispyLo.Views;
 using CrispyLo.Classes;
 using CrispyLo.Views.ComInternet;
+using CrispyLo.Modules;
 
 namespace CrispyLo
 {
@@ -36,6 +37,7 @@ namespace CrispyLo
 
         public void PrepareInitialize()
         {
+            Signature.GenererCleLocale();
             IdCommande = -1;
             EstAdmin = false;
             string cheminSon = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "sound", "myinstants.mp3");

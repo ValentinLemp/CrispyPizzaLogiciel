@@ -327,7 +327,7 @@ namespace CrispyLo.Views
             if (dataClient.Rows.Count > 0)
             {
                 int idAdresse = Convert.ToInt32(dataClient.Rows[0]["idAdresse"]);
-                sql.UpdateAdresse(idAdresse, double.Parse(codePostal), rue, numeroRue, localite);
+                sql.UpdateAdresse(idAdresse, int.Parse(codePostal), rue, numeroRue, localite);
             }
 
             SetReadOnly(true);

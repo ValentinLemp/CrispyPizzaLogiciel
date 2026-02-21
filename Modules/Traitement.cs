@@ -25,11 +25,11 @@ namespace CrispyLo.Modules
             return description.Split(", ");
         }
 
-        public static double prixTotal()
+        public static decimal prixTotal()
         {
             MainWindow PagePrincipale = (MainWindow)App.Current.MainWindow;
 
-            double montantTotal = 0;
+            decimal montantTotal = 0;
             foreach (Produit produit in PagePrincipale.Panier)
             {
                 montantTotal += produit.prixTotal;
@@ -227,6 +227,12 @@ namespace CrispyLo.Modules
                 }
             }
         }
+        public static string GenererSignature(int idCommande, DateTime date, decimal montant, string signaturePrec)
+        {
+            MainWindow PagePrincipale = (MainWindow)App.Current.MainWindow;
+            return Signature.SignerTicketAvecPrec(PagePrincipale.Restaurant, idCommande, date, montant, signaturePrec);
+        }
+
         public static void ModificationLigneIngredient(int idLigne, Produit p)
         {
             BaseDeDonnée bd = new BaseDeDonnée();

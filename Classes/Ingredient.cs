@@ -10,11 +10,11 @@ namespace CrispyLo.Classes
     {
         private int id;
         private string libelle;
-        private double prix;
+        private decimal prix;
 
         public int Id { get; set; }
         public string Libelle { get; set; }
-        public double Prix { get; set; }
+        public decimal Prix { get; set; }
         public Boolean EstSupplement { get; set; }
     }
 }

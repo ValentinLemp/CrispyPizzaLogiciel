@@ -366,14 +366,14 @@ namespace CrispyLo.Views
                 return;
             }
 
-            if (!double.TryParse(txtPrix.Text.Replace(",", "."), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double prix))
+            if (!decimal.TryParse(txtPrix.Text.Replace(",", "."), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out decimal prix))
             {
                 MessageBox.Show("Prix invalide.");
                 return;
             }
 
             int idType = (int)((ComboBoxItem)cbTypeProduit.SelectedItem).Tag;
-            double? prixLarge = null;
+            decimal? prixLarge = null;
 
             if (idType == 1)
             {
@@ -382,7 +382,7 @@ namespace CrispyLo.Views
                     MessageBox.Show("Le prix large est obligatoire pour une pizza.");
                     return;
                 }
-                if (!double.TryParse(txtPrixLarge.Text.Replace(",", "."), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double pl))
+                if (!decimal.TryParse(txtPrixLarge.Text.Replace(",", "."), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out decimal pl))
                 {
                     MessageBox.Show("Prix large invalide.");
                     return;
@@ -410,14 +410,14 @@ namespace CrispyLo.Views
                 return;
             }
 
-            if (!double.TryParse(txtPrix.Text.Replace(",", "."), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double prix))
+            if (!decimal.TryParse(txtPrix.Text.Replace(",", "."), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out decimal prix))
             {
                 MessageBox.Show("Prix invalide.");
                 return;
             }
 
             int idType = (int)((ComboBoxItem)cbTypeProduit.SelectedItem).Tag;
-            double? prixLarge = null;
+            decimal? prixLarge = null;
 
             if (idType == 1)
             {
@@ -426,7 +426,7 @@ namespace CrispyLo.Views
                     MessageBox.Show("Le prix large est obligatoire pour une pizza.");
                     return;
                 }
-                if (!double.TryParse(txtPrixLarge.Text.Replace(",", "."), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double pl))
+                if (!decimal.TryParse(txtPrixLarge.Text.Replace(",", "."), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out decimal pl))
                 {
                     MessageBox.Show("Prix large invalide.");
                     return;

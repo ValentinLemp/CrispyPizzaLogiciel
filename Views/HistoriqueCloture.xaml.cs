@@ -254,11 +254,11 @@ namespace CrispyLo.Views
                 listeClotures.Add(dataT.Rows[i]);
 
                 DateTime date = Convert.ToDateTime(dataT.Rows[i]["date"]);
-                double argentRest = Convert.ToDouble(dataT.Rows[i]["argentRestaurant"]);
-                double argentNet = Convert.ToDouble(dataT.Rows[i]["argentInternet"]);
-                double argentCarte = Convert.ToDouble(dataT.Rows[i]["argentCarte"]);
-                double argentLiquide = Convert.ToDouble(dataT.Rows[i]["argentLiquide"]);
-                double diff = Convert.ToDouble(dataT.Rows[i]["argentDifference"]);
+                decimal argentRest = Convert.ToDecimal(dataT.Rows[i]["argentRestaurant"]);
+                decimal argentNet = Convert.ToDecimal(dataT.Rows[i]["argentInternet"]);
+                decimal argentCarte = Convert.ToDecimal(dataT.Rows[i]["argentCarte"]);
+                decimal argentLiquide = Convert.ToDecimal(dataT.Rows[i]["argentLiquide"]);
+                decimal diff = Convert.ToDecimal(dataT.Rows[i]["argentDifference"]);
 
                 int numero = Convert.ToInt32(dataT.Rows[i]["numeroCloture"]);
 
@@ -288,12 +288,12 @@ namespace CrispyLo.Views
             DateTime date = Convert.ToDateTime(row["date"]);
             valDate.Text = date.ToString("dd/MM/yyyy");
 
-            double argentRest = Convert.ToDouble(row["argentRestaurant"]);
-            double argentNet = Convert.ToDouble(row["argentInternet"]);
-            double diff = Convert.ToDouble(row["argentDifference"]);
+            decimal argentRest = Convert.ToDecimal(row["argentRestaurant"]);
+            decimal argentNet = Convert.ToDecimal(row["argentInternet"]);
+            decimal diff = Convert.ToDecimal(row["argentDifference"]);
 
-            double argentCarte = Convert.ToDouble(row["argentCarte"]);
-            double argentLiquide = Convert.ToDouble(row["argentLiquide"]);
+            decimal argentCarte = Convert.ToDecimal(row["argentCarte"]);
+            decimal argentLiquide = Convert.ToDecimal(row["argentLiquide"]);
 
             valArgentRest.Text = argentRest.ToString("0.00") + " €";
             valArgentNet.Text = argentNet.ToString("0.00") + " €";
@@ -319,7 +319,7 @@ namespace CrispyLo.Views
         private void TableauClotures_LoadingRow(object sender, DataGridRowEventArgs e)
         {
             dynamic item = e.Row.DataContext;
-            double diff = item.DiffValue;
+            decimal diff = item.DiffValue;
 
             if (diff < 0)
                 e.Row.Foreground = Brushes.Red;

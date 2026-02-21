@@ -2,6 +2,7 @@ using CrispyLo.Modules;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,6 +15,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CrispyLo.Views
 {
@@ -451,8 +453,8 @@ namespace CrispyLo.Views
             DateTime aujourdhui = DateTime.Now;
 
             // ---- Totaux argent par statut ----
-            double totalRest = sql.TotalCommandeByDateAndStatut(aujourdhui, 1);
-            double totalNet = sql.TotalCommandeByDateAndStatut(aujourdhui, 2);
+            decimal totalRest = sql.TotalCommandeByDateAndStatut(aujourdhui, 1);
+            decimal totalNet = sql.TotalCommandeByDateAndStatut(aujourdhui, 2);
 
             valTotalRestaurant.Text = totalRest.ToString("0.00") + " €";
             valTotalInternet.Text = totalNet.ToString("0.00") + " €";
@@ -551,25 +553,28 @@ namespace CrispyLo.Views
 
             DateTime aujourdhui = DateTime.Now;
 
-            double argentRest = 0, argentNet = 0;
-            double.TryParse(valTotalRestaurant.Text.Replace(" €", "").Replace(",", "."), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out argentRest);
-            double.TryParse(valTotalInternet.Text.Replace(" €", "").Replace(",", "."), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out argentNet);
+            decimal argentRest = 0, argentNet = 0;
+            decimal.TryParse(valTotalRestaurant.Text.Replace(" €", "").Replace(",", "."), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out argentRest);
+            decimal.TryParse(valTotalInternet.Text.Replace(" €", "").Replace(",", "."), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out argentNet);
 
-            double argentCarte = 0, argentLiquide = 0;
-            double.TryParse(txtCarte.Text.Replace(",", "."), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out argentCarte);
-            double.TryParse(txtLiquide.Text.Replace(",", "."), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out argentLiquide);
+            decimal argentCarte = 0, argentLiquide = 0;
+            decimal.TryParse(txtCarte.Text.Replace(",", "."), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out argentCarte);
+            decimal.TryParse(txtLiquide.Text.Replace(",", "."), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out argentLiquide);
 
-            double argentDiff = 0;
+            decimal argentDiff = 0;
             string diffText = valDifference.Text.Replace(" €", "").Replace("+", "").Replace(",", ".");
-            double.TryParse(diffText, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out argentDiff);
+            decimal.TryParse(diffText, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out argentDiff);
+
+            string signaturePrec = sql.DernierSignature();
+            string signature = Traitement.GenererSignature(idCom, date, totalCommande, signaturePrec);
 
             sql.InsererCloture(aujourdhui, argentRest, argentNet, argentCarte, argentLiquide, argentDiff,
                 int.Parse(valMaxiPizza.Text), int.Parse(valPizza.Text),
                 int.Parse(valPate.Text), int.Parse(valPain.Text),
                 int.Parse(valSalade.Text), int.Parse(valSnacking.Text),
                 int.Parse(valBoisson.Text), int.Parse(valDessert.Text),
-                int.Parse(valDipy.Text));
-
+                int.Parse(valDipy.Text), signature, signaturePrec);
+            
             sql.CloturerCommandes(aujourdhui);
             MessageBox.Show("Clôture effectuée avec succès !");
             PagePrincipale.Main.Content = new HomeAdmin();

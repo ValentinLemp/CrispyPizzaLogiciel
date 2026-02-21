@@ -126,7 +126,7 @@ namespace CrispyLo.Modules
         private void Imprimer(Action<Graphics> dessiner)
         {
             PrintDocument doc = new PrintDocument();
-            doc.DefaultPageSettings.PaperSize = new PaperSize("Ticket", 315, 1200); // 80mm ≈ 315 centièmes de pouce
+            doc.DefaultPageSettings.PaperSize = new PaperSize("Ticket", 299, 1200); // 76mm ≈ 315 centièmes de pouce
             doc.DefaultPageSettings.Margins = new Margins(5, 5, 5, 5);
             doc.PrintPage += (s, e) =>
             {
@@ -142,7 +142,7 @@ namespace CrispyLo.Modules
             Imprimer(g =>
             {
                 float y = 10;
-                float pageWidth = 295; // largeur utile (315 - marges)
+                float pageWidth = 289; // largeur utile (315 - marges)
                 float xGauche = 5;
                 float xArticle = xGauche + 35;
                 float xDroite = pageWidth - 5;
@@ -202,6 +202,9 @@ namespace CrispyLo.Modules
                 // ---- Heure commande ----
                 DateTime dateCommande = Convert.ToDateTime(commande["dateHeure"]);
                 g.DrawString($"{dateCommande:HH:mm}", fGrandBold, Brushes.Black, new RectangleF(xGauche, y, pageWidth, 24), sfCenter); y += 26;
+
+                // ---- Commande N ----
+                g.DrawString($"Commande N : {commande["numeroCommande"]}", fGrandBold, Brushes.Black, xGauche, y); y += 18;
 
                 // ---- Infos client ----
                 string nomCmd = commande["nom"].ToString();
@@ -321,9 +324,23 @@ namespace CrispyLo.Modules
                 g.DrawString("TTC", fNormal, Brushes.Black, new RectangleF(xGauche, y, pageWidth, 14), sfRight);
                 y += 14;
 
-                decimal taux = 0.06m;
-                decimal ht = Math.Round(totalCommande / (1 + taux), 2);
-                decimal tvaVal = Math.Round(totalCommande - ht, 2);
+                // ---- Récupérer ticket depuis DB ----
+                int idCom = Convert.ToInt32(commande["id"]);
+                sql.TicketByCommande(idCom, out DataTable dataTicket);
+                decimal ht, tvaVal;
+                string signature = "";
+                if (dataTicket.Rows.Count > 0)
+                {
+                    ht = Convert.ToDecimal(dataTicket.Rows[0]["total_ht"]);
+                    tvaVal = Convert.ToDecimal(dataTicket.Rows[0]["total_tva"]);
+                    signature = dataTicket.Rows[0]["signature"]?.ToString() ?? "";
+                }
+                else
+                {
+                    decimal taux = 0.06m;
+                    ht = Math.Round(totalCommande / (1 + taux), 2);
+                    tvaVal = Math.Round(totalCommande - ht, 2);
+                }
 
                 g.DrawString("6%(A)", fNormal, Brushes.Black, xGauche, y);
                 g.DrawString(ht.ToString("F2").Replace(".", ","), fNormal, Brushes.Black, xGauche + 130, y);
@@ -344,14 +361,13 @@ namespace CrispyLo.Modules
                 g.DrawString("< MERCI DE VOTRE VISITE >", fBold, Brushes.Black,
                              new RectangleF(xGauche, y, pageWidth, 16), sfCenter); y += 18;
 
-                // ---- Signature (hash) - à intégrer avec le module fiscal (FDM) ----
-                // string sign = commande["signature"]?.ToString() ?? "";
-                // if (!string.IsNullOrEmpty(sign))
-                // {
-                //     Font fTiny = new Font("Arial", 6);
-                //     g.DrawString($"Sign : {sign}", fTiny, Brushes.Black,
-                //                  new RectangleF(xGauche, y, pageWidth, 12), sfCenter);
-                // }
+                // ---- Signature ----
+                if (!string.IsNullOrEmpty(signature))
+                {
+                    Font fTiny = new Font("Arial", 6);
+                    g.DrawString($"sign : {signature}", fTiny, Brushes.Black,
+                                 new RectangleF(xGauche, y, pageWidth, 12), sfCenter);
+                }
             });
         }
 
@@ -360,7 +376,7 @@ namespace CrispyLo.Modules
             Imprimer(g =>
             {
                 float y = 10;
-                float pageWidth = 295;
+                float pageWidth = 289;
                 float xGauche = 5;
                 float xArticle = xGauche + 35;
                 float xDroite = pageWidth - 5;
@@ -390,7 +406,7 @@ namespace CrispyLo.Modules
                 y += 28;
 
                 // ---- Commande N ----
-                // g.DrawString($"Commande N :{numCommande}", fGrandBold, Brushes.Black, xGauche, y); y += 18;
+                g.DrawString($"Commande N : {commande["numeroCommande"]}", fGrandBold, Brushes.Black, xGauche, y); y += 18;
 
                 // ---- Nom + Prénom client ----
                 string nomCmd = commande["nom"].ToString();
@@ -495,7 +511,7 @@ namespace CrispyLo.Modules
             Imprimer(g =>
             {
                 float y = 10;
-                float pageWidth = 295;
+                float pageWidth = 289;
                 float xGauche = 5;
                 float xArticle = xGauche + 35;
                 float xDroite = pageWidth - 5;
@@ -525,7 +541,7 @@ namespace CrispyLo.Modules
                 y += 28;
 
                 // ---- Commande N ----
-                // g.DrawString($"Commande N :{numCommande}", fGrandBold, Brushes.Black, xGauche, y); y += 18;
+                g.DrawString($"Commande N : {commande["numeroCommande"]}", fGrandBold, Brushes.Black, xGauche, y); y += 18;
 
                 // ---- Nom + Prénom client ----
                 string nomCmd = commande["nom"].ToString();
@@ -628,7 +644,7 @@ namespace CrispyLo.Modules
             Imprimer(g =>
             {
                 float y = 10;
-                float pageWidth = 295;
+                float pageWidth = 289;
                 float xGauche = 5;
                 float xArticle = xGauche + 35;
                 float xDroite = pageWidth - 5;
@@ -658,7 +674,7 @@ namespace CrispyLo.Modules
                 y += 28;
 
                 // ---- Commande N ----
-                // g.DrawString($"Commande N :{numCommande}", fGrandBold, Brushes.Black, xGauche, y); y += 18;
+                g.DrawString($"Commande N : {commande["numeroCommande"]}", fGrandBold, Brushes.Black, xGauche, y); y += 18;
 
                 // ---- Nom + Prénom client ----
                 string nomCmd = commande["nom"].ToString();
@@ -731,9 +747,163 @@ namespace CrispyLo.Modules
             });
         }
 
-        public void ImpressionCloture()
+        public void ImpressionCloture(int idCloture)
         {
-            
+            Imprimer(g =>
+            {
+                float y = 10;
+                float pageWidth = 289; // largeur utile (315 - marges)
+                float xGauche = 5;
+                float xArticle = xGauche + 35;
+                float xDroite = pageWidth - 5;
+
+                // ---- Polices ----
+                Font fTitre = new Font("Arial", 11, FontStyle.Bold);
+                Font fNormal = new Font("Arial", 8, FontStyle.Regular);
+                Font fBold = new Font("Arial", 8, FontStyle.Bold);
+                Font fGrandBold = new Font("Arial", 13, FontStyle.Bold);
+                Font fMoyenBold = new Font("Arial", 10, FontStyle.Bold);
+
+                StringFormat sfCenter = new StringFormat { Alignment = StringAlignment.Center };
+                StringFormat sfRight = new StringFormat { Alignment = StringAlignment.Far };
+                StringFormat sfLeft = new StringFormat { Alignment = StringAlignment.Near };
+
+                RectangleF rect = new RectangleF(xGauche, y, pageWidth, 20);
+
+                // ---- En-tête restaurant ----
+                string nomRestau, adresseR, villeR, tel;
+                string tva = "N° TVA : BE1028813177";
+
+                if (PagePrincipale.Restaurant == 2)
+                {
+                    nomRestau = "Crispy Pizza Ramillies";
+                    adresseR = "Avenue des Déportés 45A";
+                    villeR = "1367 Ramillies";
+                    tel = "Tel : 081/340.628";
+                }
+                else
+                {
+                    nomRestau = "Crispy Pizza Meux";
+                    adresseR = "Rue Binia 62";
+                    villeR = "5081 Meux";
+                    tel = "Tel : 081/340.628";
+                }
+
+                g.DrawString(nomRestau, fTitre, Brushes.Black, new RectangleF(xGauche, y, pageWidth, 20), sfCenter); y += 18;
+                g.DrawString(adresseR, fNormal, Brushes.Black, new RectangleF(xGauche, y, pageWidth, 16), sfCenter); y += 14;
+                g.DrawString(villeR, fNormal, Brushes.Black, new RectangleF(xGauche, y, pageWidth, 16), sfCenter); y += 14;
+                g.DrawString(tel, fNormal, Brushes.Black, new RectangleF(xGauche, y, pageWidth, 16), sfCenter); y += 14;
+                g.DrawString(tva, fNormal, Brushes.Black, new RectangleF(xGauche, y, pageWidth, 16), sfCenter); y += 18;
+
+                // ---- Type commande ----
+                bool estLivraison = Convert.ToBoolean(commande["estLivraison"]);
+                string titreCmd = estLivraison ? "COMMANDE LIVRAISON" : "COMMANDE SUR PLACE";
+                g.DrawString(titreCmd, fGrandBold, Brushes.Black, new RectangleF(xGauche, y, pageWidth, 24), sfCenter); y += 26;
+
+                // ---- Type statut ----
+                int idStatut = Convert.ToInt32(commande["idStatut"]);
+                string typeStatut = (idStatut == 2) ? "Internet" : "Restaurant";
+                g.DrawString(typeStatut, fBold, Brushes.Black, xGauche, y); y += 14;
+
+                // ---- Date impression ----
+                g.DrawString("Prise de commande :", fNormal, Brushes.Black, xGauche, y);
+                g.DrawString($"{DateTime.Now:dd/MM/yyyy  HH:mm:ss}", fNormal, Brushes.Black, new RectangleF(xGauche, y, pageWidth, 14), sfRight); y += 14;
+
+                // ---- Heure commande ----
+                DateTime dateCommande = Convert.ToDateTime(commande["dateHeure"]);
+                g.DrawString($"{dateCommande:HH:mm}", fGrandBold, Brushes.Black, new RectangleF(xGauche, y, pageWidth, 24), sfCenter); y += 26;
+
+                // ---- Infos client ----
+                string nomCmd = commande["nom"].ToString();
+                string prenomCmd = commande["prenom"].ToString();
+                g.DrawString(nomCmd, fBold, Brushes.Black, xGauche, y); y += 14;
+                if (!string.IsNullOrEmpty(prenomCmd))
+                { g.DrawString(prenomCmd, fNormal, Brushes.Black, xGauche, y); y += 14; }
+
+                if (client != null)
+                {
+                    string telClient = client["numero"]?.ToString() ?? "";
+                    if (!string.IsNullOrEmpty(telClient))
+                    { g.DrawString(telClient, fNormal, Brushes.Black, xGauche, y); y += 14; }
+
+                    if (estLivraison && adresse != null)
+                    {
+                        string rue = $"{adresse["nomRue"]} {adresse["numeroRue"]}";
+                        string codeVille = $"{adresse["codePostal"]} {adresse["localite"]}";
+                        g.DrawString(rue, fNormal, Brushes.Black, xGauche, y); y += 14;
+                        g.DrawString(codeVille, fNormal, Brushes.Black, xGauche, y); y += 14;
+                    }
+                }
+                y += 4;
+
+                y += 6;
+
+                // ---- Commentaire ----
+                string commentaireCmd = commande["commetaire"]?.ToString() ?? "";
+                if (!string.IsNullOrEmpty(commentaireCmd))
+                {
+                    g.DrawString("Commentaire :", fBold, Brushes.Black, xGauche, y); y += 14;
+                    SizeF tailleComm = g.MeasureString(commentaireCmd, fNormal, (int)pageWidth);
+                    g.DrawString(commentaireCmd, fNormal, Brushes.Black, new RectangleF(xGauche, y, pageWidth, tailleComm.Height));
+                    y += tailleComm.Height + 4;
+                }
+
+                // ---- Séparateur ----
+                g.DrawLine(Pens.Black, xGauche, y, xDroite, y); y += 6;
+
+                
+                y += 4;
+
+                // ---- Séparateur ----
+                g.DrawLine(Pens.Black, xGauche, y, xDroite, y); y += 6;
+
+                // ---- Total ----
+                decimal totalCommande = Convert.ToDecimal(commande["prixTotal"]);
+
+                g.DrawString("TOTAL :", fBold, Brushes.Black, xGauche, y);
+                g.DrawString($"{totalCommande:F2} €".Replace(".", ","), fBold, Brushes.Black,
+                             new RectangleF(xGauche, y, pageWidth, 14), sfRight);
+                y += 18;
+
+                // ---- TVA ----
+                g.DrawString("", fNormal, Brushes.Black, xGauche + 60, y);
+                g.DrawString("HT", fNormal, Brushes.Black, xGauche + 130, y);
+                g.DrawString("TVA", fNormal, Brushes.Black, xGauche + 180, y);
+                g.DrawString("TTC", fNormal, Brushes.Black, new RectangleF(xGauche, y, pageWidth, 14), sfRight);
+                y += 14;
+
+                decimal taux = 0.06m;
+                decimal ht = Math.Round(totalCommande / (1 + taux), 2);
+                decimal tvaVal = Math.Round(totalCommande - ht, 2);
+
+                g.DrawString("6%(A)", fNormal, Brushes.Black, xGauche, y);
+                g.DrawString(ht.ToString("F2").Replace(".", ","), fNormal, Brushes.Black, xGauche + 130, y);
+                g.DrawString(tvaVal.ToString("F2").Replace(".", ","), fNormal, Brushes.Black, xGauche + 180, y);
+                g.DrawString(totalCommande.ToString("F2").Replace(".", ","), fNormal, Brushes.Black,
+                             new RectangleF(xGauche, y, pageWidth, 14), sfRight);
+                y += 14;
+
+                g.DrawLine(Pens.Black, xGauche + 120, y, xDroite, y); y += 6;
+
+                g.DrawString(ht.ToString("F2").Replace(".", ","), fNormal, Brushes.Black, xGauche + 130, y);
+                g.DrawString(tvaVal.ToString("F2").Replace(".", ","), fNormal, Brushes.Black, xGauche + 180, y);
+                g.DrawString(totalCommande.ToString("F2").Replace(".", ","), fNormal, Brushes.Black,
+                             new RectangleF(xGauche, y, pageWidth, 14), sfRight);
+                y += 18;
+
+                // ---- Pied de page ----
+                g.DrawString("< MERCI DE VOTRE VISITE >", fBold, Brushes.Black,
+                             new RectangleF(xGauche, y, pageWidth, 16), sfCenter); y += 18;
+
+                // ---- Signature (hash) - à intégrer avec le module fiscal (FDM) ----
+                // string sign = commande["signature"]?.ToString() ?? "";
+                // if (!string.IsNullOrEmpty(sign))
+                // {
+                //     Font fTiny = new Font("Arial", 6);
+                //     g.DrawString($"Sign : {sign}", fTiny, Brushes.Black,
+                //                  new RectangleF(xGauche, y, pageWidth, 12), sfCenter);
+                // }
+            });
         }
     }
 }

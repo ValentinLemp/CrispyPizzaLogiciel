@@ -51,7 +51,7 @@ namespace CrispyLo.Views.Info
             Produit p = PagePrincipale.Panier[Index];
             if (p.Prix > 11)
             {
-                double result = p.Prix - 12;
+                decimal result = p.Prix - 12;
                 texte.Text = result.ToString();
             }
         }
@@ -62,7 +62,7 @@ namespace CrispyLo.Views.Info
 
         public void Click_Leave(object sender, RoutedEventArgs e)
         {
-            p.Prix = double.Parse(texte.Text);
+            p.Prix = decimal.Parse(texte.Text);
             PagePrincipale.MainInfo.Visibility = Visibility.Collapsed;
         }
 

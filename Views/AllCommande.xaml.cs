@@ -362,7 +362,7 @@ namespace CrispyLo.Views
                 {
                     Id = (int)p.Rows[0]["id"],
                     Libelle = libelle.ToUpper(),
-                    Prix = (double)dataLigne.Rows[ligne]["prixProduit"],
+                    Prix = (decimal)dataLigne.Rows[ligne]["prixProduit"],
                     EstLarge = (bool)dataLigne.Rows[ligne]["tailleLarge"],
                     TypePate = dataLigne.Rows[ligne]["typePate"].ToString(),
                     IdTypeProduit = (int)p.Rows[0]["idTypeProduit"],
@@ -377,18 +377,18 @@ namespace CrispyLo.Views
                     for (int j = 0; j < tabIng.Length; j++)
                     {
                         int id = 0;
-                        double prix = 0;
+                        decimal prix = 0;
                         if ((bool)dataIngredient.Rows[i]["ingredientEnPlus"])
                         {
                             sql.IngredientByLibelle(tabIng[j].Trim(), out DataTable data);
                             id = (int)data.Rows[0]["id"];
                             if ((bool)dataLigne.Rows[ligne]["tailleLarge"])
                             {
-                                prix = (double)data.Rows[0]["prixLarge"];
+                                prix = (decimal)data.Rows[0]["prixLarge"];
                             }
                             else
                             {
-                                prix = (double)data.Rows[0]["prixMedium"];
+                                prix = (decimal)data.Rows[0]["prixMedium"];
                             }
                         }
 
@@ -515,6 +515,17 @@ namespace CrispyLo.Views
 
             MessageBoxResult result = MessageBox.Show("Voulez-vous vraiment supprimer cette commande ?", "Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Warning);
             if (result != MessageBoxResult.Yes) return;
+
+            decimal totalCommande = decimal.Parse(prix.Text.Replace(" €", "").Trim());
+            decimal taux = 0.06m;
+            decimal ht = Math.Round(totalCommande / (1 + taux), 2);
+            decimal tvaVal = Math.Round(totalCommande - ht, 2);
+
+            sql.TicketByCommande(idCommande, out DataTable dataT);
+            sql.UpdateTicketidCom((int)dataT.Rows[0]["id"]);
+            string signaturePrec = sql.DernierSignature();
+            string signature = Traitement.GenererSignature(idCommande, datePicker.SelectedDate.Value, totalCommande, signaturePrec);
+            sql.newTicket("annulation", DateTime.Now, -ht, -tvaVal, -totalCommande, signature, signaturePrec, (int)dataT.Rows[0]["id"], -1);
 
             sql.SupprimerCommande(idCommande);
 

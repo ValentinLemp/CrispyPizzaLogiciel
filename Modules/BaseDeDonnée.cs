@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -393,7 +394,7 @@ namespace CrispyLo.Modules
             }
         }
 
-        public int AjouterAdresse(double codePostal, string nomRue, string numeroRue, string localite)
+        public int AjouterAdresse(int codePostal, string nomRue, string numeroRue, string localite)
         {
             MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
 
@@ -443,18 +444,20 @@ namespace CrispyLo.Modules
             }
         }
 
-        public int NewCommande(string nom, string prenom, Boolean livraison, DateTime date, double prixTotal, string commentaire, int idStatut, int? idClient)
+        public int NewCommande(string nom, string prenom, Boolean livraison, DateTime date, decimal prixTotal, string commentaire, int idStatut, int? idClient)
         {
             MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
 
             try
             {
                 maConnexion.Open();
-                string query = @"INSERT INTO commande(nom, prenom, estLivraison, dateHeure, prixTotal, commetaire, idStatut, idClient, estVu, estCloture)
-                        VALUES(@nom, @prenom, @livraison, @date, @prixTotal, @commentaire, @idStatut, @idClient, 1, 0)";
+                string query = @"INSERT INTO commande(numeroCommande, nom, prenom, estLivraison, dateHeure, prixTotal, commetaire, idStatut, idClient, estVu, estCloture)
+                        VALUES(@numCo, @nom, @prenom, @livraison, @date, @prixTotal, @commentaire, @idStatut, @idClient, 1, 0)";
 
                 MySqlCommand cmd = new MySqlCommand(query, maConnexion);
+                int numCom = CountCommande(date) + 1;
 
+                cmd.Parameters.AddWithValue("@numCo", numCom);
                 cmd.Parameters.AddWithValue("@nom", nom);
                 cmd.Parameters.AddWithValue("@prenom", prenom);
                 cmd.Parameters.AddWithValue("@livraison", livraison);
@@ -478,8 +481,25 @@ namespace CrispyLo.Modules
                 throw;
             }
         }
-
-        public int NewLigne(double prixLigne, Boolean taille, string typePate, string note, int idProduit, int idCom)
+        public int CountCommande(DateTime date)
+        {
+            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
+            try
+            {
+                maConnexion.Open();
+                string query = "SELECT COUNT(*) FROM commande WHERE estCloture = 0";
+                MySqlCommand cmd = new MySqlCommand(query, maConnexion);
+                int count = Convert.ToInt32(cmd.ExecuteScalar());
+                maConnexion.Close();
+                return count;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+                throw;
+            }
+        }
+        public int NewLigne(decimal prixLigne, Boolean taille, string typePate, string note, int idProduit, int idCom)
         {
             MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
 
@@ -658,7 +678,7 @@ namespace CrispyLo.Modules
         }
 
         // ---- UPDATE Commande ----
-        public void UpdateCommande(int idCommande, string nom, string prenom, bool livraison, DateTime date, double prixTotal, string commentaire, int idStatut, int? idClient)
+        public void UpdateCommande(int idCommande, string nom, string prenom, bool livraison, DateTime date, decimal prixTotal, string commentaire, int idStatut, int? idClient)
         {
             MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
 
@@ -692,7 +712,7 @@ namespace CrispyLo.Modules
         }
 
         // ---- UPDATE LigneCommande ----
-        public void UpdateLigne(int idLigne, double prixProduit, bool tailleLarge, string typePate, string note, int idProduit)
+        public void UpdateLigne(int idLigne, decimal prixProduit, bool tailleLarge, string typePate, string note, int idProduit)
         {
             MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
 
@@ -830,7 +850,7 @@ namespace CrispyLo.Modules
         }
 
         // ---- UPDATE Adresse ----
-        public void UpdateAdresse(int idAdresse, double codePostal, string nomRue, string numeroRue, string localite)
+        public void UpdateAdresse(int idAdresse, int codePostal, string nomRue, string numeroRue, string localite)
         {
             MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
 
@@ -854,7 +874,7 @@ namespace CrispyLo.Modules
             }
         }
         // ---- CLOTURE : Total prixTotal par statut pour aujourd'hui ----
-        public double TotalCommandeByDateAndStatut(DateTime date, int idStatut)
+        public decimal TotalCommandeByDateAndStatut(DateTime date, int idStatut)
         {
             MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
 
@@ -866,7 +886,7 @@ namespace CrispyLo.Modules
                 MySqlCommand cmd = new MySqlCommand(query, maConnexion);
                 cmd.Parameters.AddWithValue("@date", date.ToString("yyyy-MM-dd"));
                 cmd.Parameters.AddWithValue("@idStatut", idStatut);
-                double total = Convert.ToDouble(cmd.ExecuteScalar());
+                decimal total = Convert.ToDecimal(cmd.ExecuteScalar());
                 maConnexion.Close();
                 return total;
             }
@@ -944,8 +964,8 @@ namespace CrispyLo.Modules
             }
         }
         // ---- CLOTURE : Insérer une clôture ----
-        public void InsererCloture(DateTime date, double argentRestaurant, double argentInternet,
-            double argentCarte, double argentLiquide, double argentDifference,
+        public void InsererCloture(DateTime date, decimal argentRestaurant, decimal argentInternet,
+            decimal argentCarte, decimal argentLiquide, decimal argentDifference,
             int nbMaxiPizza, int nbPizza, int nbPate, int nbPain, int nbSalade, int nbSnacking,
             int nbBoisson, int nbDessert, int nbDipy)
         {
@@ -954,18 +974,52 @@ namespace CrispyLo.Modules
             try
             {
                 maConnexion.Open();
+
+                // ---- Calculer premier/dernier ticket + totaux depuis ticketVente ----
+                string dateStr = date.ToString("yyyy-MM-dd");
+                string queryStats = @"SELECT MIN(id), MAX(id),
+                    IFNULL(SUM(total_ht), 0), IFNULL(SUM(total_tva), 0), IFNULL(SUM(total_ttc), 0),
+                    MIN(dateValidation), MAX(dateValidation),
+                    COUNT(*),
+                    SUM(CASE WHEN type IN ('annulation', 'annule') THEN 1 ELSE 0 END)
+                    FROM ticketVente WHERE DATE(dateValidation) = @date";
+                MySqlCommand cmdStats = new MySqlCommand(queryStats, maConnexion);
+                cmdStats.Parameters.AddWithValue("@date", dateStr);
+                MySqlDataReader reader = cmdStats.ExecuteReader();
+                int premierTicket = 0, dernierTicket = 0;
+                decimal total_ht = 0, total_tva = 0, total_ttc = 0;
+                TimeSpan heureDebut = TimeSpan.Zero, heureFin = TimeSpan.Zero;
+                int totalTicket = 0, totalAnnuler = 0;
+                if (reader.Read())
+                {
+                    premierTicket = reader.IsDBNull(0) ? 0 : reader.GetInt32(0);
+                    dernierTicket = reader.IsDBNull(1) ? 0 : reader.GetInt32(1);
+                    total_ht = reader.IsDBNull(2) ? 0 : reader.GetDecimal(2);
+                    total_tva = reader.IsDBNull(3) ? 0 : reader.GetDecimal(3);
+                    total_ttc = reader.IsDBNull(4) ? 0 : reader.GetDecimal(4);
+                    heureDebut = reader.IsDBNull(5) ? TimeSpan.Zero : reader.GetDateTime(5).TimeOfDay;
+                    heureFin = reader.IsDBNull(6) ? TimeSpan.Zero : reader.GetDateTime(6).TimeOfDay;
+                    totalTicket = reader.IsDBNull(7) ? 0 : reader.GetInt32(7);
+                    totalAnnuler = reader.IsDBNull(8) ? 0 : Convert.ToInt32(reader.GetValue(8));
+                }
+                reader.Close();
+
                 int numeroCloture = NombreClotureByRestaurant() + 1;
                 string query = @"INSERT INTO cloture(numeroCloture, date, argentRestaurant, argentInternet,
                     argentCarte, argentLiquide, argentDifference,
                     nbMaxiPizza, nbPizza, nbPâte, nbPain, nbSalade, nbSnacking,
-                    nbBoisson, nbDessert, nbDipy)
+                    nbBoisson, nbDessert, nbDipy,
+                    premierTicket, dernierTicket, total_ht, total_tva, total_ttc,
+                    heureDebut, heureFin, totalTicket, totalAnnuler)
                     VALUES(@numCloture, @date, @argentRest, @argentNet,
                     @argentCarte, @argentLiquide, @argentDiff,
                     @nbMaxiPizza, @nbPizza, @nbPate, @nbPain, @nbSalade, @nbSnacking,
-                    @nbBoisson, @nbDessert, @nbDipy)";
+                    @nbBoisson, @nbDessert, @nbDipy,
+                    @premierTicket, @dernierTicket, @total_ht, @total_tva, @total_ttc,
+                    @heureDebut, @heureFin, @totalTicket, @totalAnnuler)";
                 MySqlCommand cmd = new MySqlCommand(query, maConnexion);
                 cmd.Parameters.AddWithValue("@numCloture", numeroCloture);
-                cmd.Parameters.AddWithValue("@date", date.ToString("yyyy-MM-dd"));
+                cmd.Parameters.AddWithValue("@date", dateStr);
                 cmd.Parameters.AddWithValue("@argentRest", argentRestaurant);
                 cmd.Parameters.AddWithValue("@argentNet", argentInternet);
                 cmd.Parameters.AddWithValue("@argentCarte", argentCarte);
@@ -980,6 +1034,15 @@ namespace CrispyLo.Modules
                 cmd.Parameters.AddWithValue("@nbBoisson", nbBoisson);
                 cmd.Parameters.AddWithValue("@nbDessert", nbDessert);
                 cmd.Parameters.AddWithValue("@nbDipy", nbDipy);
+                cmd.Parameters.AddWithValue("@premierTicket", premierTicket);
+                cmd.Parameters.AddWithValue("@dernierTicket", dernierTicket);
+                cmd.Parameters.AddWithValue("@total_ht", total_ht);
+                cmd.Parameters.AddWithValue("@total_tva", total_tva);
+                cmd.Parameters.AddWithValue("@total_ttc", total_ttc);
+                cmd.Parameters.AddWithValue("@heureDebut", heureDebut.ToString(@"hh\:mm\:ss"));
+                cmd.Parameters.AddWithValue("@heureFin", heureFin.ToString(@"hh\:mm\:ss"));
+                cmd.Parameters.AddWithValue("@totalTicket", totalTicket);
+                cmd.Parameters.AddWithValue("@totalAnnuler", totalAnnuler);
                 cmd.ExecuteNonQuery();
                 maConnexion.Close();
             }
@@ -1032,7 +1095,7 @@ namespace CrispyLo.Modules
         }
 
         // ---- SUGGESTION : Ajouter ----
-        public void AjouterSuggestion(string libelle, string description, double prix, double? prixLarge, int idTypeProduit)
+        public void AjouterSuggestion(string libelle, string description, decimal prix, decimal? prixLarge, int idTypeProduit)
         {
             MySqlConnection maConnexion = new MySqlConnection(DefinirCheminCommun());
 
@@ -1061,7 +1124,7 @@ namespace CrispyLo.Modules
         }
 
         // ---- SUGGESTION : Modifier ----
-        public void ModifierSuggestion(int id, string libelle, string description, double prix, double? prixLarge, int idTypeProduit)
+        public void ModifierSuggestion(int id, string libelle, string description, decimal prix, decimal? prixLarge, int idTypeProduit)
         {
             MySqlConnection maConnexion = new MySqlConnection(DefinirCheminCommun());
 
@@ -1145,6 +1208,99 @@ namespace CrispyLo.Modules
                 MySqlCommand cmd = new MySqlCommand(query, maConnexion);
                 cmd.Parameters.AddWithValue("@id", idCommande);
                 cmd.ExecuteNonQuery();
+                maConnexion.Close();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+                throw;
+            }
+        }
+
+        public void UpdateTicketidCom(int id)
+        {
+            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
+
+            try
+            {
+                maConnexion.Open();
+                string query = "UPDATE ticketVente SET idCom = -1 WHERE id = @id";
+                MySqlCommand cmd = new MySqlCommand(query, maConnexion);
+                cmd.Parameters.AddWithValue("@id", id);
+                cmd.ExecuteNonQuery();
+                maConnexion.Close();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+                throw;
+            }
+        }
+
+        public void TicketByCommande(int idCom, out DataTable dataT)
+        {
+            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
+            dataT = new DataTable();
+
+            try
+            {
+                string query = "SELECT * FROM ticketVente WHERE idCom = @idCom LIMIT 1";
+                MySqlCommand cmd = new MySqlCommand(query, maConnexion);
+                cmd.Parameters.AddWithValue("@idCom", idCom);
+                MySqlDataAdapter Data = new MySqlDataAdapter(cmd);
+                Data.Fill(dataT);
+                maConnexion.Close();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+                throw;
+            }
+        }
+
+        public string DernierSignature()
+        {
+            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
+            try
+            {
+                maConnexion.Open();
+                string query = "SELECT signature FROM ticketVente ORDER BY id DESC LIMIT 1";
+                MySqlCommand cmd = new MySqlCommand(query, maConnexion);
+                object result = cmd.ExecuteScalar();
+                maConnexion.Close();
+                return (result != null && result != DBNull.Value) ? result.ToString()! : "";
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+                return "";
+            }
+        }
+
+        public void newTicket(string type, DateTime date, decimal total_ht, decimal total_tva, decimal total_ttc, string signature, string signaturePrec,int ticketRef, int idCom)
+        {
+            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
+
+            try
+            {
+                maConnexion.Open();
+                string query = @"INSERT INTO ticketVente(type, caisse, dateValidation, total_ht, total_tva, total_ttc, signature, signature_prec, ticket_ref, idCom)
+                        VALUES(@type, 1, @date, @total_ht, @total_tva, @total_ttc, @signature, @signaturePrec, @ticket_ref , @idCom)";
+
+                MySqlCommand cmd = new MySqlCommand(query, maConnexion);
+                int numCom = CountCommande(date) + 1;
+
+                cmd.Parameters.AddWithValue("@type", type);
+                cmd.Parameters.AddWithValue("@date", date);
+                cmd.Parameters.AddWithValue("@total_ht", total_ht);
+                cmd.Parameters.AddWithValue("@total_tva", total_tva);
+                cmd.Parameters.AddWithValue("@total_ttc", total_ttc);
+                cmd.Parameters.AddWithValue("@signature", signature);
+                cmd.Parameters.AddWithValue("@signaturePrec", signaturePrec);
+                cmd.Parameters.AddWithValue("@ticket_ref", ticketRef);
+                cmd.Parameters.AddWithValue("@idCom", idCom);
+                cmd.ExecuteNonQuery();
+
                 maConnexion.Close();
             }
             catch (Exception ex)
