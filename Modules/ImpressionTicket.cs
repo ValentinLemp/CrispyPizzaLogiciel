@@ -1,3 +1,4 @@
+using Org.BouncyCastle.Bcpg.Sig;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -188,7 +189,10 @@ namespace CrispyLo.Modules
                 // ---- Type commande ----
                 bool estLivraison = Convert.ToBoolean(commande["estLivraison"]);
                 string titreCmd = estLivraison ? "COMMANDE LIVRAISON" : "COMMANDE SUR PLACE";
-                g.DrawString(titreCmd, fGrandBold, Brushes.Black, new RectangleF(xGauche, y, pageWidth, 24), sfCenter); y += 26;
+                g.DrawString(titreCmd, fGrandBold, Brushes.Black, new RectangleF(xGauche, y, pageWidth, 24), sfCenter); y += 18;
+
+                // ---- Commande N ----
+                g.DrawString($"N° : {commande["numeroCommande"]}", fGrandBold, Brushes.Black, new RectangleF(xGauche, y, pageWidth, 24), sfCenter); y += 26;
 
                 // ---- Type statut ----
                 int idStatut = Convert.ToInt32(commande["idStatut"]);
@@ -202,9 +206,6 @@ namespace CrispyLo.Modules
                 // ---- Heure commande ----
                 DateTime dateCommande = Convert.ToDateTime(commande["dateHeure"]);
                 g.DrawString($"{dateCommande:HH:mm}", fGrandBold, Brushes.Black, new RectangleF(xGauche, y, pageWidth, 24), sfCenter); y += 26;
-
-                // ---- Commande N ----
-                g.DrawString($"Commande N : {commande["numeroCommande"]}", fGrandBold, Brushes.Black, xGauche, y); y += 18;
 
                 // ---- Infos client ----
                 string nomCmd = commande["nom"].ToString();
@@ -406,7 +407,11 @@ namespace CrispyLo.Modules
                 y += 28;
 
                 // ---- Commande N ----
-                g.DrawString($"Commande N : {commande["numeroCommande"]}", fGrandBold, Brushes.Black, xGauche, y); y += 18;
+                g.DrawString($"Commande N : {commande["numeroCommande"]}", fBold, Brushes.Black, xGauche, y); y += 18;
+
+                // ---- Heure commande ----
+                DateTime dateCommande = Convert.ToDateTime(commande["dateHeure"]);
+                g.DrawString($"{dateCommande:HH:mm}", fGrandBold, Brushes.Black, new RectangleF(xGauche, y, pageWidth, 24), sfCenter); y += 26;
 
                 // ---- Nom + Prénom client ----
                 string nomCmd = commande["nom"].ToString();
@@ -414,13 +419,10 @@ namespace CrispyLo.Modules
                 g.DrawString(nomCmd, fBold, Brushes.Black, xGauche, y); y += 14;
                 if (!string.IsNullOrEmpty(prenomCmd))
                 { g.DrawString(prenomCmd, fNormal, Brushes.Black, xGauche, y); y += 14; }
+                
                 y += 4;
 
-                // ---- Date/heure commande ----
-                DateTime dateCommande = Convert.ToDateTime(commande["dateHeure"]);
-                g.DrawString($"{dateCommande:dd/MM/yyyy}   {dateCommande:HH:mm}",
-                                fGrandBold, Brushes.Black, xGauche, y);
-                y += 20;
+                y += 6;
 
                 // ---- Commentaire ----
                 string commentaireCmd = commande["commetaire"]?.ToString() ?? "";
@@ -432,7 +434,6 @@ namespace CrispyLo.Modules
                     y += tailleComm.Height + 4;
                 }
 
-                y += 6;
                 // ---- Séparateur ----
                 g.DrawLine(Pens.Black, xGauche, y, xDroite, y); y += 6;
 
@@ -541,7 +542,11 @@ namespace CrispyLo.Modules
                 y += 28;
 
                 // ---- Commande N ----
-                g.DrawString($"Commande N : {commande["numeroCommande"]}", fGrandBold, Brushes.Black, xGauche, y); y += 18;
+                g.DrawString($"Commande N : {commande["numeroCommande"]}", fBold, Brushes.Black, xGauche, y); y += 18;
+
+                // ---- Heure commande ----
+                DateTime dateCommande = Convert.ToDateTime(commande["dateHeure"]);
+                g.DrawString($"{dateCommande:HH:mm}", fGrandBold, Brushes.Black, new RectangleF(xGauche, y, pageWidth, 24), sfCenter); y += 26;
 
                 // ---- Nom + Prénom client ----
                 string nomCmd = commande["nom"].ToString();
@@ -551,11 +556,7 @@ namespace CrispyLo.Modules
                 { g.DrawString(prenomCmd, fNormal, Brushes.Black, xGauche, y); y += 14; }
                 y += 4;
 
-                // ---- Date/heure commande ----
-                DateTime dateCommande = Convert.ToDateTime(commande["dateHeure"]);
-                g.DrawString($"{dateCommande:dd/MM/yyyy}   {dateCommande:HH:mm}",
-                                fGrandBold, Brushes.Black, xGauche, y);
-                y += 20;
+                y += 6;
 
                 // ---- Commentaire ----
                 string commentaireCmd = commande["commetaire"]?.ToString() ?? "";
@@ -567,7 +568,6 @@ namespace CrispyLo.Modules
                     y += tailleComm.Height + 4;
                 }
 
-                y += 6;
                 // ---- Séparateur ----
                 g.DrawLine(Pens.Black, xGauche, y, xDroite, y); y += 6;
 
@@ -674,7 +674,11 @@ namespace CrispyLo.Modules
                 y += 28;
 
                 // ---- Commande N ----
-                g.DrawString($"Commande N : {commande["numeroCommande"]}", fGrandBold, Brushes.Black, xGauche, y); y += 18;
+                g.DrawString($"N° : {commande["numeroCommande"]}", fBold, Brushes.Black, xGauche, y); y += 18;
+
+                // ---- Heure commande ----
+                DateTime dateCommande = Convert.ToDateTime(commande["dateHeure"]);
+                g.DrawString($"{dateCommande:HH:mm}", fGrandBold, Brushes.Black, new RectangleF(xGauche, y, pageWidth, 24), sfCenter); y += 26;
 
                 // ---- Nom + Prénom client ----
                 string nomCmd = commande["nom"].ToString();
@@ -682,13 +686,10 @@ namespace CrispyLo.Modules
                 g.DrawString(nomCmd, fBold, Brushes.Black, xGauche, y); y += 14;
                 if (!string.IsNullOrEmpty(prenomCmd))
                 { g.DrawString(prenomCmd, fNormal, Brushes.Black, xGauche, y); y += 14; }
+
                 y += 4;
 
-                // ---- Date/heure commande ----
-                DateTime dateCommande = Convert.ToDateTime(commande["dateHeure"]);
-                g.DrawString($"{dateCommande:dd/MM/yyyy}   {dateCommande:HH:mm}",
-                                fGrandBold, Brushes.Black, xGauche, y);
-                y += 20;
+                y += 6;
 
                 // ---- Commentaire ----
                 string commentaireCmd = commande["commetaire"]?.ToString() ?? "";
@@ -699,8 +700,6 @@ namespace CrispyLo.Modules
                     g.DrawString(commentaireCmd, fNormal, Brushes.Black, new RectangleF(xGauche, y, pageWidth, tailleComm.Height));
                     y += tailleComm.Height + 4;
                 }
-                y += 6;
-
                 // ---- Séparateur ----
                 g.DrawLine(Pens.Black, xGauche, y, xDroite, y); y += 6;
 

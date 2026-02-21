@@ -135,7 +135,12 @@ namespace CrispyLo.Views
             tableauClotures.Columns.Add(new DataGridTextColumn { Header = "Internet", Binding = new Binding("ArgentNet"), Width = 85 });
             tableauClotures.Columns.Add(new DataGridTextColumn { Header = "Carte", Binding = new Binding("ArgentCarte"), Width = 85 });
             tableauClotures.Columns.Add(new DataGridTextColumn { Header = "Liquide", Binding = new Binding("ArgentLiquide"), Width = 85 });
-            tableauClotures.Columns.Add(new DataGridTextColumn { Header = "Différence", Binding = new Binding("Difference"), Width = new DataGridLength(1, DataGridLengthUnitType.Star) });
+            tableauClotures.Columns.Add(new DataGridTextColumn { Header = "Différence", Binding = new Binding("Difference"), Width = 100 });
+            tableauClotures.Columns.Add(new DataGridTextColumn { Header = "HT", Binding = new Binding("TotalHT"), Width = 90 });
+            tableauClotures.Columns.Add(new DataGridTextColumn { Header = "TVA", Binding = new Binding("TotalTVA"), Width = 90 });
+            tableauClotures.Columns.Add(new DataGridTextColumn { Header = "TTC", Binding = new Binding("TotalTTC"), Width = 90 });
+            tableauClotures.Columns.Add(new DataGridTextColumn { Header = "Tickets", Binding = new Binding("TotalTicket"), Width = 70 });
+            tableauClotures.Columns.Add(new DataGridTextColumn { Header = "Annulations", Binding = new Binding("TotalAnnuler"), Width = new DataGridLength(1, DataGridLengthUnitType.Star) });
 
             tableauClotures.LoadingRow += TableauClotures_LoadingRow;
 
@@ -244,7 +249,7 @@ namespace CrispyLo.Views
 
         public void ChargerClotures()
         {
-            sql.AllClotureByRestaurant(out DataTable dataT, out int nbrRow);
+            sql.AllCloture(out DataTable dataT, out int nbrRow);
 
             listeClotures.Clear();
             List<object> lignes = new List<object>();
@@ -262,6 +267,12 @@ namespace CrispyLo.Views
 
                 int numero = Convert.ToInt32(dataT.Rows[i]["numeroCloture"]);
 
+                decimal totalHT = Convert.ToDecimal(dataT.Rows[i]["total_ht"]);
+                decimal totalTVA = Convert.ToDecimal(dataT.Rows[i]["total_tva"]);
+                decimal totalTTC = Convert.ToDecimal(dataT.Rows[i]["total_ttc"]);
+                int totalTicket = Convert.ToInt32(dataT.Rows[i]["totalTicket"]);
+                int totalAnnuler = Convert.ToInt32(dataT.Rows[i]["totalAnnuler"]);
+
                 lignes.Add(new
                 {
                     Numero = numero,
@@ -271,7 +282,12 @@ namespace CrispyLo.Views
                     ArgentCarte = argentCarte.ToString("0.00") + " €",
                     ArgentLiquide = argentLiquide.ToString("0.00") + " €",
                     Difference = diff.ToString("0.00") + " €",
-                    DiffValue = diff
+                    DiffValue = diff,
+                    TotalHT = totalHT.ToString("0.00") + " €",
+                    TotalTVA = totalTVA.ToString("0.00") + " €",
+                    TotalTTC = totalTTC.ToString("0.00") + " €",
+                    TotalTicket = totalTicket.ToString(),
+                    TotalAnnuler = totalAnnuler.ToString()
                 });
             }
 

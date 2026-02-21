@@ -145,7 +145,7 @@ namespace CrispyLo.Views
             tableauCommandes.Columns.Add(new DataGridTextColumn { Header = "N°", Binding = new Binding("Id"), Width = 50 });
             tableauCommandes.Columns.Add(new DataGridTextColumn { Header = "Date", Binding = new Binding("Date"), Width = 100 });
             tableauCommandes.Columns.Add(new DataGridTextColumn { Header = "Heure", Binding = new Binding("Heure"), Width = 70 });
-            tableauCommandes.Columns.Add(new DataGridTextColumn { Header = "Prise Commande", Binding = new Binding("PriseCommande"), Width = 130 });
+            tableauCommandes.Columns.Add(new DataGridTextColumn { Header = "Prise Commande", Binding = new Binding("PriseCommande"), Width = 140 });
             tableauCommandes.Columns.Add(new DataGridTextColumn { Header = "Client", Binding = new Binding("Client"), Width = 120 });
             tableauCommandes.Columns.Add(new DataGridTextColumn { Header = "Adresse", Binding = new Binding("Adresse"), Width = new DataGridLength(1, DataGridLengthUnitType.Star) });
             tableauCommandes.Columns.Add(new DataGridTextColumn { Header = "Montant", Binding = new Binding("Montant"), Width = 80 });

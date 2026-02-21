@@ -2,7 +2,6 @@ using CrispyLo.Modules;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,7 +14,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CrispyLo.Views
 {
@@ -557,18 +555,30 @@ namespace CrispyLo.Views
             decimal.TryParse(valTotalRestaurant.Text.Replace(" €", "").Replace(",", "."), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out argentRest);
             decimal.TryParse(valTotalInternet.Text.Replace(" €", "").Replace(",", "."), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out argentNet);
 
-            decimal argentCarte = 0, argentLiquide = 0;
-            decimal.TryParse(txtCarte.Text.Replace(",", "."), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out argentCarte);
+            decimal argentCarteEncode = 0, argentLiquide = 0;
+            decimal.TryParse(txtCarte.Text.Replace(",", "."), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out argentCarteEncode);
             decimal.TryParse(txtLiquide.Text.Replace(",", "."), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out argentLiquide);
+            decimal argentCarte = argentNet + argentCarteEncode;
 
             decimal argentDiff = 0;
             string diffText = valDifference.Text.Replace(" €", "").Replace("+", "").Replace(",", ".");
             decimal.TryParse(diffText, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out argentDiff);
 
-            string signaturePrec = sql.DernierSignature();
-            string signature = Traitement.GenererSignature(idCom, date, totalCommande, signaturePrec);
+            string signaturePrec = "";
+            decimal totalTTC = 0;
+            int idCloture = 0;
 
-            sql.InsererCloture(aujourdhui, argentRest, argentNet, argentCarte, argentLiquide, argentDiff,
+            sql.DerniereCloture(out DataTable data, out int count);
+            if (count > 0)
+            {
+                signaturePrec = data.Rows[0]["signature"].ToString();
+                totalTTC = (decimal)data.Rows[0]["total_ttc"];
+                idCloture = (int)data.Rows[0]["id"];
+            }
+
+            string signature = Traitement.GenererSignature(idCloture, aujourdhui, totalTTC, signaturePrec);
+
+            sql.NewCloture(aujourdhui, argentRest, argentNet, argentCarte, argentLiquide, argentDiff,
                 int.Parse(valMaxiPizza.Text), int.Parse(valPizza.Text),
                 int.Parse(valPate.Text), int.Parse(valPain.Text),
                 int.Parse(valSalade.Text), int.Parse(valSnacking.Text),

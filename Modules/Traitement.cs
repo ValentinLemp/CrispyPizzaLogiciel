@@ -1,6 +1,7 @@
 ﻿using CrispyLo.Classes;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
@@ -260,6 +261,38 @@ namespace CrispyLo.Modules
                 bd.NewLigneIngredient(idLigne, ingP, true);
             if (ingM != "")
                 bd.NewLigneIngredient(idLigne, ingM, false);
+        }
+
+        public static void calculCloture(DataTable data, int count, out int premierTicket, out int dernierTicket, out decimal total_ht, out decimal total_tva, out decimal total_ttc, out string heureDebut, out string heureFin, out int totalTicket, out int totalAnnuler)
+        {
+            if (data == null || count == 0)
+            {
+                premierTicket = 0; dernierTicket = 0;
+                total_ht = 0; total_tva = 0; total_ttc = 0;
+                heureDebut = ""; heureFin = "";
+                totalTicket = 0; totalAnnuler = 0;
+            }
+            else
+            {
+                premierTicket = (int)data.Rows[0]["id"];
+                dernierTicket = (int)data.Rows[count-1]["id"];
+                totalTicket = 0; totalAnnuler = 0;
+                total_ht = 0; total_tva = 0; total_ttc = 0;
+                heureDebut = ((DateTime)data.Rows[0]["dateValidation"]).ToString("HH:mm:ss");
+                heureFin = ((DateTime)data.Rows[count-1]["dateValidation"]).ToString("HH:mm:ss");
+
+                for (int i = 0; i < count; i++)
+                {
+                    total_ht += (decimal)data.Rows[i]["total_ht"];
+                    total_tva += (decimal)data.Rows[i]["total_tva"];
+                    total_ttc += (decimal)data.Rows[i]["total_ttc"];
+                    totalTicket++;
+                    if (data.Rows[i]["type"].ToString() == "annulation")
+                    {
+                        totalAnnuler++;
+                    }
+                }
+            }
         }
     }
 }

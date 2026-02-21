@@ -964,10 +964,10 @@ namespace CrispyLo.Modules
             }
         }
         // ---- CLOTURE : Insérer une clôture ----
-        public void InsererCloture(DateTime date, decimal argentRestaurant, decimal argentInternet,
+        public void NewCloture(DateTime date, decimal argentRestaurant, decimal argentInternet,
             decimal argentCarte, decimal argentLiquide, decimal argentDifference,
             int nbMaxiPizza, int nbPizza, int nbPate, int nbPain, int nbSalade, int nbSnacking,
-            int nbBoisson, int nbDessert, int nbDipy)
+            int nbBoisson, int nbDessert, int nbDipy, string signature, string signaturePrec)
         {
             MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
 
@@ -977,32 +977,14 @@ namespace CrispyLo.Modules
 
                 // ---- Calculer premier/dernier ticket + totaux depuis ticketVente ----
                 string dateStr = date.ToString("yyyy-MM-dd");
-                string queryStats = @"SELECT MIN(id), MAX(id),
-                    IFNULL(SUM(total_ht), 0), IFNULL(SUM(total_tva), 0), IFNULL(SUM(total_ttc), 0),
-                    MIN(dateValidation), MAX(dateValidation),
-                    COUNT(*),
-                    SUM(CASE WHEN type IN ('annulation', 'annule') THEN 1 ELSE 0 END)
-                    FROM ticketVente WHERE DATE(dateValidation) = @date";
+                string queryStats = @"SELECT * FROM ticketVente WHERE DATE(dateValidation) = @date";
                 MySqlCommand cmdStats = new MySqlCommand(queryStats, maConnexion);
                 cmdStats.Parameters.AddWithValue("@date", dateStr);
-                MySqlDataReader reader = cmdStats.ExecuteReader();
-                int premierTicket = 0, dernierTicket = 0;
-                decimal total_ht = 0, total_tva = 0, total_ttc = 0;
-                TimeSpan heureDebut = TimeSpan.Zero, heureFin = TimeSpan.Zero;
-                int totalTicket = 0, totalAnnuler = 0;
-                if (reader.Read())
-                {
-                    premierTicket = reader.IsDBNull(0) ? 0 : reader.GetInt32(0);
-                    dernierTicket = reader.IsDBNull(1) ? 0 : reader.GetInt32(1);
-                    total_ht = reader.IsDBNull(2) ? 0 : reader.GetDecimal(2);
-                    total_tva = reader.IsDBNull(3) ? 0 : reader.GetDecimal(3);
-                    total_ttc = reader.IsDBNull(4) ? 0 : reader.GetDecimal(4);
-                    heureDebut = reader.IsDBNull(5) ? TimeSpan.Zero : reader.GetDateTime(5).TimeOfDay;
-                    heureFin = reader.IsDBNull(6) ? TimeSpan.Zero : reader.GetDateTime(6).TimeOfDay;
-                    totalTicket = reader.IsDBNull(7) ? 0 : reader.GetInt32(7);
-                    totalAnnuler = reader.IsDBNull(8) ? 0 : Convert.ToInt32(reader.GetValue(8));
-                }
-                reader.Close();
+                MySqlDataAdapter Data = new MySqlDataAdapter(cmdStats);
+                DataTable dataT = new DataTable();
+                Data.Fill(dataT);
+                int count = dataT.Rows.Count;
+                Traitement.calculCloture(dataT, count, out int premierTicket, out int dernierTicket, out decimal total_ht, out decimal total_tva, out decimal total_ttc, out string heureDebut, out string heureFin, out int totalTicket, out int totalAnnuler);
 
                 int numeroCloture = NombreClotureByRestaurant() + 1;
                 string query = @"INSERT INTO cloture(numeroCloture, date, argentRestaurant, argentInternet,
@@ -1010,13 +992,13 @@ namespace CrispyLo.Modules
                     nbMaxiPizza, nbPizza, nbPâte, nbPain, nbSalade, nbSnacking,
                     nbBoisson, nbDessert, nbDipy,
                     premierTicket, dernierTicket, total_ht, total_tva, total_ttc,
-                    heureDebut, heureFin, totalTicket, totalAnnuler)
+                    heureDebut, heureFin, totalTicket, totalAnnuler, signature, signature_prec)
                     VALUES(@numCloture, @date, @argentRest, @argentNet,
                     @argentCarte, @argentLiquide, @argentDiff,
                     @nbMaxiPizza, @nbPizza, @nbPate, @nbPain, @nbSalade, @nbSnacking,
                     @nbBoisson, @nbDessert, @nbDipy,
                     @premierTicket, @dernierTicket, @total_ht, @total_tva, @total_ttc,
-                    @heureDebut, @heureFin, @totalTicket, @totalAnnuler)";
+                    @heureDebut, @heureFin, @totalTicket, @totalAnnuler, @signature, @signaturePrec)";
                 MySqlCommand cmd = new MySqlCommand(query, maConnexion);
                 cmd.Parameters.AddWithValue("@numCloture", numeroCloture);
                 cmd.Parameters.AddWithValue("@date", dateStr);
@@ -1039,10 +1021,12 @@ namespace CrispyLo.Modules
                 cmd.Parameters.AddWithValue("@total_ht", total_ht);
                 cmd.Parameters.AddWithValue("@total_tva", total_tva);
                 cmd.Parameters.AddWithValue("@total_ttc", total_ttc);
-                cmd.Parameters.AddWithValue("@heureDebut", heureDebut.ToString(@"hh\:mm\:ss"));
-                cmd.Parameters.AddWithValue("@heureFin", heureFin.ToString(@"hh\:mm\:ss"));
+                cmd.Parameters.AddWithValue("@heureDebut", heureDebut);
+                cmd.Parameters.AddWithValue("@heureFin", heureFin);
                 cmd.Parameters.AddWithValue("@totalTicket", totalTicket);
                 cmd.Parameters.AddWithValue("@totalAnnuler", totalAnnuler);
+                cmd.Parameters.AddWithValue("@signature", signature);
+                cmd.Parameters.AddWithValue("@signaturePrec", signaturePrec);
                 cmd.ExecuteNonQuery();
                 maConnexion.Close();
             }
@@ -1052,15 +1036,36 @@ namespace CrispyLo.Modules
                 throw;
             }
         }
-        // ---- HISTORIQUE : Toutes les clôtures par restaurant ----
-        public void AllClotureByRestaurant(out DataTable dataT, out int nbrRow)
+        public void DerniereCloture(out DataTable dataT, out int count)
         {
             MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
             dataT = new DataTable();
 
             try
             {
-                string query = "SELECT numeroCloture, date, argentRestaurant, argentInternet, argentCarte, argentLiquide, argentDifference, nbMaxiPizza, nbPizza, nbPâte, nbPain, nbSalade, nbSnacking, nbBoisson, nbDessert, nbDipy FROM cloture ORDER BY date DESC";
+                string query = "SELECT * FROM cloture ORDER BY id DESC LIMIT 1";
+                MySqlCommand cmd = new MySqlCommand(query, maConnexion);
+                MySqlDataAdapter Data = new MySqlDataAdapter(cmd);
+                Data.Fill(dataT);
+                count = dataT.Rows.Count;
+                maConnexion.Close();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+                throw;
+            }
+        }
+
+        // ---- HISTORIQUE : Toutes les clôtures par restaurant ----
+        public void AllCloture(out DataTable dataT, out int nbrRow)
+        {
+            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
+            dataT = new DataTable();
+
+            try
+            {
+                string query = "SELECT * FROM cloture ORDER BY date DESC";
                 MySqlCommand cmd = new MySqlCommand(query, maConnexion);
                 MySqlDataAdapter Data = new MySqlDataAdapter(cmd);
                 Data.Fill(dataT);
