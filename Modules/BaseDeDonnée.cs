@@ -1229,7 +1229,7 @@ namespace CrispyLo.Modules
             {
                 maConnexion.Open();
                 string query = @"INSERT INTO produit(libelle, description, quantite, prix, prixLarge, centilitre, urlImage, idTypePizza, idTypeProduit, estSuggestion)
-                    VALUES(@libelle, @description, NULL, @prix, @prixLarge, NULL, '/images/suggestions/suggestion', NULL, @idTypeProduit, 1)";
+                    VALUES(@libelle, @description, NULL, @prix, @prixLarge, NULL, '/images/suggestions/suggestion.png', NULL, @idTypeProduit, 1)";
                 MySqlCommand cmd = new MySqlCommand(query, maConnexion);
                 cmd.Parameters.AddWithValue("@libelle", libelle);
                 cmd.Parameters.AddWithValue("@description", description);
