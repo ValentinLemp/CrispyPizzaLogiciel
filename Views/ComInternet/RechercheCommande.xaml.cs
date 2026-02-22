@@ -170,6 +170,18 @@ namespace CrispyLo.Views.ComInternet
 
             try
             {
+                sql.CommandeById(idCommande, out DataTable dataCom);
+                decimal totalCommande = Convert.ToDecimal(dataCom.Rows[0]["prixTotal"]);
+                DateTime dateCommande = Convert.ToDateTime(dataCom.Rows[0]["dateHeure"]);
+                decimal taux = 0.06m;
+                decimal ht = Math.Round(totalCommande / (1 + taux), 2);
+                decimal tvaVal = Math.Round(totalCommande - ht, 2);
+
+                string signaturePrec = sql.DernierSignature();
+                string signature = Traitement.GenererSignature(idCommande, dateCommande, totalCommande, signaturePrec);
+                sql.newTicket("vente", dateCommande, ht, tvaVal, totalCommande, signature, signaturePrec, -1, idCommande);
+                sql.InsererJournal("Caisse 1", $"Validation commande internet N°{idCommande} - {totalCommande:0.00}€");
+
                 impression.GeneralImpression(idCommande);
                 sql.MarquerCommandeVue(idCommande);
             }

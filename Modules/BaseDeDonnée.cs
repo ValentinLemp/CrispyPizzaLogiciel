@@ -451,7 +451,7 @@ namespace CrispyLo.Modules
             try
             {
                 maConnexion.Open();
-                string query = @"INSERT INTO commande(numeroCommande, nom, prenom, estLivraison, dateHeure, prixTotal, commetaire, idStatut, idClient, estVu, estCloture)
+                string query = @"INSERT INTO commande(numeroCommande, nom, prenom, estLivraison, dateHeure, prixTotal, commentaire, idStatut, idClient, estVu, estCloture)
                         VALUES(@numCo, @nom, @prenom, @livraison, @date, @prixTotal, @commentaire, @idStatut, @idClient, 1, 0)";
 
                 MySqlCommand cmd = new MySqlCommand(query, maConnexion);
@@ -686,7 +686,7 @@ namespace CrispyLo.Modules
             {
                 maConnexion.Open();
                 string query = @"UPDATE commande SET nom = @nom, prenom = @prenom, estLivraison = @livraison,
-                    dateHeure = @date, prixTotal = @prixTotal, commetaire = @commentaire,
+                    dateHeure = @date, prixTotal = @prixTotal, commentaire = @commentaire,
                     idStatut = @idStatut, idClient = @idClient WHERE id = @id";
                 MySqlCommand cmd = new MySqlCommand(query, maConnexion);
                 cmd.Parameters.AddWithValue("@nom", nom);

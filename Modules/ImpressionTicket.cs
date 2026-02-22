@@ -233,7 +233,7 @@ namespace CrispyLo.Modules
                 y += 6;
 
                 // ---- Commentaire ----
-                string commentaireCmd = commande["commetaire"]?.ToString() ?? "";
+                string commentaireCmd = commande["commentaire"]?.ToString() ?? "";
                 if (!string.IsNullOrEmpty(commentaireCmd))
                 {
                     g.DrawString("Commentaire :", fBold, Brushes.Black, xGauche, y); y += 14;
@@ -429,7 +429,7 @@ namespace CrispyLo.Modules
                 y += 6;
 
                 // ---- Commentaire ----
-                string commentaireCmd = commande["commetaire"]?.ToString() ?? "";
+                string commentaireCmd = commande["commentaire"]?.ToString() ?? "";
                 if (!string.IsNullOrEmpty(commentaireCmd))
                 {
                     g.DrawString("Commentaire :", fBold, Brushes.Black, xGauche, y); y += 14;
@@ -563,7 +563,7 @@ namespace CrispyLo.Modules
                 y += 6;
 
                 // ---- Commentaire ----
-                string commentaireCmd = commande["commetaire"]?.ToString() ?? "";
+                string commentaireCmd = commande["commentaire"]?.ToString() ?? "";
                 if (!string.IsNullOrEmpty(commentaireCmd))
                 {
                     g.DrawString("Commentaire :", fBold, Brushes.Black, xGauche, y); y += 14;
@@ -696,7 +696,7 @@ namespace CrispyLo.Modules
                 y += 6;
 
                 // ---- Commentaire ----
-                string commentaireCmd = commande["commetaire"]?.ToString() ?? "";
+                string commentaireCmd = commande["commentaire"]?.ToString() ?? "";
                 if (!string.IsNullOrEmpty(commentaireCmd))
                 {
                     g.DrawString("Commentaire :", fBold, Brushes.Black, xGauche, y); y += 14;

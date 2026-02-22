@@ -49,7 +49,7 @@ namespace CrispyLo.Views
 
             Nom.Text = dataCom.Rows[0]["nom"].ToString();
             Prenom.Text = dataCom.Rows[0]["prenom"].ToString();
-            Commentaire.Text = dataCom.Rows[0]["commetaire"].ToString();
+            Commentaire.Text = dataCom.Rows[0]["commentaire"].ToString();
 
             DateTime dateHeure = Convert.ToDateTime(dataCom.Rows[0]["dateHeure"]);
             datePicker.SelectedDate = dateHeure.Date;
