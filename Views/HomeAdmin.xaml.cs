@@ -82,6 +82,7 @@ namespace CrispyLo.Views
             wrap.Children.Add(CreerBouton("📜\nHistorique\nClôture", Brushes.DarkCyan, Click_HistClot));
             wrap.Children.Add(CreerBouton("📦\nCommandes", Brushes.IndianRed, Click_AllCommande));
             wrap.Children.Add(CreerBouton("👥\nClients", Brushes.MediumSeaGreen, Click_AllClient));
+            wrap.Children.Add(CreerBouton("🎫\nTickets", Brushes.DarkOliveGreen, Click_AllTicket));
 
             grdMain.Children.Add(wrap);
         }
@@ -139,6 +140,11 @@ namespace CrispyLo.Views
         public void Click_AllClient(object sender, RoutedEventArgs e)
         {
             PagePrincipale.Main.Content = new AllClient();
+        }
+
+        public void Click_AllTicket(object sender, RoutedEventArgs e)
+        {
+            PagePrincipale.Main.Content = new AllTicket();
         }
 
         public void Click_Suggestion(object sender, RoutedEventArgs e)

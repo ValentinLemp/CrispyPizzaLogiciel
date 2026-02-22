@@ -1036,6 +1036,38 @@ namespace CrispyLo.Modules
                 throw;
             }
         }
+        public void TicketById(int id, out DataTable dataT)
+        {
+            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
+            dataT = new DataTable();
+            try
+            {
+                string query = "SELECT * FROM ticketVente WHERE id = @id LIMIT 1";
+                MySqlCommand cmd = new MySqlCommand(query, maConnexion);
+                cmd.Parameters.AddWithValue("@id", id);
+                MySqlDataAdapter Data = new MySqlDataAdapter(cmd);
+                Data.Fill(dataT);
+                maConnexion.Close();
+            }
+            catch (Exception ex) { Debug.WriteLine(ex); throw; }
+        }
+
+        public void ClotureById(int id, out DataTable dataT)
+        {
+            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
+            dataT = new DataTable();
+            try
+            {
+                string query = "SELECT * FROM cloture WHERE id = @id LIMIT 1";
+                MySqlCommand cmd = new MySqlCommand(query, maConnexion);
+                cmd.Parameters.AddWithValue("@id", id);
+                MySqlDataAdapter Data = new MySqlDataAdapter(cmd);
+                Data.Fill(dataT);
+                maConnexion.Close();
+            }
+            catch (Exception ex) { Debug.WriteLine(ex); throw; }
+        }
+
         public void DerniereCloture(out DataTable dataT, out int count)
         {
             MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
@@ -1078,6 +1110,27 @@ namespace CrispyLo.Modules
                 throw;
             }
         }
+        public void AllTicketByDate(DateTime date, out DataTable dataT, out int nbrRow)
+        {
+            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
+            dataT = new DataTable();
+            try
+            {
+                string query = "SELECT * FROM ticketVente WHERE DATE(dateValidation) = @date ORDER BY id ASC";
+                MySqlCommand cmd = new MySqlCommand(query, maConnexion);
+                cmd.Parameters.AddWithValue("@date", date.ToString("yyyy-MM-dd"));
+                MySqlDataAdapter Data = new MySqlDataAdapter(cmd);
+                Data.Fill(dataT);
+                nbrRow = dataT.Rows.Count;
+                maConnexion.Close();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+                throw;
+            }
+        }
+
         // ---- SUGGESTION : Toutes les suggestions ----
         public void AllSuggestions(out DataTable dataT, out int nbrRow)
         {

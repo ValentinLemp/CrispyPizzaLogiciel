@@ -22,6 +22,7 @@ namespace CrispyLo.Views
     /// </summary>
     public partial class Cloture : Page
     {
+        ImpressionTicket ticket = new ImpressionTicket();
         MainWindow PagePrincipale = (MainWindow)App.Current.MainWindow;
         BaseDeDonnée sql = new BaseDeDonnée();
 
@@ -586,6 +587,7 @@ namespace CrispyLo.Views
                 int.Parse(valDipy.Text), signature, signaturePrec);
             
             sql.CloturerCommandes(aujourdhui);
+            ticket.ImpressionCloture(idCloture);
             MessageBox.Show("Clôture effectuée avec succès !");
             PagePrincipale.Main.Content = new HomeAdmin();
         }

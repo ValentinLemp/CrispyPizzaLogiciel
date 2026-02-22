@@ -24,6 +24,7 @@ namespace CrispyLo.Views
     public partial class HistoriqueCloture : Page
     {
         MainWindow PagePrincipale = (MainWindow)App.Current.MainWindow;
+        ImpressionTicket ticket = new ImpressionTicket();
         BaseDeDonnée sql = new BaseDeDonnée();
 
         DataGrid tableauClotures = new DataGrid();
@@ -347,9 +348,11 @@ namespace CrispyLo.Views
 
         public void Click_Imprimer(object sender, RoutedEventArgs e)
         {
-            if (tableauClotures.SelectedItem == null) return;
+            if (tableauClotures.SelectedIndex < 0) return;
 
-            // ici code imprimer
+            DataRow row = listeClotures[tableauClotures.SelectedIndex];
+            int idCloture = Convert.ToInt32(row["id"]);
+            ticket.ImpressionCloture(idCloture);
         }
 
         public void Click_Retour(object sender, RoutedEventArgs e)
