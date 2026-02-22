@@ -1,4 +1,5 @@
-﻿using CrispyLo.Views.Info;
+﻿using CrispyLo.Modules;
+using CrispyLo.Views.Info;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -83,6 +84,7 @@ namespace CrispyLo.Views
             wrap.Children.Add(CreerBouton("📦\nCommandes", Brushes.IndianRed, Click_AllCommande));
             wrap.Children.Add(CreerBouton("👥\nClients", Brushes.MediumSeaGreen, Click_AllClient));
             wrap.Children.Add(CreerBouton("🎫\nTickets", Brushes.DarkOliveGreen, Click_AllTicket));
+            wrap.Children.Add(CreerBouton("📁\nJournals", Brushes.DarkGoldenrod, Click_AllArchive));
 
             grdMain.Children.Add(wrap);
         }
@@ -108,6 +110,7 @@ namespace CrispyLo.Views
 
         public void Click_Leave(object sender, RoutedEventArgs e)
         {
+            new BaseDeDonnée().InsererJournal("Admin", "Déconnexion mode admin");
             PagePrincipale.EstAdmin = false;
             PagePrincipale.Main.Content = new Home();
         }
@@ -145,6 +148,11 @@ namespace CrispyLo.Views
         public void Click_AllTicket(object sender, RoutedEventArgs e)
         {
             PagePrincipale.Main.Content = new AllTicket();
+        }
+
+        public void Click_AllArchive(object sender, RoutedEventArgs e)
+        {
+            PagePrincipale.Main.Content = new AllArchive();
         }
 
         public void Click_Suggestion(object sender, RoutedEventArgs e)

@@ -281,6 +281,7 @@ namespace CrispyLo.Views
             MessageBoxResult result = MessageBox.Show("Voulez-vous vraiment supprimer ce client ?", "Confirmation", MessageBoxButton.YesNo);
             if (result == MessageBoxResult.Yes)
             {
+                sql.InsererJournal("Admin", $"Suppression client N°{idClientSelectionne} - {txtNom.Text} {txtPrenom.Text}");
                 sql.SupprimerClient(idClientSelectionne);
                 idClientSelectionne = -1;
                 txtNom.Text = "";
@@ -330,6 +331,7 @@ namespace CrispyLo.Views
                 sql.UpdateAdresse(idAdresse, int.Parse(codePostal), rue, numeroRue, localite);
             }
 
+            sql.InsererJournal("Admin", $"Modification client N°{idClientSelectionne} - {nom} {prenom}");
             SetReadOnly(true);
             btnSauvegarder.Visibility = Visibility.Collapsed;
             ChargerClients();

@@ -78,6 +78,7 @@ namespace CrispyLo.Views.Info
                     PagePrincipale.MainInfo.Visibility = Visibility.Collapsed;
                     PagePrincipale.Main.Content = new HomeAdmin();
                     PagePrincipale.EstAdmin = true;
+                    new BaseDeDonnée().InsererJournal("Admin", "Connexion mode admin");
                 }
             }
             text.Text = "";

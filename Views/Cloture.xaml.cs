@@ -587,6 +587,7 @@ namespace CrispyLo.Views
                 int.Parse(valDipy.Text), signature, signaturePrec);
             
             sql.CloturerCommandes(aujourdhui);
+            sql.InsererJournal("Admin", $"Clôture journée {aujourdhui:dd/MM/yyyy} - TTC {argentRest + argentNet:0.00}€");
             ticket.ImpressionCloture(idCloture);
             MessageBox.Show("Clôture effectuée avec succès !");
             PagePrincipale.Main.Content = new HomeAdmin();

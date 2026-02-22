@@ -639,7 +639,8 @@ namespace CrispyLo.Views
             Adresse adr = (Adresse)item.Tag;
             selectionEnCours = true;
             Adresse.Text = adr.Rue;
-            Numero.Text = adr.Numero;
+            if (!string.IsNullOrEmpty(adr.Numero))
+                Numero.Text = adr.Numero;
             Localite.Text = adr.CodePostal;
             Ville.Text = adr.Ville;
             selectionEnCours = false;
@@ -902,6 +903,7 @@ namespace CrispyLo.Views
                     signature = Traitement.GenererSignature(idCom, date, totalCommande, signaturePrec);
                     bd.newTicket("vente",DateTime.Now, ht, tvaVal, totalCommande, signature, signaturePrec, -1, idCom);
 
+                    bd.InsererJournal("Caisse 1", $"Modification commande N°{idCom} - {Convert.ToDecimal(prixTotal):0.00}€");
                     impression.GeneralImpression(PagePrincipale.IdCommande);
                     MessageBox.Show("Commande modifiée avec succès !");
                     PagePrincipale.IdCommande = -1;
@@ -945,6 +947,7 @@ namespace CrispyLo.Views
                     string signaturePrec = bd.DernierSignature();
                     string signature = Traitement.GenererSignature(newIdCommande, date, totalCommande, signaturePrec);
                     bd.newTicket("vente" , date, ht, tvaVal, totalCommande, signature, signaturePrec, -1, newIdCommande);
+                    bd.InsererJournal("Caisse 1", $"Nouvelle commande N°{newIdCommande} - {totalCommande:0.00}€");
 
                     impression.GeneralImpression(newIdCommande);
                     MessageBox.Show("Commade sauvegarder avec succès !");

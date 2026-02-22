@@ -303,7 +303,8 @@ namespace CrispyLo.Views
                     Client = dataT.Rows[i]["nom"].ToString() + " " + dataT.Rows[i]["prenom"].ToString(),
                     Adresse = adresse,
                     Montant = dataT.Rows[i]["prixTotal"].ToString() + " €",
-                    PriseCommande = statut
+                    PriseCommande = statut,
+                    EstCloture = Convert.ToBoolean(dataT.Rows[i]["estCloture"])
                 });
             }
 
@@ -500,6 +501,13 @@ namespace CrispyLo.Views
 
         public void Click_Modifier(object sender, RoutedEventArgs e)
         {
+            if (tableauCommandes.SelectedItem == null) return;
+            dynamic commande = tableauCommandes.SelectedItem;
+            if (commande.EstCloture)
+            {
+                MessageBox.Show("Cette commande est clôturée et ne peut pas être modifiée.", "Commande clôturée", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
             if (PagePrincipale.IdCommande != -1)
             {
                 PagePrincipale.Main.Content = new Home();
@@ -509,9 +517,14 @@ namespace CrispyLo.Views
         public void Click_Supprimer(object sender, RoutedEventArgs e)
         {
             if (tableauCommandes.SelectedItem == null) return;
+            dynamic cmd = tableauCommandes.SelectedItem;
+            if (cmd.EstCloture)
+            {
+                MessageBox.Show("Cette commande est clôturée et ne peut pas être supprimée.", "Commande clôturée", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
 
-            dynamic commande = tableauCommandes.SelectedItem;
-            int idCommande = Convert.ToInt32(commande.Id);
+            int idCommande = Convert.ToInt32(cmd.Id);
 
             MessageBoxResult result = MessageBox.Show("Voulez-vous vraiment supprimer cette commande ?", "Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Warning);
             if (result != MessageBoxResult.Yes) return;
@@ -528,6 +541,7 @@ namespace CrispyLo.Views
             sql.newTicket("annulation", DateTime.Now, -ht, -tvaVal, -totalCommande, signature, signaturePrec, (int)dataT.Rows[0]["id"], -1);
 
             sql.SupprimerCommande(idCommande);
+            sql.InsererJournal("Admin", $"Annulation commande N°{idCommande} - {totalCommande:0.00}€");
 
             PagePrincipale.Panier.Clear();
             PagePrincipale.IdCommande = -1;

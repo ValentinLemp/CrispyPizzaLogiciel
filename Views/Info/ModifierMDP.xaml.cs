@@ -231,6 +231,8 @@ namespace CrispyLo.Views.Info
             else
             {
                 sql.ModificationMDPById(data.Rows[i]["id"], mdpNouv.Text);
+                string type = estAdmin ? "Admin" : "Logiciel";
+                sql.InsererJournal("Admin", $"Modification mot de passe {type}");
                 estLogiciel = false;
                 estAdmin = false;
                 panel.Visibility = Visibility.Collapsed;

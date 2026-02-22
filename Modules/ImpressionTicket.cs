@@ -15,6 +15,7 @@ namespace CrispyLo.Modules
         MainWindow PagePrincipale = (MainWindow)App.Current.MainWindow;
 
         BaseDeDonnée sql = new BaseDeDonnée();
+        private static readonly string VersionLogiciel = "CrispyLo v" + (System.Reflection.Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "1.0.0");
         DataRow commande;
         DataTable lignes;
         List<DataTable> ingredients = new List<DataTable>();
@@ -367,7 +368,11 @@ namespace CrispyLo.Modules
                     Font fTiny = new Font("Arial", 6);
                     g.DrawString($"sign : {signature}", fTiny, Brushes.Black,
                                  new RectangleF(xGauche, y, pageWidth, 12), sfCenter);
+                    y += 14;
                 }
+
+                // ---- Version logiciel ----
+                g.DrawString(VersionLogiciel, new Font("Arial", 6), Brushes.Gray, xGauche, y);
             });
         }
 
@@ -852,7 +857,11 @@ namespace CrispyLo.Modules
                 {
                     g.DrawString($"sign. préc : {signaturePrec}", fTiny, Brushes.Black,
                                  new RectangleF(xGauche, y, pageWidth, 12), sfCenter);
+                    y += 14;
                 }
+
+                // ---- Version logiciel ----
+                g.DrawString(VersionLogiciel, new Font("Arial", 6), Brushes.Gray, xGauche, y);
             });
         }
 
@@ -957,6 +966,9 @@ namespace CrispyLo.Modules
                     g.DrawLine(Pens.Black, xGauche, y, xDroite, y); y += 2;
                     g.DrawLine(Pens.Black, xGauche, y + 2, xDroite, y + 2); y += 10;
                 }
+
+                // ---- Version logiciel ----
+                g.DrawString(VersionLogiciel, new Font("Arial", 6), Brushes.Gray, xGauche, y);
 
                 e.HasMorePages = false;
             };
@@ -1134,7 +1146,11 @@ namespace CrispyLo.Modules
                 {
                     g.DrawString($"sign. préc : {signaturePrec}", fTiny, Brushes.Black,
                                  new RectangleF(xGauche, y, pageWidth, 12), sfCenter);
+                    y += 14;
                 }
+
+                // ---- Version logiciel ----
+                g.DrawString(VersionLogiciel, new Font("Arial", 6), Brushes.Gray, xGauche, y);
             });
         }
     }

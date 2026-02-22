@@ -1110,6 +1110,55 @@ namespace CrispyLo.Modules
                 throw;
             }
         }
+        public void InsererJournal(string utilisateur, string action)
+        {
+            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
+            try
+            {
+                maConnexion.Open();
+                string query = "INSERT INTO journal(date, utilisateur, action) VALUES(@date, @utilisateur, @action)";
+                MySqlCommand cmd = new MySqlCommand(query, maConnexion);
+                cmd.Parameters.AddWithValue("@date", DateTime.Now);
+                cmd.Parameters.AddWithValue("@utilisateur", utilisateur);
+                cmd.Parameters.AddWithValue("@action", action);
+                cmd.ExecuteNonQuery();
+                maConnexion.Close();
+            }
+            catch (Exception ex) { Debug.WriteLine(ex); }
+        }
+
+        public void JournalByDate(DateTime date, out DataTable dataT, out int nbrRow)
+        {
+            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
+            dataT = new DataTable();
+            try
+            {
+                string query = "SELECT * FROM journal WHERE DATE(date) = @date ORDER BY date ASC";
+                MySqlCommand cmd = new MySqlCommand(query, maConnexion);
+                cmd.Parameters.AddWithValue("@date", date.ToString("yyyy-MM-dd"));
+                MySqlDataAdapter Data = new MySqlDataAdapter(cmd);
+                Data.Fill(dataT);
+                nbrRow = dataT.Rows.Count;
+                maConnexion.Close();
+            }
+            catch (Exception ex) { Debug.WriteLine(ex); throw; }
+        }
+
+        public void ToutJournal(out DataTable dataT, out int nbrRow)
+        {
+            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
+            dataT = new DataTable();
+            try
+            {
+                string query = "SELECT * FROM journal ORDER BY date ASC";
+                MySqlDataAdapter Data = new MySqlDataAdapter(query, maConnexion);
+                Data.Fill(dataT);
+                nbrRow = dataT.Rows.Count;
+                maConnexion.Close();
+            }
+            catch (Exception ex) { Debug.WriteLine(ex); throw; }
+        }
+
         public void AllTicketByDate(DateTime date, out DataTable dataT, out int nbrRow)
         {
             MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
@@ -1120,6 +1169,25 @@ namespace CrispyLo.Modules
                 MySqlCommand cmd = new MySqlCommand(query, maConnexion);
                 cmd.Parameters.AddWithValue("@date", date.ToString("yyyy-MM-dd"));
                 MySqlDataAdapter Data = new MySqlDataAdapter(cmd);
+                Data.Fill(dataT);
+                nbrRow = dataT.Rows.Count;
+                maConnexion.Close();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+                throw;
+            }
+        }
+
+        public void AllTickets(out DataTable dataT, out int nbrRow)
+        {
+            MySqlConnection maConnexion = new MySqlConnection(DefinirCheminBD());
+            dataT = new DataTable();
+            try
+            {
+                string query = "SELECT * FROM ticketVente ORDER BY id ASC";
+                MySqlDataAdapter Data = new MySqlDataAdapter(query, maConnexion);
                 Data.Fill(dataT);
                 nbrRow = dataT.Rows.Count;
                 maConnexion.Close();
